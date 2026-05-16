@@ -3,31 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Taybeti — Paranoid-grade encrypted note app for Android. Zero-trust, offline-only, open-source.">
     <title>Taybeti – Secure Offline Notes</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; line-height: 1.6; }
-        h1 { color: #111; }
-        .features { background: #f5f5f5; padding: 20px; border-radius: 10px; }
-        .download { display: inline-block; margin-top: 20px; padding: 12px 24px; background: #0070f3; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
+        :root {
+            --bg: #0a0a0c;
+            --surface: #141418;
+            --surface2: #1e1e24;
+            --text: #e0e0e0;
+            --text-secondary: #a0a0b0;
+            --accent: #4f9cf7;
+            --accent-hover: #3b82f6;
+            --border: #2a2a35;
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Header / Hero */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .download-btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: var(--accent);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(79,156,247,0.3);
+        }
+        .download-btn:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 6px 20px rgba(79,156,247,0.5);
+            transform: translateY(-1px);
+        }
+        .github-link {
+            color: var(--text-secondary);
+            margin-left: 1rem;
+            font-weight: 500;
+        }
+        .github-link:hover { color: var(--accent); }
+
+        /* Card grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .feature-card:hover {
+            border-color: var(--accent);
+            background: var(--surface2);
+        }
+        .feature-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            padding-top: 2rem;
+        }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2.5rem; }
+            .download-btn { padding: 12px 24px; }
+        }
     </style>
 </head>
 <body>
-    <h1>🔐 Taybeti</h1>
-    <p>An open‑source, offline, encrypted note app for Android. Your notes stay on your device, protected by AES‑256‑GCM and Argon2id. No internet permission, no Google services, no backdoors.</p>
-    
-    <div class="features">
-        <h2>Why Taybeti?</h2>
-        <ul>
-            <li>Zero‑trust master password (no hash stored)</li>
-            <li>Per‑note encryption keys</li>
-            <li>Covert sharing: encrypt messages as normal YouTube links</li>
-            <li>100% offline – no ads, no tracking, no cloud</li>
-            <li>Open source (MIT license) – auditable by anyone</li>
-        </ul>
+    <div class="container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1>🔐 Taybeti</h1>
+            <p class="subtitle">Paranoid‑grade encrypted notes. Zero trust. Completely offline.</p>
+            <a class="download-btn" href="https://github.com/Cyberboy161/Taybeti/releases/latest/download/taybeti.apk">
+                ⬇ Download APK
+            </a>
+            <a class="github-link" href="https://github.com/Cyberboy161/Taybeti">View on GitHub →</a>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="features">
+            <div class="feature-card">
+                <h3>🛡️ Zero‑Trust Login</h3>
+                <p>No password hash stored. Login is verified by <em>decrypting</em> a known string — nothing to crack.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔑 Per‑Note Keys</h3>
+                <p>Each note has its own passphrase and independent AES‑256‑GCM encryption. No shared secret.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🕵️ Covert Sharing</h3>
+                <p>Disguise encrypted messages as normal‑looking YouTube/Instagram links. Nobody suspects a thing.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📵 100% Offline</h3>
+                <p>No internet permission. No cloud, no telemetry, no backdoors. Your data never leaves the device.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 Custom Keyboard</h3>
+                <p>Built‑in keyboard prevents system keyloggers and predictive text from leaking your secrets.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📖 Open Source (MIT)</h3>
+                <p>Every line of code is public. Auditable, forkable, and free forever.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2025 Taybeti. Licensed under MIT. <br>
+            <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a> · 
+            <a href="https://github.com/Cyberboy161/Taybeti#security-audit">Security Audit</a>
+            </p>
+        </div>
     </div>
-    
-    <a class="download" href="https://github.com/Cyberboy161/Taybeti/releases/latest/download/taybeti.apk">Download APK</a>
-    
-    <p style="margin-top: 40px; font-size: 0.9em; color: #666;">Taybeti is free software. <a href="https://github.com/Cyberboy161/Taybeti">View on GitHub</a></p>
 </body>
 </html>
