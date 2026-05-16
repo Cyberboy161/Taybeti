@@ -27,15 +27,49 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 2rem 1rem;
+            padding-top: 60px; /* space for fixed top bar */
+        }
+
+        /* Fixed language bar */
+        .lang-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 999;
+            flex-wrap: wrap;
+        }
+        .lang-bar button {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .lang-bar button:hover,
+        .lang-bar button.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
         }
 
         .container {
             max-width: 800px;
             width: 100%;
+            padding: 2rem 1rem;
         }
 
-        /* Header / Hero */
+        /* Hero */
         .hero {
             text-align: center;
             margin-bottom: 3rem;
@@ -66,6 +100,7 @@
             font-size: 1.1rem;
             transition: all 0.2s;
             box-shadow: 0 4px 15px rgba(79,156,247,0.3);
+            margin-bottom: 1rem;
         }
         .download-btn:hover {
             background: var(--accent-hover);
@@ -79,7 +114,7 @@
         }
         .github-link:hover { color: var(--accent); }
 
-        /* Card grid */
+        /* Feature cards */
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -122,60 +157,187 @@
         .footer a { color: var(--accent); text-decoration: none; }
         .footer a:hover { text-decoration: underline; }
 
-        /* Responsive */
         @media (max-width: 600px) {
             .hero h1 { font-size: 2.5rem; }
-            .download-btn { padding: 12px 24px; }
+            .lang-bar { justify-content: flex-start; padding: 8px 10px; }
+            .lang-bar button { padding: 4px 10px; font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
+    <!-- Language Bar -->
+    <div class="lang-bar">
+        <button onclick="setLanguage('en')" class="active" id="lang-en">English</button>
+        <button onclick="setLanguage('de')" id="lang-de">Deutsch</button>
+        <button onclick="setLanguage('tr')" id="lang-tr">Türkçe</button>
+        <button onclick="setLanguage('ckb')" id="lang-ckb">کوردیی ناوەندی</button>
+        <button onclick="setLanguage('kmr')" id="lang-kmr">Kurmancî</button>
+    </div>
+
     <div class="container">
         <!-- Hero -->
         <div class="hero">
             <h1>🔐 Taybeti</h1>
-            <p class="subtitle">Paranoid‑grade encrypted notes. Zero trust. Completely offline.</p>
-            <a class="download-btn" href="https://github.com/Cyberboy161/Taybeti/releases/latest/download/taybeti.apk">
+            <p class="subtitle" data-i18n="subtitle">Paranoid‑grade encrypted notes. Zero trust. Completely offline.</p>
+            <a class="download-btn" href="https://github.com/Cyberboy161/Taybeti/releases/latest/download/taybeti.apk" data-i18n="download">
                 ⬇ Download APK
             </a>
-            <a class="github-link" href="https://github.com/Cyberboy161/Taybeti">View on GitHub →</a>
+            <a class="github-link" href="https://github.com/Cyberboy161/Taybeti" data-i18n="github">View on GitHub →</a>
         </div>
 
         <!-- Feature Cards -->
         <div class="features">
             <div class="feature-card">
-                <h3>🛡️ Zero‑Trust Login</h3>
-                <p>No password hash stored. Login is verified by <em>decrypting</em> a known string — nothing to crack.</p>
+                <h3>🛡️ <span data-i18n="ft1-title">Zero‑Trust Login</span></h3>
+                <p data-i18n="ft1-desc">No password hash stored. Login is verified by <em>decrypting</em> a known string — nothing to crack.</p>
             </div>
             <div class="feature-card">
-                <h3>🔑 Per‑Note Keys</h3>
-                <p>Each note has its own passphrase and independent AES‑256‑GCM encryption. No shared secret.</p>
+                <h3>🔑 <span data-i18n="ft2-title">Per‑Note Keys</span></h3>
+                <p data-i18n="ft2-desc">Each note has its own passphrase and independent AES‑256‑GCM encryption. No shared secret.</p>
             </div>
             <div class="feature-card">
-                <h3>🕵️ Covert Sharing</h3>
-                <p>Disguise encrypted messages as normal‑looking YouTube/Instagram links. Nobody suspects a thing.</p>
+                <h3>🕵️ <span data-i18n="ft3-title">Covert Sharing</span></h3>
+                <p data-i18n="ft3-desc">Disguise encrypted messages as normal‑looking YouTube/Instagram links. Nobody suspects a thing.</p>
             </div>
             <div class="feature-card">
-                <h3>📵 100% Offline</h3>
-                <p>No internet permission. No cloud, no telemetry, no backdoors. Your data never leaves the device.</p>
+                <h3>📵 <span data-i18n="ft4-title">100% Offline</span></h3>
+                <p data-i18n="ft4-desc">No internet permission. No cloud, no telemetry, no backdoors. Your data never leaves the device.</p>
             </div>
             <div class="feature-card">
-                <h3>🔒 Custom Keyboard</h3>
-                <p>Built‑in keyboard prevents system keyloggers and predictive text from leaking your secrets.</p>
+                <h3>🔒 <span data-i18n="ft5-title">Custom Keyboard</span></h3>
+                <p data-i18n="ft5-desc">Built‑in keyboard prevents system keyloggers and predictive text from leaking your secrets.</p>
             </div>
             <div class="feature-card">
-                <h3>📖 Open Source (MIT)</h3>
-                <p>Every line of code is public. Auditable, forkable, and free forever.</p>
+                <h3>📖 <span data-i18n="ft6-title">Open Source (MIT)</span></h3>
+                <p data-i18n="ft6-desc">Every line of code is public. Auditable, forkable, and free forever.</p>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>© 2025 Taybeti. Licensed under MIT. <br>
-            <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a> · 
-            <a href="https://github.com/Cyberboy161/Taybeti#security-audit">Security Audit</a>
+            <p data-i18n="footer">© 2025 Taybeti. Licensed under MIT.</p>
+            <p>
+                <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a> · 
+                <a href="https://github.com/Cyberboy161/Taybeti#security-audit">Security Audit</a>
             </p>
         </div>
     </div>
+
+    <script>
+        const translations = {
+            en: {
+                subtitle: "Paranoid‑grade encrypted notes. Zero trust. Completely offline.",
+                download: "⬇ Download APK",
+                github: "View on GitHub →",
+                "ft1-title": "Zero‑Trust Login",
+                "ft1-desc": "No password hash stored. Login is verified by <em>decrypting</em> a known string — nothing to crack.",
+                "ft2-title": "Per‑Note Keys",
+                "ft2-desc": "Each note has its own passphrase and independent AES‑256‑GCM encryption. No shared secret.",
+                "ft3-title": "Covert Sharing",
+                "ft3-desc": "Disguise encrypted messages as normal‑looking YouTube/Instagram links. Nobody suspects a thing.",
+                "ft4-title": "100% Offline",
+                "ft4-desc": "No internet permission. No cloud, no telemetry, no backdoors. Your data never leaves the device.",
+                "ft5-title": "Custom Keyboard",
+                "ft5-desc": "Built‑in keyboard prevents system keyloggers and predictive text from leaking your secrets.",
+                "ft6-title": "Open Source (MIT)",
+                "ft6-desc": "Every line of code is public. Auditable, forkable, and free forever.",
+                footer: "© 2025 Taybeti. Licensed under MIT."
+            },
+            de: {
+                subtitle: "Paranoid‑sichere verschlüsselte Notizen. Zero Trust. Vollständig offline.",
+                download: "⬇ APK herunterladen",
+                github: "Auf GitHub ansehen →",
+                "ft1-title": "Zero‑Trust‑Anmeldung",
+                "ft1-desc": "Kein Passwort‑Hash gespeichert. Die Anmeldung wird durch <em>Entschlüsseln</em> einer bekannten Zeichenkette verifiziert — nichts zu knacken.",
+                "ft2-title": "Pro‑Notiz‑Schlüssel",
+                "ft2-desc": "Jede Notiz hat ihre eigene Passphrase und eine unabhängige AES‑256‑GCM‑Verschlüsselung. Kein geteiltes Geheimnis.",
+                "ft3-title": "Verdecktes Teilen",
+                "ft3-desc": "Verschlüsselte Nachrichten werden als normale YouTube‑/Instagram‑Links getarnt. Niemand ahnt etwas.",
+                "ft4-title": "100% offline",
+                "ft4-desc": "Keine Internetberechtigung. Keine Cloud, keine Telemetrie, keine Hintertüren. Deine Daten verlassen das Gerät nie.",
+                "ft5-title": "Eigene Tastatur",
+                "ft5-desc": "Die integrierte Tastatur verhindert, dass System‑Keylogger und Vorschläge deine Geheimnisse preisgeben.",
+                "ft6-title": "Open Source (MIT)",
+                "ft6-desc": "Jede Codezeile ist öffentlich. Auditierbar, forkbar und für immer frei.",
+                footer: "© 2025 Taybeti. Lizenziert unter MIT."
+            },
+            tr: {
+                subtitle: "Paranoid seviyede şifreli notlar. Sıfır güven. Tamamen çevrimdışı.",
+                download: "⬇ APK İndir",
+                github: "GitHub'da Görüntüle →",
+                "ft1-title": "Sıfır‑Güven Girişi",
+                "ft1-desc": "Hiçbir parola karması saklanmaz. Giriş, bilinen bir dizgiyi <em>şifreyi çözerek</em> doğrulanır — kırılacak bir şey yoktur.",
+                "ft2-title": "Not‑Başına Anahtar",
+                "ft2-desc": "Her notanın kendi parolası ve bağımsız AES‑256‑GCM şifrelemesi vardır. Paylaşılan bir sır yok.",
+                "ft3-title": "Gizli Paylaşım",
+                "ft3-desc": "Şifreli mesajlar normal YouTube/Instagram bağlantıları gibi gizlenir. Kimse bir şeyden şüphelenmez.",
+                "ft4-title": "%100 Çevrimdışı",
+                "ft4-desc": "İnternet izni yok. Bulut yok, telemetri yok, arka kapı yok. Verileriniz asla cihazdan ayrılmaz.",
+                "ft5-title": "Özel Klavye",
+                "ft5-desc": "Yerleşik klavye, sistem keylogger’larının ve tahminli metnin sırlarınızı sızdırmasını engeller.",
+                "ft6-title": "Açık Kaynak (MIT)",
+                "ft6-desc": "Her satır kod herkese açıktır. Denetlenebilir, çatallanabilir ve sonsuza kadar ücretsiz.",
+                footer: "© 2025 Taybeti. MIT Lisansı altında."
+            },
+            ckb: { // Sorani Kurdish
+                subtitle: "تێبینییە نهێنییەکانی پلەی پارانۆیا. متمانە سفر. بەتەواوی ئۆفلاین.",
+                download: "⬇ دابەزاندنی APK",
+                github: "لە GitHub ــدا ببینە →",
+                "ft1-title": "چوونەژوورەوەی متمانە‑سفر",
+                "ft1-desc": "هیچ هاشێکی وشەی نهێنی پاشەکەوت ناکرێت. چوونەژوورەوە بە <em>کردنەوەی نهێنی</em>ی زنجیرەیەکی ناسراو پشتڕاست دەکرێتەوە — هیچ شتێک نییە بشکێت.",
+                "ft2-title": "کلیلی هەر تێبینییەک",
+                "ft2-desc": "هەر تێبینییەک ووشەی نهێنی تایبەتی خۆی و شفرەکردنی سەربەخۆی AES‑256‑GCM ی هەیە. هیچ نهێنییەکی هاوبەش نییە.",
+                "ft3-title": "هاوبەشکردنی شاراوە",
+                "ft3-desc": "پەیامە شفرەکراوەکان وەک لینکی ئاسایی یوتوب/ئینستاگرام خۆدەنوێنن. کەس گومان نابات.",
+                "ft4-title": "١٠٠٪ ئۆفلاین",
+                "ft4-desc": "هیچ مۆڵەتی ئینتەرنێت نییە. هەوری نییە، تێلیمیتری نییە، دەرگای پشتەوە نییە. داتاکانت هەرگیز ئامێرەکە جێناهێڵێت.",
+                "ft5-title": "کیبۆردی تایبەت",
+                "ft5-desc": "کیبۆردی ناوەکی ڕێگا لە کیلاگەرەکانی سیستەم و دەقی پێشبینیکراو دەگرێت کە نهێنییەکانت ئاشکرا بکەن.",
+                "ft6-title": "سەرچاوە کراوە (MIT)",
+                "ft6-desc": "هەموو هێڵێکی کۆد گشتییە. دەتوانرێت چاودێری بکرێت، لەسەر بڕوات و بۆ هەمیشە خۆڕاییە.",
+                footer: "© 2025 Taybeti. لەژێر مۆڵەتی MIT دایە."
+            },
+            kmr: { // Kurmanji Kurdish
+                subtitle: "Notên şîfrekirî yên asta paranoîd. Sifir bawerî. Bi tevahî offline.",
+                download: "⬇ APK Daxîne",
+                github: "Li GitHub Binêre →",
+                "ft1-title": "Têketina Sifir‑Bawerî",
+                "ft1-desc": "Hîç hash a şîfreyê nayê tomarkirin. Têketin bi <em>deşîfrekirina</em> rêzeke naskirî tê rastandin — tiştekî were şikestin tine ye.",
+                "ft2-title": "Mifteyên Her‑Notî",
+                "ft2-desc": "Her notek şîfreya xwe û şîfrekirina AES‑256‑GCM ya serbixwe heye. Siruşteke hevpar nîne.",
+                "ft3-title": "Parvekirina Veşartî",
+                "ft3-desc": "Peyamên şîfrekirî wek lînkên asayî yên YouTube/Instagram tên veşartin. Tu kes guman nake.",
+                "ft4-title": "100% Offline",
+                "ft4-desc": "Destûra înternetê nîne. Ewr nîne, telemetrî nîne, paşderî nîne. Daneyên te qet ji cîhazê dernakevin.",
+                "ft5-title": "Klavyeya Taybet",
+                "ft5-desc": "Klavyeya navxweyî nahêle keyloggerên sîstemê û metna pêşbînîkirî siruştên te eşkere bikin.",
+                "ft6-title": "Çavkanî Vekirî (MIT)",
+                "ft6-desc": "Her rêzek kodê vekirî ye. Tê vekolîn, dikare bê çiqkirin û herdem belaş e.",
+                footer: "© 2025 Taybeti. Di bin Lîsansa MIT de."
+            }
+        };
+
+        function setLanguage(lang) {
+            // Update button active states
+            document.querySelectorAll('.lang-bar button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+
+            // Update all elements with data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    // For elements that may contain HTML (like <em> tags), use innerHTML carefully
+                    if (translations[lang][key].includes('<')) {
+                        el.innerHTML = translations[lang][key];
+                    } else {
+                        el.textContent = translations[lang][key];
+                    }
+                }
+            });
+        }
+
+        // Set English by default on load
+        setLanguage('en');
+    </script>
 </body>
 </html>
