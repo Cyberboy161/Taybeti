@@ -158,6 +158,27 @@
             font-size: 0.95rem;
         }
 
+        /* Social links */
+        .social {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .social p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        .social a {
+            display: inline-block;
+            margin: 0 10px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .social a:hover {
+            text-decoration: underline;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -181,7 +202,7 @@
     <!-- Language Bar with flags -->
     <div class="lang-bar">
         <button onclick="setLanguage('en')" class="active" id="lang-en">
-            🇬🇧 English
+            🌐 English
         </button>
         <button onclick="setLanguage('de')" id="lang-de">
             🇩🇪 Deutsch
@@ -240,6 +261,15 @@
             </div>
         </div>
 
+        <!-- Social Links -->
+        <div class="social">
+            <p>🌍 Join the Community:</p>
+            <a href="https://discord.gg/Kn3nxyQFq" target="_blank">🎮 Taybeti Discord</a>
+            <a href="https://discord.gg/UquQdWTm" target="_blank">💬 My Discord</a>
+            <a href="https://www.instagram.com/nashat_161?igsh=aGk0ZnNyYTQzY3Z3" target="_blank">📸 Instagram</a>
+            <a href="https://www.facebook.com/share/18XHHHPM2W/" target="_blank">📘 Facebook</a>
+        </div>
+
         <!-- Footer -->
         <div class="footer">
             <p data-i18n="footer">© 2025 Taybeti. Licensed under MIT.</p>
@@ -271,7 +301,7 @@
                 footer: "© 2025 Taybeti. Licensed under MIT."
             },
             de: {
-                subtitle: "Paranoid‑sichere verschlüsselte Notizen. Zero Trust. Vollständig offline.",
+                subtitle: `Taybeti bedeutet persönlich oder privat auf Kurdisch (Sorani) und diese App wird dies mit den fortschrittlichsten Techniken erreichen – die erste ihrer Art und völlig kostenlos. Jeder kann den Code einsehen, wie es funktioniert, auf der <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">GitHub-Seite</a>.`,
                 download: "⬇ APK herunterladen",
                 github: "Auf GitHub ansehen →",
                 "ft1-title": "Zero‑Trust‑Anmeldung",
@@ -289,7 +319,7 @@
                 footer: "© 2025 Taybeti. Lizenziert unter MIT."
             },
             tr: {
-                subtitle: "Paranoid seviyede şifreli notlar. Sıfır güven. Tamamen çevrimdışı.",
+                subtitle: `Taybeti Kürtçe (Sorani)'de kişisel veya özel anlamına gelir ve bu uygulama bunu en gelişmiş tekniklerle başaracak – türünün ilk örneği ve tamamen ücretsiz. Herkes, nasıl çalıştığını <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">GitHub sayfasında</a> görebilir.`,
                 download: "⬇ APK İndir",
                 github: "GitHub'da Görüntüle →",
                 "ft1-title": "Sıfır‑Güven Girişi",
@@ -307,7 +337,7 @@
                 footer: "© 2025 Taybeti. MIT Lisansı altında."
             },
             ckb: {
-                subtitle: "تێبینییە نهێنییەکانی پلەی پارانۆیا. متمانە سفر. بەتەواوی ئۆفلاین.",
+                subtitle: `تایبەتی بە زمانی کوردی (سۆرانی) بەواتای تاکەکەسی یان تایبەتی دێت و ئەم ئەپە بە پێشکەوتووترین تەکنیکەکان دەستدەکەوێت — یەکەمین لە جۆری خۆی و بەتەواوی خۆڕایی. هەموو کەسێک دەتوانێت کۆدەکە ببینێت کە چۆن کاردەکات لە <a href='https://github.com/Cyberboy161/Taybeti' target='_blank'>لاپەڕەی GitHub</a>.`,
                 download: "⬇ دابەزاندنی APK",
                 github: "لە GitHub ــدا ببینە →",
                 "ft1-title": "چوونەژوورەوەی متمانە‑سفر",
@@ -325,7 +355,7 @@
                 footer: "© 2025 Taybeti. لەژێر مۆڵەتی MIT دایە."
             },
             kmr: {
-                subtitle: "Notên şîfrekirî yên asta paranoîd. Sifir bawerî. Bi tevahî offline.",
+                subtitle: `Taybeti bi kurdî (soranî) wateya şexsî an taybet dide û ev sepan dê vê yekê bi teknîkên herî pêşkeftî pêk bîne — yekem ji cureyê xwe û bi tevahî belaş. Her kes dikare kodê bibîne ka çawa dixebite li ser <a href='https://github.com/Cyberboy161/Taybeti' target='_blank'>rûpela GitHub</a>.`,
                 download: "⬇ APK Daxîne",
                 github: "Li GitHub Binêre →",
                 "ft1-title": "Têketina Sifir‑Bawerî",
