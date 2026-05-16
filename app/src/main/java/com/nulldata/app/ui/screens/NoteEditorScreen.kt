@@ -555,13 +555,16 @@ private fun DecoyEncryptedView(
     onBack: () -> Unit
 ) {
     var selectedPlatform by remember { mutableStateOf(DecoyPlatform.YOUTUBE) }
+    var useDisguise by remember { mutableStateOf(false) }
+    var showDisguise by remember { mutableStateOf(false) }
     var dropdownExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val strings = LocalStrings.current
 
-    val disguisedUrl = remember(encryptedBlob, selectedPlatform) {
-        DecoyEncoder.encode(encryptedBlob, selectedPlatform)
+    val disguisedUrl = remember(encryptedBlob, selectedPlatform, useDisguise) {
+        if (useDisguise) DecoyEncoder.encode(encryptedBlob, selectedPlatform)
+        else encryptedBlob
     }
 
     Column(
@@ -569,6 +572,7 @@ private fun DecoyEncryptedView(
             .fillMaxSize()
             .padding(padding)
             .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Text(
             strings.encryptedMessage,
@@ -576,17 +580,18 @@ private fun DecoyEncryptedView(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(4.dp))
+
+        // ── Raw encrypted blob ──
         OutlinedTextField(
-            value = disguisedUrl,
+            value = encryptedBlob,
             onValueChange = {},
             readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.4f),
-            label = { Text(strings.disguisedUrl) },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 2,
+            label = { Text(strings.encryptedBlob) },
             trailingIcon = {
                 IconButton(onClick = {
-                    clipboard.setText(AnnotatedString(disguisedUrl))
+                    clipboard.setText(AnnotatedString(encryptedBlob))
                     Toast.makeText(context, strings.copied, Toast.LENGTH_SHORT).show()
                 }) {
                     Icon(Icons.Default.ContentCopy, contentDescription = strings.copy)
@@ -598,7 +603,7 @@ private fun DecoyEncryptedView(
         Row(modifier = Modifier.fillMaxWidth()) {
             Button(
                 onClick = {
-                    clipboard.setText(AnnotatedString(disguisedUrl))
+                    clipboard.setText(AnnotatedString(encryptedBlob))
                     Toast.makeText(context, strings.copied, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f)
@@ -617,39 +622,77 @@ private fun DecoyEncryptedView(
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text(
-            strings.disguiseAs,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        ExposedDropdownMenuBox(
-            expanded = dropdownExpanded,
-            onExpandedChange = { dropdownExpanded = it }
-        ) {
-            OutlinedTextField(
-                value = selectedPlatform.label,
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-            )
-            ExposedDropdownMenu(
-                expanded = dropdownExpanded,
-                onDismissRequest = { dropdownExpanded = false }
+        // ── Disguise section ──
+        if (!showDisguise) {
+            Button(
+                onClick = { showDisguise = true },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                DecoyPlatform.entries.forEach { platform ->
+                Text(strings.disguiseAsLink)
+            }
+        } else {
+            Text(
+                strings.disguiseAs,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+
+            ExposedDropdownMenuBox(
+                expanded = dropdownExpanded,
+                onExpandedChange = { dropdownExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = if (useDisguise) selectedPlatform.label else "None (keep raw)",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(strings.platform) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = dropdownExpanded,
+                    onDismissRequest = { dropdownExpanded = false }
+                ) {
                     DropdownMenuItem(
-                        text = { Text(platform.label) },
+                        text = { Text("None (keep raw)") },
                         onClick = {
-                            selectedPlatform = platform
+                            useDisguise = false
                             dropdownExpanded = false
                         }
                     )
+                    DecoyPlatform.entries.forEach { platform ->
+                        DropdownMenuItem(
+                            text = { Text(platform.label) },
+                            onClick = {
+                                selectedPlatform = platform
+                                useDisguise = true
+                                dropdownExpanded = false
+                            }
+                        )
+                    }
                 }
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = disguisedUrl,
+                onValueChange = {},
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                label = { Text(if (useDisguise) strings.disguisedUrl else strings.encryptedBlob) },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        clipboard.setText(AnnotatedString(disguisedUrl))
+                        Toast.makeText(context, strings.copied, Toast.LENGTH_SHORT).show()
+                    }) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = strings.copy)
+                    }
+                }
+            )
         }
     }
 }
