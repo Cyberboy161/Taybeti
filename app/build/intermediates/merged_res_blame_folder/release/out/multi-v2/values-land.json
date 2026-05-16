@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.nulldata.app-mergeReleaseResources-56:/values-land/values-land.xml",
+            "map": [
+                {
+                    "source": "/home/casper/.gradle/caches/transforms-3/60b18e072f717f8c6696af57e3de4dd6/transformed/appcompat-1.7.0/res/values-land/values-land.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,125,196",
+                        "endColumns": "69,70,67",
+                        "endOffsets": "120,191,259"
+                    }
+                }
+            ]
+        }
+    ]
+}
