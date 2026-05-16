@@ -2,6 +2,7 @@ package com.nulldata.app.ui.screens
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -296,15 +299,33 @@ fun NoteEditorScreen(
             var newKey by remember { mutableStateOf(generatedKey) }
             var confirmKey by remember { mutableStateOf("") }
             var createKeyError by remember { mutableStateOf<String?>(null) }
+            val dialogKb = remember { KeyboardState() }
             val MIN_KEY_LEN = 8
 
-            AlertDialog(
-                onDismissRequest = { /* block outside dismiss — user must use Cancel */ },
-                properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
-                modifier = Modifier.fillMaxWidth(0.95f),
-                title = { Text(strings.createKey) },
-                text = {
-                    Column {
+            Dialog(
+                onDismissRequest = { /* block outside dismiss */ },
+                properties = DialogProperties(
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false,
+                    usePlatformDefaultWidth = false
+                )
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = strings.createKey,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
                         Text(
                             strings.minChars,
                             style = MaterialTheme.typography.bodySmall,
@@ -313,19 +334,32 @@ fun NoteEditorScreen(
                             else MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        PasswordField(
-                            value = newKey,
-                            onValueChange = { newKey = it; createKeyError = null },
-                            label = strings.noteKey,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        PasswordField(
-                            value = confirmKey,
-                            onValueChange = { confirmKey = it; createKeyError = null },
-                            label = "Confirm key",
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        CompositionLocalProvider(LocalKeyboardState provides dialogKb) {
+                            PasswordField(
+                                value = newKey,
+                                onValueChange = { newKey = it; createKeyError = null },
+                                label = strings.noteKey,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            PasswordField(
+                                value = confirmKey,
+                                onValueChange = { confirmKey = it; createKeyError = null },
+                                label = "Confirm key",
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        if (dialogKb.isVisible) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            CustomKeyboard(
+                                onKeyPress = { dialogKb.onKeyPress?.invoke(it) },
+                                onDelete = { dialogKb.onDelete?.invoke() },
+                                onDone = { dialogKb.onDone?.invoke() }
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+
                         if (createKeyError != null) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(createKeyError!!, color = MaterialTheme.colorScheme.error)
@@ -347,35 +381,42 @@ fun NoteEditorScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            when {
-                                newKey.isEmpty() -> createKeyError = strings.keyRequired
-                                newKey.length < MIN_KEY_LEN -> createKeyError = strings.keyTooShort
-                                newKey != confirmKey -> createKeyError = strings.keysMatch
-                                else -> {
-                                    noteKey = newKey
-                                    showCreateKeyDialog = false
-                                    isLocked = false
-                                    title = ""
-                                    plaintext = ""
-                                }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextButton(
+                                onClick = onBack,
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.cancel) }
+                            Button(
+                                onClick = {
+                                    when {
+                                        newKey.isEmpty() -> createKeyError = strings.keyRequired
+                                        newKey.length < MIN_KEY_LEN -> createKeyError = strings.keyTooShort
+                                        newKey != confirmKey -> createKeyError = strings.keysMatch
+                                        else -> {
+                                            noteKey = newKey
+                                            showCreateKeyDialog = false
+                                            isLocked = false
+                                            title = ""
+                                            plaintext = ""
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = if (newKey.length < MIN_KEY_LEN && newKey.isNotEmpty())
+                                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                else ButtonDefaults.buttonColors()
+                            ) {
+                                Text(strings.createNote)
                             }
-                        },
-                        colors = if (newKey.length < MIN_KEY_LEN && newKey.isNotEmpty())
-                            ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        else ButtonDefaults.buttonColors()
-                    ) {
-                        Text(strings.createNote)
+                        }
                     }
-                },
-                dismissButton = {
-                    TextButton(onClick = onBack) { Text(strings.cancel) }
                 }
-            )
+            }
         }
 
         Scaffold(
