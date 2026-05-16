@@ -4383,7 +4383,10 @@ androidx.compose.foundation.gestures.ForEachGestureKt$forEachGesture$1
 androidx.compose.foundation.gestures.ForEachGestureKt:
     public static final java.lang.Object awaitAllPointersUp(androidx.compose.ui.input.pointer.PointerInputScope,kotlin.coroutines.Continuation)
     public static final java.lang.Object forEachGesture(androidx.compose.ui.input.pointer.PointerInputScope,kotlin.jvm.functions.Function2,kotlin.coroutines.Continuation)
-androidx.compose.foundation.gestures.GestureCancellationException
+androidx.compose.foundation.gestures.GestureCancellationException:
+    public static final int $stable
+    public void <init>()
+    public synthetic void <init>(java.lang.String,int,kotlin.jvm.internal.DefaultConstructorMarker)
 androidx.compose.foundation.gestures.MapDraggableAnchors
 androidx.compose.foundation.gestures.ModifierLocalScrollableContainerProvider:
     public final boolean getEnabled()
@@ -4404,10 +4407,7 @@ androidx.compose.foundation.gestures.PressGestureScope:
     public static synthetic long access$toSp-0xMU5do$jd(androidx.compose.foundation.gestures.PressGestureScope,float)
     public static synthetic long access$toSp-kPz2Gy4$jd(androidx.compose.foundation.gestures.PressGestureScope,float)
     public static synthetic long access$toSp-kPz2Gy4$jd(androidx.compose.foundation.gestures.PressGestureScope,int)
-    public abstract java.lang.Object awaitRelease(kotlin.coroutines.Continuation)
-androidx.compose.foundation.gestures.PressGestureScopeImpl$awaitRelease$1
 androidx.compose.foundation.gestures.PressGestureScopeImpl:
-    public java.lang.Object awaitRelease(kotlin.coroutines.Continuation)
     public androidx.compose.ui.geometry.Rect toRect(androidx.compose.ui.unit.DpRect)
     public long toSp-kPz2Gy4(int)
 androidx.compose.foundation.gestures.ScrollDraggableState:
@@ -42320,6 +42320,8 @@ androidx.compose.foundation.gestures.DraggableNode:
 androidx.compose.foundation.gestures.ForEachGestureKt$awaitEachGesture$2:
     public final java.lang.Object invoke$5()
 androidx.compose.foundation.gestures.ForEachGestureKt
+androidx.compose.foundation.gestures.GestureCancellationException:
+    static void <clinit>()
 androidx.compose.foundation.gestures.ModifierLocalScrollableContainerProvider:
     public final void setEnabled()
 androidx.compose.foundation.gestures.MouseWheelScrollNode$1$1$2$1$1$1:
@@ -42361,8 +42363,8 @@ androidx.compose.foundation.gestures.ScrollableElement:
 androidx.compose.foundation.gestures.ScrollableGesturesNode$onDragStopped$1$1:
     public final java.lang.Object invoke$3()
 androidx.compose.foundation.gestures.ScrollableGesturesNode$onDragStopped$1:
+    public int label
     public final java.lang.Object invoke-LuvzFrg()
-    public final java.lang.Object invoke-d-4ec7I(androidx.compose.foundation.gestures.PressGestureScopeImpl,long,kotlin.coroutines.Continuation)
 androidx.compose.foundation.gestures.ScrollableGesturesNode$startDragImmediately$1
 androidx.compose.foundation.gestures.ScrollableGesturesNode:
     public final boolean enabled
@@ -43362,6 +43364,7 @@ androidx.compose.foundation.lazy.layout.LazyLayoutSemanticsKt$lazyLayoutSemantic
 androidx.compose.foundation.lazy.layout.LazyLayoutSemanticsKt$lazyLayoutSemantics$1$accessibilityScrollState$2
 androidx.compose.foundation.lazy.layout.LazyLayoutSemanticsKt$lazyLayoutSemantics$1$indexForKeyMapping$1:
     public static java.lang.Integer invoke$4()
+    public final void invoke-k-4lQ0M()
     public static long invoke-tuRUvjQ$1()
 androidx.compose.foundation.lazy.layout.LazyLayoutSemanticsKt$lazyLayoutSemantics$1$scrollByAction$1$1:
     public final java.lang.Object invoke$3()
@@ -55962,8 +55965,12 @@ com.nulldata.app.ui.components.CustomKeyboardKt$CustomKeyboard$1:
     public final void invoke(androidx.compose.runtime.Composer,int)
 com.nulldata.app.ui.components.CustomKeyboardKt$CustomKeyboard$2
 com.nulldata.app.ui.components.CustomKeyboardKt$CustomKeyboard$selectLang$1
-com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$1$1
+com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$1$1:
+    public final java.lang.Object invoke$3()
 com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$1:
+    public final java.lang.Object invoke-d-4ec7I(androidx.compose.foundation.gestures.PressGestureScopeImpl,long,kotlin.coroutines.Continuation)
+com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$2
+com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1:
     public final java.lang.Object invoke$4()
 com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$3
 com.nulldata.app.ui.components.CustomKeyboardKt$FlatActionKey$2:
@@ -56004,6 +56011,7 @@ com.nulldata.app.ui.components.CustomKeyboardKt:
     public static final boolean access$CustomKeyboard$lambda$1(androidx.compose.runtime.MutableState)
     public static final void access$CustomKeyboard$lambda$11(androidx.compose.runtime.MutableState,boolean)
     public static final int access$CustomKeyboard$lambda$4(androidx.compose.runtime.MutableState)
+    public static final void access$DeleteKey_cf5BqRc$lambda$50(androidx.compose.runtime.MutableState,boolean)
 com.nulldata.app.ui.components.KeyboardHostKt$KeyboardHost$1$1$2:
     public final androidx.compose.animation.ContentTransform invoke()
     public final void invoke$2()

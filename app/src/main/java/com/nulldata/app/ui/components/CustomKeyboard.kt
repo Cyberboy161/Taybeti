@@ -32,6 +32,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private val KEYBOARD_PREFS = "keyboard_prefs"
 private val KEY_LANG_INDEX = "lang_index"
@@ -588,20 +590,31 @@ private fun RowScope.DeleteKey(
     keyBg: Color,
     onDelete: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    var pressed by remember { mutableStateOf(false) }
+
     Box(
         modifier = rowKeyModifier(weight, keyBg)
             .pointerInput(Unit) {
                 detectTapGestures(
+                    onTap = { onDelete() },
                     onPress = {
-                        onDelete()
-                        var delayMs = 400L
+                        pressed = true
+                        scope.launch {
+                            var delayMs = 400L
+                            try {
+                                while (pressed) {
+                                    delay(delayMs)
+                                    onDelete()
+                                    delayMs = (delayMs * 3L / 4L).coerceAtLeast(30L)
+                                }
+                            } catch (_: kotlinx.coroutines.CancellationException) {}
+                        }
                         try {
-                            while (true) {
-                                delay(delayMs)
-                                onDelete()
-                                delayMs = (delayMs * 3L / 4L).coerceAtLeast(30L)
-                            }
-                        } catch (_: kotlinx.coroutines.CancellationException) {}
+                            awaitRelease()
+                        } finally {
+                            pressed = false
+                        }
                     }
                 )
             },

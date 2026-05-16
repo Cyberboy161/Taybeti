@@ -1,32 +1,5 @@
 Marking string:m3c_dialog:2131558479 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:view_tree_on_back_pressed_dispatcher_owner:2131230902 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:view_tree_view_model_store_owner:2131230904 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:view_tree_lifecycle_owner:2131230901 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking layout:abc_action_menu_item_layout:2131427330 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking dimen:abc_cascading_menus_min_smallest_width:2131099670 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking style:DialogWindowTheme:2131624097 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:compose_view_saveable_id_tag:2131230792 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking attr:actionModeStyle:2130903069 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking attr:actionBarPopupTheme:2130903043 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking layout:abc_action_mode_close_item_material:2131427333 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking layout:abc_action_bar_title_item:2131427328 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:action_bar_title:2131230765 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:action_bar_subtitle:2131230764 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking attr:actionBarStyle:2130903046 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking attr:actionOverflowButtonStyle:2130903072 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:tag_accessibility_actions:2131230874 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:accessibility_action_clickable_span:2131230726 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:tag_accessibility_clickable_spans:2131230875 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:androidx_compose_ui_view_composition_context:2131230781 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:view_tree_saved_state_registry_owner:2131230903 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:tag_unhandled_key_event_manager:2131230884 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:tag_unhandled_key_listeners:2131230885 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:pooling_container_listener_holder_tag:2131230839 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:consume_window_insets_tag:2131230793 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:topPanel:2131230896 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:buttonPanel:2131230786 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:contentPanel:2131230795 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:customPanel:2131230797 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking drawable:abc_textfield_default_mtrl_alpha:2131165258 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking drawable:abc_ab_share_pack_mtrl_alpha:2131165184 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking drawable:abc_textfield_search_default_mtrl_alpha:2131165260 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
@@ -76,8 +49,33 @@ Marking color:abc_tint_btn_checkable:2131034131 reachable: referenced from /home
 Marking drawable:abc_seekbar_thumb_material:2131165242 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking color:abc_tint_seek_thumb:2131034134 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking color:abc_tint_spinner:2131034135 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking attr:listMenuViewStyle:2130903215 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking dimen:abc_cascading_menus_min_smallest_width:2131099670 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking layout:abc_action_menu_item_layout:2131427330 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking attr:dropDownListViewStyle:2130903165 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking attr:actionModeStyle:2130903069 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking attr:actionBarPopupTheme:2130903043 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking layout:abc_action_mode_close_item_material:2131427333 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking layout:abc_action_bar_title_item:2131427328 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:action_bar_title:2131230765 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:action_bar_subtitle:2131230764 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking attr:actionBarStyle:2130903046 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:hide_in_inspector_tag:2131230811 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking attr:actionOverflowButtonStyle:2130903072 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:androidx_compose_ui_view_composition_context:2131230781 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking string:default_popup_window_title:2131558439 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:compose_view_saveable_id_tag:2131230792 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:consume_window_insets_tag:2131230793 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:tag_accessibility_actions:2131230874 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:accessibility_action_clickable_span:2131230726 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:tag_accessibility_clickable_spans:2131230875 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking style:DialogWindowTheme:2131624097 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:view_tree_view_model_store_owner:2131230904 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:view_tree_lifecycle_owner:2131230901 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:topPanel:2131230896 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:buttonPanel:2131230786 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:contentPanel:2131230795 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:customPanel:2131230797 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking attr:listMenuViewStyle:2130903215 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:abc_prepend_shortcut_label:2131558417 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:abc_menu_meta_shortcut_label:2131558413 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:abc_menu_ctrl_shortcut_label:2131558409 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
@@ -135,35 +133,27 @@ Marking string:selected:2131558506 reachable: referenced from /home/casper/Cheet
 Marking string:not_selected:2131558500 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:template_percent:2131558510 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:in_progress:2131558441 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking string:default_popup_window_title:2131558439 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:hide_in_inspector_tag:2131230811 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking string:m3c_dropdown_menu_expanded:2131558481 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking string:m3c_dropdown_menu_collapsed:2131558480 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:tag_unhandled_key_listeners:2131230885 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:tab:2131558509 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:switch_role:2131558508 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking attr:toolbarNavigationButtonStyle:2130903329 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking string:m3c_dropdown_menu_expanded:2131558481 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking string:m3c_dropdown_menu_collapsed:2131558480 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:inspection_slot_table_set:2131230819 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking attr:actionBarSize:2130903044 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:action_bar_activity_content:2131230760 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:action_bar_container:2131230761 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:action_bar:2131230759 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking attr:nestedScrollViewStyle:2130903235 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:is_pooling_container_tag:2131230820 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:view_tree_saved_state_registry_owner:2131230903 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:androidx_startup:2131558427 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:tag_window_insets_animation_callback:2131230886 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:tag_on_apply_window_listener:2131230878 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:tag_unhandled_key_event_manager:2131230884 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:pooling_container_listener_holder_tag:2131230839 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking string:default_error_message:2131558438 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:wrapped_composition_tag:2131230908 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:spacer:2131230865 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking attr:autoCompleteTextViewStyle:2130903087 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:wrapped_composition_tag:2131230908 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:tag_accessibility_pane_title:2131230877 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking layout:abc_popup_menu_item_layout:2131427347 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking dimen:abc_config_prefDialogWidth:2131099671 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking layout:abc_popup_menu_header_item_layout:2131427346 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:split_action_bar:2131230867 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking id:action_context_bar:2131230767 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking attr:actionOverflowMenuStyle:2130903073 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking attr:alpha:2130903082 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking attr:lStar:2130903204 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:inspection_slot_table_set:2131230819 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking drawable:abc_cab_background_top_material:2131165200 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking drawable:abc_ratingbar_material:2131165235 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking dimen:abc_star_big:2131099707 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
@@ -175,16 +165,26 @@ Marking drawable:abc_vector_test:2131165262 reachable: referenced from /home/cas
 Marking drawable:abc_seekbar_track_material:2131165244 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking drawable:abc_list_divider_mtrl_alpha:2131165221 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking drawable:abc_dialog_material_background:2131165203 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:split_action_bar:2131230867 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:action_context_bar:2131230767 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:tag_window_insets_animation_callback:2131230886 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:tag_on_apply_window_listener:2131230878 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking attr:actionOverflowMenuStyle:2130903073 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking attr:alpha:2130903082 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking attr:lStar:2130903204 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking string:navigation_menu:2131558499 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking string:close_drawer:2131558436 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking attr:toolbarStyle:2130903330 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:abc_action_bar_up_description:2131558401 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:report_drawn:2131230843 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking string:navigation_menu:2131558499 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking string:close_drawer:2131558436 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:tag_screen_reader_focusable:2131230881 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:tag_accessibility_heading:2131230876 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking id:tag_accessibility_pane_title:2131230877 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:tag_state_description:2131230882 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking dimen:abc_config_prefDialogWidth:2131099671 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking layout:abc_cascading_menu_item_layout:2131427339 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking string:default_error_message:2131558438 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking layout:abc_popup_menu_header_item_layout:2131427346 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking layout:abc_popup_menu_item_layout:2131427347 reachable: referenced from /home/casper/CheetahClaws/Main/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 android.content.res.Resources#getIdentifier present: true
 Web content present: false
 Referenced Strings:
@@ -207,16 +207,16 @@ Dekodieren
 textSelectionRange
 https://en.wikipedia.org/wiki/
 ACTION_PRESS_AND_HOLD
-left
 kotlinx.coroutines.DefaultExecutor
+left
 notnull
 Strategy.HighQuality
 removeItemAt
 Veke
 setNextSelectedPositionInt
 role
-INSTAGRAM
 S_RESUMING_BY_RCV
+INSTAGRAM
 Selection
 emoji2.text.DefaultEmojiConfig
 H
@@ -232,8 +232,8 @@ EXTRA_BENCHMARK_OPERATION
 _
 a
 Çık
-Center
 b
+Center
 salt
 ACTION_CLEAR_ACCESSIBILITY_FOCUS
 c
@@ -241,8 +241,8 @@ Infinity
 Compose:unobserve
 truncated
 Taybeti
-nulldata.db
 RESUMING_BY_EB
+nulldata.db
 kotlin.String
 m
 OnClick
@@ -274,14 +274,14 @@ b49fda3ada77555c3d9156f68f8d29b0
 child
 cid
 androidx.view.accessibility.Accessibi...
-setSelectedPositionInt
 UNDO
+setSelectedPositionInt
 COMPLETING_WAITING_CHILDREN
 _invoked
 Wikipedia
 PAGE_DOWN
-SDK_INT
 WordBreak.None
+SDK_INT
 provider
 kotlinx.coroutines.main.delay
 _delayed
@@ -297,11 +297,11 @@ ckb
 ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE
 android.view.View$AttachInfo
 java.lang.Float
-Dispatchers.IO
 باش
+Dispatchers.IO
 fixups
-InactivePendingWork
 ARGON2JNI_PASSWORD_BYTEBUFFER_NULL
+InactivePendingWork
 SharingStarted.Eagerly
 TransformOriginInterruptionHandling
 autoMigrationSpecs
@@ -315,8 +315,8 @@ write
 StateDescription
 toggleableState
 EmojiSupportMatch.Default
-byte
 $this$Button
+byte
 TextSubstitution
 Favoriler
 Square
@@ -357,8 +357,8 @@ statusBarStyle
 mStableInsets
 _cur
 SELECT_PAGE_UP
-REAL
 StructuralEqualityPolicy
+REAL
 _id
 kotlin.Throwable
 RequestFocus
@@ -445,8 +445,8 @@ Compose:Composer.dispose
 Container
 Compose
 java.lang.Short
-positionSelector
 Search
+positionSelector
 android.widget.Button
 _closeCause
 Oklab
@@ -466,16 +466,16 @@ font_variation_settings
 DpAnimation
 Şifreleniyor...
 _isTerminated
-EmojiSupportMatch.None
 Continue
+EmojiSupportMatch.None
 TextSelectionRange
 Taybeti::login::check::ok
 Stylus
 SEALED
-CREATED
 android.text.DynamicLayout$ChangeWatcher
-ContentOrRtl
+CREATED
 NO_OWNER
+ContentOrRtl
 androidx.content.action.LOAD_EMOJI_FONT
 QWERTYUIOP
 Password
@@ -491,8 +491,8 @@ Sentences
 short
 ARGON2_DECODING_LENGTH_FAIL
 encodedBuffer
-COMPLETING_RETRY
 Strategy.Unspecified
+COMPLETING_RETRY
 android.widget.RadioButton
 android.widget.ImageView
 ACCESSIBILITY_CLICKABLE_SPAN_ID
@@ -522,8 +522,8 @@ Düzenle
 CHANNEL_CLOSED
 SharingStarted.Lazily
 java.lang.Throwable
-map.entries
 /data/misc/profiles/cur/0/
+map.entries
 effectiveNodeIndex
 Outlined
 migrationContainer
@@ -540,9 +540,9 @@ LineHeightStyle.Alignment.Bottom
 ACTION_DRAG_START
 $this$navigate
 Yapıştır
-TAB
-.immediate
 SecureOff
+.immediate
+TAB
 char
 None
 Bevel
@@ -605,8 +605,8 @@ Button
 kotlin.reflect.jvm.internal.Reflectio...
 CutText
 COLLAPSED
-DEFAULT_TEST_TAG
 cleanedAndPointers
+DEFAULT_TEST_TAG
 addObserver
 ClearTextSubstitution
 ON_ANY
@@ -615,10 +615,10 @@ route
 ON_PAUSE
 Note
 groupAnchor
-context.noBackupFilesDir
 Recomposer:animation
-Wrap
+context.noBackupFilesDir
 getEmojiConsistencySet
+Wrap
 لکاندن
 DROP_LATEST
 _exceptionsHolder
@@ -671,8 +671,8 @@ Plaintext
 java.lang.Boolean
 selector
 Leading
-classSimpleName
 owner
+classSimpleName
 Baş
 SELECT_DOWN
 Vegerîne
@@ -689,9 +689,9 @@ SetText
 updateDisplayListIfDirty
 lastScheduledTask
 InsertTextAtCursor
-navigation
 tables
 Unlocking...
+navigation
 androidx.activity.result.contract.ext...
 androidx.view.accessibility.Accessibi...
 action
@@ -718,8 +718,8 @@ file
 typeConverters
 traversalIndex
 CancellableContinuation
-map
 Final
+map
 $this$OutlinedButton
 ARGON2_MEMORY_TOO_LITTLE
 ACTION_PAGE_RIGHT
@@ -768,13 +768,13 @@ asyncTraceEnd
 systemBarsIgnoringVisibility
 Versiyon
 STARTED
-Round
 Inactive
+Round
 NeverEqualPolicy
 DONE_RCV
 Error
-collectionItemInfo
 Closed
+collectionItemInfo
 Completed
 callback
 RESUME_TOKEN
@@ -802,8 +802,8 @@ Butt
 وەشان
 input_method
 defaultCreationExtras
-Expand
 unique
+Expand
 setCurrentState
 components
 kotlin.Function
@@ -816,8 +816,8 @@ kotlinx.coroutines.channels.defaultBu...
 classes_to_restore
 isTraversalGroup
 Exclusion
-getBoolean
 Bleiben
+getBoolean
 decoyEnabled
 p.second
 ARGON2_MEMORY_ALLOCATION_ERROR
@@ -901,8 +901,8 @@ https://www.reddit.com/r/all/comments/
 Favorites
 DELETE_SKIP_FILE
 Heading
-Filled.ContentPaste
 kotlin.collections.MutableMap
+Filled.ContentPaste
 androidx.compose.ui.semantics.id
 signature
 createFromFamiliesWithDefault
@@ -984,8 +984,8 @@ REUSABLE_CLAIMED
 TestTag
 resources
 Kapalı
-Filled.Settings
 fontMetrics
+Filled.Settings
 int
 command
 ARGON2_THREAD_FAIL
@@ -1096,8 +1096,8 @@ androidx.view.accessibility.Accessibi...
 createSegment
 Settings
 IQ
-_rootCause
 ARGON2_PWD_TOO_SHORT
+_rootCause
 handle
 androidx.compose.ui.input.pointer.Poi...
 Encrypt
@@ -1105,12 +1105,12 @@ Deutsch
 onOpenDrawer
 Top
 subtitle
-FLOA
 insertIndex
+FLOA
 .dp
 navigatorProvider
-Snackbar
 .xml
+Snackbar
 Strictness.Loose
 other
 viewModelStore
@@ -1124,8 +1124,8 @@ androidx$room$IMultiInstanceInvalidat...
 LocalViewConfiguration
 androidx.view.accessibility.Accessibi...
 Strategy.Simple
-kotlin.Long
 .em
+kotlin.Long
 androidx.view.accessibility.Accessibi...
 CHARACTER_PALETTE
 Style
@@ -1136,8 +1136,8 @@ Width
 ALIGN_LEFT
 Focused
 _resumed
-KU
 Text
+KU
 Lab
 Verschlüsseln
 runningWorkers
@@ -1151,8 +1151,8 @@ kotlin.collections.Collection
 ARGON2_TIME_TOO_SMALL
 ARGON2_AD_TOO_LONG
 paneTitle
-_isCompleting
 resolvedState
+_isCompleting
 Hyphens.Auto
 Filled.Security
 settings
@@ -1169,8 +1169,8 @@ kotlin.Int
 queryParam
 Modified
 handleLifecycleEvent
-COMPLETING_ALREADY
 Indeterminate
+COMPLETING_ALREADY
 Entschlüsseln
 java.lang.Iterable
 androidx.appcompat.widget.LinearLayou...
@@ -1207,8 +1207,8 @@ maxState
 languageCode
 https://x.com/user/status/
 SOUNDCLOUD
-dbObj
 verticalScrollAxisRange
+dbObj
 targetVector
 _COROUTINE.
 REMOVE_FROZEN
@@ -1231,9 +1231,9 @@ kotlin.Char
 ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
 triggerType
 Sp
+TR
 _decisionAndIndex
 SrcOver
-TR
 Şîfre/Vekirin
 navigationIcon
 dimen
@@ -1241,8 +1241,8 @@ onValueChange
 java.util.ListIterator
 Anleitung
 Label
-DefaultDispatcher
 android.view.accessibility.extra.EXTR...
+DefaultDispatcher
 kotlin.Double
 lifecycle
 view
@@ -1258,8 +1258,8 @@ name
 Up
 Şifrele/Çöz
 getDescriptor
-distance
 bool
+distance
 string
 kotlin.coroutines.jvm.internal.BaseCo...
 android
@@ -1282,15 +1282,15 @@ collectionInfo
 Filled.Upload
 Cancelled
 callbackName
-Filled.Delete
 .lck
+Filled.Delete
 $command
 android.intent.action.VIEW
 window
 $this$TextButton
 Cancelling
-MainContent
 container
+MainContent
 ARGON2_PWD_PTR_MISMATCH
 _isCompleted
 .sp
@@ -1304,8 +1304,8 @@ kotlinx.coroutines.scheduler.max.pool...
 double
 Darken
 kotlin.Short
-mRecreateDisplayList
 ڕێکخستنەکان
+mRecreateDisplayList
 Decoded
 aboutInsta
 Dispatchers.Unconfined
@@ -1339,8 +1339,8 @@ ScrollToIndex
 completedExpandBuffersAndPauseFlag
 EmojiCompatInitializer
 kotlin.Any
-چپقڤفغعھخحج
 KEY_COMPONENT_ACTIVITY_REGISTERED_RCS
+چپقڤفغعھخحج
 backStackEntryId
 AnimatedVisibility
 ARGON2_OK
@@ -1363,8 +1363,8 @@ editableText
 effect
 CLOSED_EMPTY
 kotlin.collections.Iterator
-res/
 SecureOn
+res/
 job
 SetTextSubstitution
 unexpected
@@ -1383,8 +1383,8 @@ $this$navOptions
 Size.Unspecified
 compose:lazylist:prefetch:compose
 ACTION_PREVIOUS_HTML_ELEMENT
-getDeclaredField
 loginTag
+getDeclaredField
 CLOB
 Ellipsis
 onLanguageSelected
@@ -1408,8 +1408,8 @@ Unlock
 SHOULD_BUFFER
 LineHeightStyle.Alignment.Center
 traceCounter
-kotlin.Unit
 kotlinx.coroutines.scheduler.resoluti...
+kotlin.Unit
 instructions_prompt_shown
 kotlin.jvm.internal.StringCompanionOb...
 DpOffset.Unspecified
@@ -1433,8 +1433,8 @@ androidx.view.accessibility.Accessibi...
 LINE_END
 ACTION_IME_ENTER
 Dil
-Strictness.Strict
 https://discord.gg/Kn3nxyQFq
+Strictness.Strict
 Export/Import
 plaintext
 ناچالاک
@@ -1491,11 +1491,11 @@ Filled.SwapHoriz
 LINE_START
 false
 getDeclaredMethod
-Middle
-PendingWork
 aboutSignalGroup
 workerCtl
 Filled.Logout
+Middle
+PendingWork
 onBack
 Ascii
 $query
@@ -1512,16 +1512,16 @@ Devam
 clipboard
 کۆدکردنه‌وه‌
 Filled.Info
-BottomBar
 سەبەتە
+BottomBar
 ARGON2_THREADS_TOO_MANY
 java.lang.Character
 Düzenlendi
 Atla
 context
 id
-dispatcher
 %07x
+dispatcher
 Exit
 Filled.Warning
 it
@@ -1559,8 +1559,8 @@ argName
 onDone
 TextFieldInputState
 kotlin.Number
-NULL
 TOO_LATE_TO_CANCEL
+NULL
 Dst
 ms
 entry
@@ -1646,8 +1646,8 @@ kotlin.Float
 SELECT_RIGHT_CHAR
 پاشگه‌زبوونه‌وه‌
 Words
-compressed
 to
+compressed
 _prev
 tr
 horizontalScrollAxisRange
@@ -1660,8 +1660,8 @@ kotlinx.coroutines.flow.defaultConcur...
 query
 java.util.Collection
 ASDFGHJKLÖÄ
-https://soundcloud.com/user/sets/
 CLOSE_HANDLER_CLOSED
+https://soundcloud.com/user/sets/
 https://www.facebook.com/share/1Cpbqu...
 PreventUserInput
 Girtî
@@ -1676,8 +1676,8 @@ Filled.Menu
 PREV_PARAGRAPH
 removeObserver
 destination
-changes
 ON_DESTROY
+changes
 Restore
 abortCreation
 LocalContext
@@ -1691,8 +1691,8 @@ Saturation
 TextLayout:initLayout
 DropDownMenu
 مانەوە
-DELETE_PREV_WORD
 Dispatchers.Main.immediate
+DELETE_PREV_WORD
 Entsperren
 invalidatedTablesIds
 ASDFGHJKL
@@ -1700,8 +1700,8 @@ Compose:onRemembered
 statusBarsIgnoringVisibility
 REMOVED_TASK
 SrcOut
-ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
 $this$TopAppBar
+ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
 Platform
 triggerName
 repository
@@ -1720,8 +1720,8 @@ Instructions
 ARGON2_SALT_PTR_MISMATCH
 ShowKeyboard
 ACTION_ARGUMENT_SELECTION_START_INT
-YouTube
 android.support.text.emoji.emojiCompa...
+YouTube
 saveableStateHolderRef
 _state
 Next
@@ -1729,8 +1729,8 @@ NOT_CROSSED
 ACTION_FOCUS
 ARGON2_ALLOCATE_MEMORY_CBK_NULL
 java.lang.Double
-ColorAnimation
 range
+ColorAnimation
 kmr
 onNoteClick
 c.columnNames
@@ -1769,8 +1769,8 @@ kotlin.jvm.internal.EnumCompanionObject
 ACTION_COPY
 innerTextField
 controlState
-LineHeightStyle.Trim.Both
 Şifreli
+LineHeightStyle.Trim.Both
 Active
 android.widget.TextView
 kotlin.collections.Iterable
@@ -1780,15 +1780,15 @@ endVelocityVector
 send
 Derxistin/Anîn
 isFavorite
-favorites
 Favorite
+favorites
 kotlin.collections.Map.Entry
 ScrollBy
 line
 Screen
+sqLiteQuery
 CopyText
 mAccessibilityDelegate
-sqLiteQuery
 Taybeti::decoy::check::ok
 encrypt_decrypt
 kotlin.collections.Set
