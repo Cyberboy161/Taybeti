@@ -39,7 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 private val KEYBOARD_PREFS = "keyboard_prefs"
@@ -591,32 +592,40 @@ private fun RowScope.DeleteKey(
     onDelete: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var pressed by remember { mutableStateOf(false) }
 
     Box(
         modifier = rowKeyModifier(weight, keyBg)
             .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { onDelete() },
-                    onPress = {
-                        pressed = true
-                        scope.launch {
-                            var delayMs = 400L
-                            try {
-                                while (pressed) {
-                                    delay(delayMs)
-                                    onDelete()
-                                    delayMs = (delayMs * 3L / 4L).coerceAtLeast(30L)
-                                }
-                            } catch (_: kotlinx.coroutines.CancellationException) {}
-                        }
-                        try {
-                            awaitRelease()
-                        } finally {
-                            pressed = false
+                while (true) {
+                    // Wait for a finger down
+                    awaitPointerEventScope {
+                        awaitFirstDown()
+                    }
+                    // Delete one character immediately
+                    onDelete()
+
+                    // Start repeat loop using compose's coroutine scope
+                    val repeatJob = scope.launch {
+                        var delayMs = 400L
+                        while (isActive) {
+                            delay(delayMs)
+                            onDelete()
+                            delayMs = (delayMs * 3L / 4L).coerceAtLeast(30L)
                         }
                     }
-                )
+
+                    // Wait for the finger to lift
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            event.changes.forEach { it.consume() }
+                            if (event.changes.any { !it.pressed }) break
+                        }
+                    }
+
+                    // Stop repeating
+                    repeatJob.cancel()
+                }
             },
         contentAlignment = Alignment.Center
     ) {

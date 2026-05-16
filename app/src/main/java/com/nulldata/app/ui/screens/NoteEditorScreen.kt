@@ -296,12 +296,12 @@ fun NoteEditorScreen(
             var newKey by remember { mutableStateOf(generatedKey) }
             var confirmKey by remember { mutableStateOf("") }
             var createKeyError by remember { mutableStateOf<String?>(null) }
-            val dialogKeyboardState = remember { KeyboardState() }
             val MIN_KEY_LEN = 8
 
             AlertDialog(
                 onDismissRequest = { /* block outside dismiss — user must use Cancel */ },
                 properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+                modifier = Modifier.fillMaxWidth(0.95f),
                 title = { Text(strings.createKey) },
                 text = {
                     Column {
@@ -313,29 +313,19 @@ fun NoteEditorScreen(
                             else MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
-                            PasswordField(
-                                value = newKey,
-                                onValueChange = { newKey = it; createKeyError = null },
-                                label = strings.noteKey,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            PasswordField(
-                                value = confirmKey,
-                                onValueChange = { confirmKey = it; createKeyError = null },
-                                label = "Confirm key",
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        if (dialogKeyboardState.isVisible) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            CustomKeyboard(
-                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
-                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
-                                onDone = { dialogKeyboardState.onDone?.invoke() }
-                            )
-                        }
+                        PasswordField(
+                            value = newKey,
+                            onValueChange = { newKey = it; createKeyError = null },
+                            label = strings.noteKey,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        PasswordField(
+                            value = confirmKey,
+                            onValueChange = { confirmKey = it; createKeyError = null },
+                            label = "Confirm key",
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         if (createKeyError != null) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(createKeyError!!, color = MaterialTheme.colorScheme.error)
