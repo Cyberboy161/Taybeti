@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nulldata.app.data.database.AppDatabase
 import com.nulldata.app.data.entities.NoteEntity
+import com.nulldata.app.util.LocalStrings
 import com.nulldata.app.util.formatTimestamp
 import kotlinx.coroutines.launch
 
@@ -45,10 +47,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun TrashScreen(
     isDecoy: Boolean,
-    onBack: () -> Unit
+    onOpenDrawer: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val strings = LocalStrings.current
     var notes by remember { mutableStateOf<List<NoteEntity>>(emptyList()) }
     val db = remember { AppDatabase.getInstance(context) }
 
@@ -61,10 +64,10 @@ fun TrashScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Trash") },
+                title = { Text(strings.trash) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Text("✕", style = MaterialTheme.typography.titleMedium)
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 },
                 actions = {
@@ -90,7 +93,7 @@ fun TrashScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "Trash is empty",
+                    strings.noTrash,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
@@ -125,7 +128,7 @@ fun TrashScreen(
                                     notes = db.noteDao().getTrash(isDecoy)
                                 }
                             }) {
-                                Icon(Icons.Default.RestoreFromTrash, contentDescription = "Restore")
+                                Icon(Icons.Default.RestoreFromTrash, contentDescription = strings.restore)
                             }
                             IconButton(onClick = {
                                 scope.launch {
@@ -135,7 +138,7 @@ fun TrashScreen(
                             }) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "Permanently delete",
+                                    contentDescription = strings.deleteForever,
                                     tint = MaterialTheme.colorScheme.error
                                 )
                             }

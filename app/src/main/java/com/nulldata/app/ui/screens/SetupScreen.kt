@@ -11,12 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +37,7 @@ import com.nulldata.app.data.repository.NoteRepository
 import com.nulldata.app.ui.components.KeyboardHost
 import com.nulldata.app.ui.components.PasswordField
 import com.nulldata.app.util.Constants
+import com.nulldata.app.util.LocalStrings
 import kotlinx.coroutines.launch
 
 @Composable
@@ -40,25 +45,25 @@ fun SetupScreen(
     repository: NoteRepository,
     onSetupComplete: () -> Unit
 ) {
+    val strings = LocalStrings.current
     var masterPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var decoyPassword by remember { mutableStateOf("") }
     var confirmDecoy by remember { mutableStateOf("") }
     var enableDecoy by remember { mutableStateOf(false) }
+    var showDecoyInfo by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     KeyboardHost {
-        Scaffold { padding ->
+        Column(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(24.dp)
+                .weight(1f)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 Icons.Default.Security,
@@ -68,7 +73,7 @@ fun SetupScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Set Master Password",
+                strings.setupCreatePassword,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -83,14 +88,14 @@ fun SetupScreen(
             PasswordField(
                 value = masterPassword,
                 onValueChange = { masterPassword = it; error = null },
-                label = "Master Password (min ${Constants.MIN_MASTER_PASSWORD_LENGTH} chars)",
+                label = "${strings.setupCreatePassword} (min ${Constants.MIN_MASTER_PASSWORD_LENGTH} chars)",
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
             PasswordField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it; error = null },
-                label = "Confirm Master Password",
+                label = strings.setupConfirmPassword,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -105,25 +110,85 @@ fun SetupScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Enable decoy password", style = MaterialTheme.typography.titleMedium)
-                Switch(checked = enableDecoy, onCheckedChange = {
-                    enableDecoy = it
-                    if (!it) { decoyPassword = ""; confirmDecoy = "" }
-                })
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        strings.setupEnableDecoy,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (enableDecoy) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.error
+                    )
+                    IconButton(onClick = { showDecoyInfo = true }) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = "Why enable decoy?",
+                            tint = if (enableDecoy) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+                Switch(
+                    checked = enableDecoy,
+                    onCheckedChange = {
+                        enableDecoy = it
+                        if (!it) { decoyPassword = ""; confirmDecoy = "" }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                        checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                        uncheckedThumbColor = MaterialTheme.colorScheme.error,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.error.copy(alpha = 0.3f)
+                    )
+                )
             }
             Text(
-                "A decoy password unlocks a separate set of notes. Use it for plausible deniability.",
+                strings.setupDecoyHint,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(top = 4.dp)
             )
+
+            // Decoy info dialog
+            if (showDecoyInfo) {
+                AlertDialog(
+                    onDismissRequest = { showDecoyInfo = false },
+                    title = { Text(strings.setupEnableDecoy) },
+                    text = {
+                        Text(
+                            "A decoy vault protects you in situations where you are forced to " +
+                            "unlock your app. If you enter the decoy password, the app opens a " +
+                            "separate vault with harmless notes — your real notes stay hidden.\n\n" +
+                            "Without a decoy vault, an attacker who forces you to unlock the app " +
+                            "will see all your real notes. The decoy vault is your last line of " +
+                            "defense against physical coercion."
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                enableDecoy = true
+                                showDecoyInfo = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text("Enable Decoy Vault")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDecoyInfo = false }) {
+                            Text("Not Now")
+                        }
+                    }
+                )
+            }
 
             if (enableDecoy) {
                 Spacer(modifier = Modifier.height(12.dp))
                 PasswordField(
                     value = decoyPassword,
                     onValueChange = { decoyPassword = it; error = null },
-                    label = "Decoy Password (min ${Constants.MIN_MASTER_PASSWORD_LENGTH} chars)",
+                    label = "${strings.setupDecoyPassword} (min ${Constants.MIN_MASTER_PASSWORD_LENGTH} chars)",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -144,45 +209,49 @@ fun SetupScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = {
-                    when {
-                        masterPassword.length < Constants.MIN_MASTER_PASSWORD_LENGTH ->
-                            error = "Master password must be at least ${Constants.MIN_MASTER_PASSWORD_LENGTH} characters"
-                        masterPassword != confirmPassword ->
-                            error = "Passwords do not match"
-                        enableDecoy && decoyPassword.length < Constants.MIN_MASTER_PASSWORD_LENGTH ->
-                            error = "Decoy password must be at least ${Constants.MIN_MASTER_PASSWORD_LENGTH} characters"
-                        enableDecoy && decoyPassword != confirmDecoy ->
-                            error = "Decoy passwords do not match"
-                        enableDecoy && decoyPassword == masterPassword ->
-                            error = "Decoy password must differ from master password"
-                        else -> {
-                            isLoading = true
-                            scope.launch {
-                                val decoy = if (enableDecoy) decoyPassword.toCharArray() else null
-                                val result = repository.setupMasterPassword(
-                                    masterPassword.toCharArray(),
-                                    decoy
-                                )
-                                isLoading = false
-                                masterPassword = ""
-                                confirmPassword = ""
-                                decoyPassword = ""
-                                confirmDecoy = ""
-                                if (result.isSuccess) onSetupComplete()
-                                else error = "Setup failed: ${result.exceptionOrNull()?.message}"
-                            }
+            Spacer(modifier = Modifier.height(16.dp))
+        } // end scrollable inner Column
+
+        // Button always visible above keyboard
+        Button(
+            onClick = {
+                when {
+                    masterPassword.length < Constants.MIN_MASTER_PASSWORD_LENGTH ->
+                        error = "Master password must be at least ${Constants.MIN_MASTER_PASSWORD_LENGTH} characters"
+                    masterPassword != confirmPassword ->
+                        error = strings.setupPasswordMismatch
+                    enableDecoy && decoyPassword.length < Constants.MIN_MASTER_PASSWORD_LENGTH ->
+                        error = "Decoy password must be at least ${Constants.MIN_MASTER_PASSWORD_LENGTH} characters"
+                    enableDecoy && decoyPassword != confirmDecoy ->
+                        error = "Decoy passwords do not match"
+                    enableDecoy && decoyPassword == masterPassword ->
+                        error = "Decoy password must differ from master password"
+                    else -> {
+                        isLoading = true
+                        scope.launch {
+                            val decoy = if (enableDecoy) decoyPassword.toCharArray() else null
+                            val result = repository.setupMasterPassword(
+                                masterPassword.toCharArray(),
+                                decoy
+                            )
+                            isLoading = false
+                            masterPassword = ""
+                            confirmPassword = ""
+                            decoyPassword = ""
+                            confirmDecoy = ""
+                            if (result.isSuccess) onSetupComplete()
+                            else error = "Setup failed: ${result.exceptionOrNull()?.message}"
                         }
                     }
-                },
-                enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(if (isLoading) "Setting up..." else "Create Vault")
-            }
+                }
+            },
+            enabled = !isLoading,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+        ) {
+            Text(if (isLoading) "Setting up..." else strings.setupCreateBtn)
         }
+    } // end outer Column
     }
-}
 }

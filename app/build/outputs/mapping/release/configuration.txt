@@ -1,4 +1,4 @@
-# The proguard configuration file for the following section is /home/casper/CheetahClaws/NulllData/app/build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.2.2
+# The proguard configuration file for the following section is /home/casper/CheetahClaws/Main/app/build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.2.2
 # This is a configuration file for ProGuard.
 # http://proguard.sourceforge.net/index.html#manual/usage.html
 #
@@ -117,8 +117,8 @@
 # These classes are duplicated between android.jar and core-lambda-stubs.jar.
 -dontnote java.lang.invoke.**
 
-# End of content from /home/casper/CheetahClaws/NulllData/app/build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.2.2
-# The proguard configuration file for the following section is /home/casper/CheetahClaws/NulllData/app/proguard-rules.pro
+# End of content from /home/casper/CheetahClaws/Main/app/build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.2.2
+# The proguard configuration file for the following section is /home/casper/CheetahClaws/Main/app/proguard-rules.pro
 # Strip all logging
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);
@@ -139,8 +139,8 @@
 -allowaccessmodification
 -repackageclasses
 
-# End of content from /home/casper/CheetahClaws/NulllData/app/proguard-rules.pro
-# The proguard configuration file for the following section is /home/casper/CheetahClaws/NulllData/app/build/intermediates/aapt_proguard_file/release/aapt_rules.txt
+# End of content from /home/casper/CheetahClaws/Main/app/proguard-rules.pro
+# The proguard configuration file for the following section is /home/casper/CheetahClaws/Main/app/build/intermediates/aapt_proguard_file/release/aapt_rules.txt
 -keep class androidx.core.app.CoreComponentFactory { <init>(); }
 -keep class androidx.profileinstaller.ProfileInstallReceiver { <init>(); }
 -keep class androidx.room.MultiInstanceInvalidationService { <init>(); }
@@ -188,7 +188,7 @@
 -keep class androidx.core.widget.NestedScrollView { <init>(android.content.Context, android.util.AttributeSet); }
 
 
-# End of content from /home/casper/CheetahClaws/NulllData/app/build/intermediates/aapt_proguard_file/release/aapt_rules.txt
+# End of content from /home/casper/CheetahClaws/Main/app/build/intermediates/aapt_proguard_file/release/aapt_rules.txt
 # The proguard configuration file for the following section is /home/casper/.gradle/caches/transforms-3/185bc923f5c28711be329ee5bc0ce4e9/transformed/navigation-common-2.7.7/proguard.txt
 # Copyright (C) 2019 The Android Open Source Project
 #

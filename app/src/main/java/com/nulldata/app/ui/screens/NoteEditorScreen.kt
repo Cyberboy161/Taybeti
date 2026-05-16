@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -62,6 +63,7 @@ import com.nulldata.app.ui.components.PasswordField
 import com.nulldata.app.util.Constants
 import com.nulldata.app.util.DecoyEncoder
 import com.nulldata.app.util.DecoyPlatform
+import com.nulldata.app.util.LocalStrings
 import com.nulldata.app.util.generateRandomKey
 import kotlinx.coroutines.launch
 import java.util.Base64
@@ -75,6 +77,7 @@ fun NoteEditorScreen(
     onBack: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val strings = LocalStrings.current
     val context = LocalContext.current
 
     var noteEntity by remember { mutableStateOf<NoteEntity?>(null) }
@@ -109,11 +112,11 @@ fun NoteEditorScreen(
         if (showUnsavedDialog) {
             AlertDialog(
                 onDismissRequest = { showUnsavedDialog = false },
-                title = { Text("Discard note?") },
-                text = { Text("You have unsaved content. Encrypt first to save it, or discard your changes.") },
+                title = { Text(strings.discardNoteTitle) },
+                text = { Text(strings.discardNoteMsg) },
                 confirmButton = {
                     TextButton(onClick = { showUnsavedDialog = false }) {
-                        Text("Stay")
+                        Text(strings.stay)
                     }
                 },
                 dismissButton = {
@@ -123,7 +126,7 @@ fun NoteEditorScreen(
                         plaintext = ""
                         onBack()
                     }) {
-                        Text("Discard", color = MaterialTheme.colorScheme.error)
+                        Text(strings.discard, color = MaterialTheme.colorScheme.error)
                     }
                 }
             )
@@ -138,16 +141,16 @@ fun NoteEditorScreen(
                     editKeyError = null
                     editKey = ""
                 },
-                title = { Text("Enter Note Key") },
+                title = { Text(strings.enterNoteKey) },
                 text = {
                     Column {
-                        Text("Re-enter the key to unlock and edit this note.")
+                        Text(strings.reEnterKeyToUnlock)
                         Spacer(modifier = Modifier.height(8.dp))
                         CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
                             PasswordField(
                                 value = editKey,
                                 onValueChange = { editKey = it; editKeyError = null },
-                                label = "Note key",
+                                label = strings.noteKey,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -168,7 +171,7 @@ fun NoteEditorScreen(
                 confirmButton = {
                     Button(onClick = {
                         if (editKey.isEmpty()) {
-                            editKeyError = "Key is required"
+                            editKeyError = strings.keyRequired
                             return@Button
                         }
                         scope.launch {
@@ -187,18 +190,18 @@ fun NoteEditorScreen(
                                     editKey = ""
                                     editKeyError = null
                                 } else {
-                                    editKeyError = "Wrong key"
+                                    editKeyError = strings.wrongKey
                                 }
                             }
                         }
-                    }) { Text("Unlock") }
+                    }) { Text(strings.unlock) }
                 },
                 dismissButton = {
                     TextButton(onClick = {
                         showEditKeyDialog = false
                         editKeyError = null
                         editKey = ""
-                    }) { Text("Cancel") }
+                    }) { Text(strings.cancel) }
                 }
             )
         }
@@ -227,15 +230,16 @@ fun NoteEditorScreen(
         if (showKeyDialog) {
             val dialogKeyboardState = remember { KeyboardState() }
             AlertDialog(
-                onDismissRequest = { onBack() },
-                title = { Text("Enter Note Key") },
+                onDismissRequest = { /* block outside dismiss — user must use Cancel */ },
+                properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+                title = { Text(strings.enterNoteKey) },
                 text = {
                     Column {
                         CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
                             PasswordField(
                                 value = noteKey,
                                 onValueChange = { noteKey = it; keyError = null },
-                                label = "Encryption key for this note",
+                                label = strings.noteKey,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -252,7 +256,7 @@ fun NoteEditorScreen(
                 confirmButton = {
                     Button(onClick = {
                         if (noteKey.isEmpty()) {
-                            keyError = "Key is required"
+                            keyError = strings.keyRequired
                             return@Button
                         }
                         scope.launch {
@@ -272,14 +276,14 @@ fun NoteEditorScreen(
                                 } else {
                                     SecureMemory.clear(noteKey.toCharArray())
                                     noteKey = ""
-                                    keyError = "Wrong key"
+                                    keyError = strings.wrongKey
                                 }
                             }
                         }
-                    }) { Text("Unlock") }
+                    }) { Text(strings.unlock) }
                 },
                 dismissButton = {
-                    TextButton(onClick = onBack) { Text("Cancel") }
+                    TextButton(onClick = onBack) { Text(strings.cancel) }
                 }
             )
             if (keyError != null) {
@@ -296,12 +300,13 @@ fun NoteEditorScreen(
             val MIN_KEY_LEN = 8
 
             AlertDialog(
-                onDismissRequest = { onBack() },
-                title = { Text("Set Encryption Key") },
+                onDismissRequest = { /* block outside dismiss — user must use Cancel */ },
+                properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+                title = { Text(strings.createKey) },
                 text = {
                     Column {
                         Text(
-                            "Minimum $MIN_KEY_LEN characters",
+                            strings.minChars,
                             style = MaterialTheme.typography.bodySmall,
                             color = if (newKey.length in 1 until MIN_KEY_LEN)
                                 MaterialTheme.colorScheme.error
@@ -312,7 +317,7 @@ fun NoteEditorScreen(
                             PasswordField(
                                 value = newKey,
                                 onValueChange = { newKey = it; createKeyError = null },
-                                label = "Note encryption key",
+                                label = strings.noteKey,
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -342,7 +347,7 @@ fun NoteEditorScreen(
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Generate Secure Key")
+                            Text(strings.generateKey)
                         }
                         if (generatedKey.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(4.dp))
@@ -358,9 +363,9 @@ fun NoteEditorScreen(
                     Button(
                         onClick = {
                             when {
-                                newKey.isEmpty() -> createKeyError = "Key is required"
-                                newKey.length < MIN_KEY_LEN -> createKeyError = "Key must be at least $MIN_KEY_LEN characters"
-                                newKey != confirmKey -> createKeyError = "Keys do not match"
+                                newKey.isEmpty() -> createKeyError = strings.keyRequired
+                                newKey.length < MIN_KEY_LEN -> createKeyError = strings.keyTooShort
+                                newKey != confirmKey -> createKeyError = strings.keysMatch
                                 else -> {
                                     noteKey = newKey
                                     showCreateKeyDialog = false
@@ -374,11 +379,11 @@ fun NoteEditorScreen(
                             ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                         else ButtonDefaults.buttonColors()
                     ) {
-                        Text("Create Note")
+                        Text(strings.createNote)
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = onBack) { Text("Cancel") }
+                    TextButton(onClick = onBack) { Text(strings.cancel) }
                 }
             )
         }
@@ -388,7 +393,7 @@ fun NoteEditorScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            if (isNewNote) "New Note" else title.ifEmpty { "Note" },
+                            if (isNewNote) strings.newNote else title.ifEmpty { "Note" },
                             fontWeight = FontWeight.Bold
                         )
                     },
@@ -400,7 +405,7 @@ fun NoteEditorScreen(
                                 onBack()
                             }
                         }) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.Filled.ArrowBack, contentDescription = strings.back)
                         }
                     },
                     actions = {
@@ -420,7 +425,7 @@ fun NoteEditorScreen(
                                             SecureMemory.clear(plaintext.toCharArray())
                                             plaintext = ""
                                             isLocked = true
-                                            Toast.makeText(context, "\uD83D\uDD12 Encrypted", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 },
@@ -434,7 +439,7 @@ fun NoteEditorScreen(
                                     modifier = Modifier.height(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Encrypt", fontWeight = FontWeight.Bold)
+                                Text(strings.encrypt, fontWeight = FontWeight.Bold)
                             }
                         }
                     },
@@ -468,12 +473,12 @@ fun NoteEditorScreen(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("\uD83D\uDD12 Encrypted", style = MaterialTheme.typography.headlineMedium)
+                            Text(strings.encryptedNote, style = MaterialTheme.typography.headlineMedium)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("Enter the note key to decrypt", style = MaterialTheme.typography.bodyMedium)
+                            Text(strings.enterKeyToDecrypt, style = MaterialTheme.typography.bodyMedium)
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { showKeyDialog = true }) {
-                                Text("Unlock")
+                                Text(strings.unlock)
                             }
                         }
                     }
@@ -495,7 +500,7 @@ fun NoteEditorScreen(
                     AppTextField(
                         value = plaintext,
                         onValueChange = { plaintext = it },
-                        label = "Note content",
+                        label = strings.noteContent,
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
@@ -522,6 +527,7 @@ private fun DecoyEncryptedView(
     var dropdownExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
+    val strings = LocalStrings.current
 
     val disguisedUrl = remember(encryptedBlob, selectedPlatform) {
         DecoyEncoder.encode(encryptedBlob, selectedPlatform)
@@ -534,7 +540,7 @@ private fun DecoyEncryptedView(
             .padding(16.dp)
     ) {
         Text(
-            "Encrypted Message:",
+            strings.encryptedMessage,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
@@ -546,13 +552,13 @@ private fun DecoyEncryptedView(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.4f),
-            label = { Text("Disguised URL") },
+            label = { Text(strings.disguisedUrl) },
             trailingIcon = {
                 IconButton(onClick = {
                     clipboard.setText(AnnotatedString(disguisedUrl))
-                    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, strings.copied, Toast.LENGTH_SHORT).show()
                 }) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
+                    Icon(Icons.Default.ContentCopy, contentDescription = strings.copy)
                 }
             }
         )
@@ -562,26 +568,26 @@ private fun DecoyEncryptedView(
             Button(
                 onClick = {
                     clipboard.setText(AnnotatedString(disguisedUrl))
-                    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, strings.copied, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.height(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Copy")
+                Text(strings.copy)
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = onEdit,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Edit")
+                Text(strings.edit)
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            "Disguise as",
+            strings.disguiseAs,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )

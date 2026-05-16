@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.nulldata.app.data.repository.NoteRepository
 import com.nulldata.app.ui.components.KeyboardHost
 import com.nulldata.app.ui.components.PasswordField
+import com.nulldata.app.util.LocalStrings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -41,6 +42,7 @@ fun LoginScreen(
     var lockedOut by remember { mutableStateOf(false) }
     var remainingSec by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
+    val strings = LocalStrings.current
 
     fun performLogin() {
         if (password.isEmpty() || isLoading || lockedOut) return
@@ -81,7 +83,7 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Unlock Vault",
+                strings.loginTitle,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -96,7 +98,7 @@ fun LoginScreen(
             PasswordField(
                 value = password,
                 onValueChange = { password = it; error = null },
-                label = "Master Password",
+                label = strings.masterPassword,
                 modifier = Modifier.fillMaxWidth(),
                 onDone = {
                     if (password.isNotEmpty() && !isLoading && !lockedOut) {
@@ -129,7 +131,7 @@ fun LoginScreen(
                 enabled = !isLoading && !lockedOut && password.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (isLoading) "Unlocking..." else "Unlock")
+                Text(if (isLoading) "Unlocking..." else strings.loginButton)
             }
         }
     }

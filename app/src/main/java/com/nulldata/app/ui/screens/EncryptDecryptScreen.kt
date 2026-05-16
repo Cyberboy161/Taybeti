@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,8 +47,10 @@ import com.nulldata.app.security.SecureMemory
 import com.nulldata.app.ui.components.AppTextField
 import com.nulldata.app.ui.components.KeyboardHost
 import com.nulldata.app.ui.components.PasswordField
+import com.nulldata.app.ui.components.SharingTutorialButton
 import com.nulldata.app.util.DecoyEncoder
 import com.nulldata.app.util.DecoyPlatform
+import com.nulldata.app.util.LocalStrings
 import com.nulldata.app.util.generateRandomKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -57,10 +60,11 @@ import java.util.Base64
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncryptDecryptScreen(
-    onBack: () -> Unit
+    onOpenDrawer: () -> Unit
 ) {
+    val strings = LocalStrings.current
     var tabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Encrypt", "Decrypt", "Decoy")
+    val tabs = listOf(strings.encryptTab, strings.decryptTab, strings.decoyTab)
 
     DisposableEffect(Unit) {
         onDispose { /* Clear any sensitive data */ }
@@ -70,10 +74,10 @@ fun EncryptDecryptScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Encrypt / Decrypt") },
+                title = { Text(strings.encryptDecryptTitle) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Text("✕", style = MaterialTheme.typography.titleMedium)
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 }
             )
@@ -112,6 +116,7 @@ private fun EncryptTab() {
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
+    val strings = LocalStrings.current
 
     val disguisedUrl = remember(output, selectedPlatform) {
         if (output.isNotEmpty()) DecoyEncoder.encode(output, selectedPlatform) else ""
@@ -126,7 +131,7 @@ private fun EncryptTab() {
         AppTextField(
             value = plaintext,
             onValueChange = { plaintext = it; error = null },
-            label = "Plaintext",
+            label = strings.plaintext,
             modifier = Modifier.fillMaxWidth(),
             minLines = 4
         )
@@ -135,7 +140,7 @@ private fun EncryptTab() {
         PasswordField(
             value = key,
             onValueChange = { key = it; error = null },
-            label = "Encryption Key",
+            label = strings.encryptionKey,
             modifier = Modifier.fillMaxWidth()
         )
         if (key.isNotEmpty() && key.length < 8) {
@@ -151,7 +156,7 @@ private fun EncryptTab() {
             Button(onClick = {
                 key = generateRandomKey(20)
             }) {
-                Text("Generate 20-char key")
+                Text(strings.generateKey)
             }
         }
 
@@ -181,7 +186,7 @@ private fun EncryptTab() {
                             output = "${b64.encodeToString(salt)}::${b64.encodeToString(result.iv)}::${b64.encodeToString(result.tag)}::${b64.encodeToString(result.ciphertext)}"
                             error = null
                         } catch (e: Exception) {
-                            error = "Encryption failed: ${e.message}"
+                            error = strings.encryptFailed + ": ${e.message}"
                         }
                     }
                     isLoading = false
@@ -190,7 +195,7 @@ private fun EncryptTab() {
             enabled = !isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isLoading) "Encrypting..." else "Encrypt")
+            Text(if (isLoading) strings.encrypting else strings.encrypt)
         }
 
         if (error != null) {
@@ -200,7 +205,7 @@ private fun EncryptTab() {
 
         if (output.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Encrypted Output:", style = MaterialTheme.typography.titleMedium)
+            Text(strings.encryptedOutput, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = disguisedUrl,
@@ -208,13 +213,13 @@ private fun EncryptTab() {
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
-                label = { Text("Disguised URL") },
+                label = { Text(strings.disguisedUrl) },
                 trailingIcon = {
                     IconButton(onClick = {
                         clipboard.setText(AnnotatedString(disguisedUrl))
-                        Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, strings.copied, Toast.LENGTH_SHORT).show()
                     }) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
+                        Icon(Icons.Default.ContentCopy, contentDescription = strings.copy)
                     }
                 }
             )
@@ -228,7 +233,7 @@ private fun EncryptTab() {
                     value = selectedPlatform.label,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Disguise as") },
+                    label = { Text(strings.disguiseAs) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
                     modifier = Modifier
                         .menuAnchor()
@@ -250,6 +255,9 @@ private fun EncryptTab() {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        SharingTutorialButton(modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -263,6 +271,7 @@ private fun DecryptTab() {
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
+    val strings = LocalStrings.current
 
     DisposableEffect(Unit) {
         onDispose {
@@ -280,7 +289,7 @@ private fun DecryptTab() {
         AppTextField(
             value = blob,
             onValueChange = { blob = it; error = null },
-            label = "Encrypted blob",
+            label = strings.encryptedBlob,
             modifier = Modifier.fillMaxWidth(),
             minLines = 3,
             trailingIcon = {
@@ -291,7 +300,7 @@ private fun DecryptTab() {
                         error = null
                     }
                 }) {
-                    Icon(Icons.Default.ContentPaste, contentDescription = "Paste")
+                    Icon(Icons.Default.ContentPaste, contentDescription = strings.paste)
                 }
             }
         )
@@ -317,7 +326,7 @@ private fun DecryptTab() {
                         try {
                             val parts = blob.split("::")
                             if (parts.size != 4) {
-                                error = "Invalid blob format"
+                                error = strings.invalidBlob
                                 isLoading = false
                                 return@withContext
                             }
@@ -336,7 +345,7 @@ private fun DecryptTab() {
                             output = String(plaintext, Charsets.UTF_8)
                             error = null
                         } catch (e: Exception) {
-                            error = "Decryption failed (wrong key or corrupted data)"
+                            error = strings.decryptFailed
                         }
                     }
                     isLoading = false
@@ -345,7 +354,7 @@ private fun DecryptTab() {
             enabled = !isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isLoading) "Decrypting..." else "Decrypt")
+            Text(if (isLoading) strings.decrypting else strings.decrypt)
         }
 
         if (error != null) {
@@ -355,7 +364,7 @@ private fun DecryptTab() {
 
         if (output.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Decrypted:", style = MaterialTheme.typography.titleMedium)
+            Text(strings.decrypted, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = output,
@@ -366,9 +375,9 @@ private fun DecryptTab() {
                 trailingIcon = {
                     IconButton(onClick = {
                         clipboard.setText(AnnotatedString(output))
-                        Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, strings.copied, Toast.LENGTH_SHORT).show()
                     }) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
+                        Icon(Icons.Default.ContentCopy, contentDescription = strings.copy)
                     }
                 }
             )
@@ -386,6 +395,7 @@ private fun DecoyTab() {
     var error by remember { mutableStateOf<String?>(null) }
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
+    val strings = LocalStrings.current
 
     Column(
         modifier = Modifier
@@ -394,7 +404,7 @@ private fun DecoyTab() {
             .verticalScroll(rememberScrollState())
     ) {
         Text(
-            "Paste a disguised URL to extract the encrypted message.",
+            strings.decoyHint,
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -407,7 +417,7 @@ private fun DecoyTab() {
                 value = selectedPlatform.label,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Platform") },
+                label = { Text(strings.platform) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
                 modifier = Modifier
                     .menuAnchor()
@@ -434,7 +444,7 @@ private fun DecoyTab() {
             value = urlText,
             onValueChange = { urlText = it; error = null; result = null },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Disguised URL") },
+            label = { Text(strings.disguisedUrl) },
             singleLine = true,
             trailingIcon = {
                 IconButton(onClick = {
@@ -445,7 +455,7 @@ private fun DecoyTab() {
                         result = null
                     }
                 }) {
-                    Icon(Icons.Default.ContentPaste, contentDescription = "Paste")
+                    Icon(Icons.Default.ContentPaste, contentDescription = strings.paste)
                 }
             }
         )
@@ -454,12 +464,12 @@ private fun DecoyTab() {
         Button(
             onClick = {
                 if (urlText.isBlank()) {
-                    error = "Paste a URL first"
+                    error = strings.pasteUrlFirst
                     return@Button
                 }
                 val decoded = DecoyEncoder.decode(urlText.trim(), selectedPlatform)
                 if (decoded == null) {
-                    error = "Invalid URL for selected platform"
+                    error = strings.invalidUrl
                     return@Button
                 }
                 result = decoded
@@ -467,7 +477,7 @@ private fun DecoyTab() {
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Decode")
+            Text(strings.decode)
         }
 
         if (error != null) {
@@ -477,7 +487,7 @@ private fun DecoyTab() {
 
         if (result != null) {
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Extracted encrypted blob:", style = MaterialTheme.typography.titleSmall)
+            Text(strings.extractedBlob, style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = result!!,
@@ -485,19 +495,19 @@ private fun DecoyTab() {
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
-                label = { Text("Encrypted blob") },
+                label = { Text(strings.encryptedBlob) },
                 trailingIcon = {
                     IconButton(onClick = {
                         clipboard.setText(AnnotatedString(result!!))
-                        Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, strings.copied, Toast.LENGTH_SHORT).show()
                     }) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
+                        Icon(Icons.Default.ContentCopy, contentDescription = strings.copy)
                     }
                 }
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "Switch to the Decrypt tab, paste this blob, and enter your key to decrypt.",
+                strings.switchToDecrypt,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )

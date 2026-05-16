@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -30,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.nulldata.app.data.repository.NoteRepository
 import com.nulldata.app.ui.components.KeyboardHost
 import com.nulldata.app.ui.components.PasswordField
+import com.nulldata.app.util.LocalStrings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,10 +44,11 @@ import java.io.FileOutputStream
 @Composable
 fun ExportImportScreen(
     repository: NoteRepository,
-    onBack: () -> Unit
+    onOpenDrawer: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val strings = LocalStrings.current
 
     var exportKey by remember { mutableStateOf("") }
     var exportResult by remember { mutableStateOf<String?>(null) }
@@ -57,10 +62,10 @@ fun ExportImportScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Export / Import") },
+                title = { Text(strings.exportImport) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Text("✕", style = MaterialTheme.typography.titleMedium)
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 }
             )
@@ -74,7 +79,7 @@ fun ExportImportScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             // Export section
-            Text("Export Encrypted Backup", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(strings.exportTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "All notes will be encrypted with the export passphrase below.",
@@ -85,7 +90,7 @@ fun ExportImportScreen(
             PasswordField(
                 value = exportKey,
                 onValueChange = { exportKey = it; exportError = null },
-                label = "Export passphrase",
+                label = strings.exportPassword,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -109,7 +114,7 @@ fun ExportImportScreen(
                                         it.write(result.getOrNull()!!.toByteArray(Charsets.UTF_8))
                                     }
                                 }
-                                Toast.makeText(context, "Backup saved", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, strings.exportSuccess, Toast.LENGTH_SHORT).show()
                             } catch (e: Exception) {
                                 exportError = "Save failed: ${e.message}"
                             }
@@ -120,7 +125,7 @@ fun ExportImportScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Export")
+                Text(strings.exportTitle)
             }
             if (exportError != null) {
                 Text(exportError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -131,7 +136,7 @@ fun ExportImportScreen(
                     value = exportResult!!,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Exported data (also saved to file)") },
+                    label = { Text(strings.exportFile) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3
                 )
@@ -142,12 +147,12 @@ fun ExportImportScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Import section
-            Text("Import Encrypted Backup", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(strings.importTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = importBlob,
                 onValueChange = { importBlob = it; importError = null },
-                label = { Text("Paste backup blob") },
+                label = { Text(strings.importFile) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
@@ -169,7 +174,7 @@ fun ExportImportScreen(
                         val result = repository.importEncrypted(importBlob, importKey.toCharArray())
                         importKey = ""
                         if (result.isSuccess) {
-                            importResult = "Imported ${result.getOrNull()} notes successfully"
+                            importResult = strings.importSuccess
                             importBlob = ""
                         } else {
                             importError = "Import failed: ${result.exceptionOrNull()?.message}"
@@ -178,7 +183,7 @@ fun ExportImportScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Import")
+                Text(strings.importTitle)
             }
             if (importError != null) {
                 Text(importError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

@@ -1,14 +1,19 @@
 package com.nulldata.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,19 +26,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.nulldata.app.util.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(onBack: () -> Unit) {
+fun AboutScreen(onOpenDrawer: () -> Unit) {
+    val strings = LocalStrings.current
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("About") },
+                title = { Text(strings.about) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Text("✕", style = MaterialTheme.typography.titleMedium)
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 }
             )
@@ -55,90 +61,121 @@ fun AboutScreen(onBack: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "NulldData",
+                strings.appName,
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                "Version 1.0.0",
+                strings.aboutVersion,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                strings.aboutDescription,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                "License",
+                strings.aboutLicense,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "NulldData is open-source software licensed under the MIT License.\n\n" +
-                        "Copyright (c) 2024 NulldData\n\n" +
-                        "Permission is hereby granted, free of charge, to any person obtaining a copy " +
-                        "of this software and associated documentation files (the \"Software\"), to deal " +
-                        "in the Software without restriction, including without limitation the rights " +
-                        "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell " +
-                        "copies of the Software, and to permit persons to whom the Software is " +
-                        "furnished to do so, subject to the following conditions:\n\n" +
-                        "The above copyright notice and this permission notice shall be included in all " +
-                        "copies or substantial portions of the Software.\n\n" +
-                        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR " +
-                        "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, " +
-                        "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.",
+                "This software is licensed under the MIT License",
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                strings.aboutTechStack,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                "Security Architecture",
+                strings.aboutThreatModelTitle,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "• Argon2id key derivation (6 iterations, 64MB memory, 4 parallelism)\n" +
-                        "• AES-256-GCM encryption for all data\n" +
-                        "• Random 32-byte salts, random 12-byte IVs\n" +
-                        "• Zero-trust master password (verified via decryption canary)\n" +
-                        "• Per-note encryption keys\n" +
-                        "• In-app custom keyboard (no system keyboard, no learning)\n" +
-                        "• FLAG_SECURE on all screens (no screenshots)\n" +
-                        "• No internet permission\n" +
-                        "• Char[] zeroing after password/key use\n" +
-                        "• No Android Keystore dependency\n" +
-                        "• No Google Play Services",
+                strings.aboutThreatModel,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                "Threat Model",
+                strings.aboutCommunityTitle,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                "NulldData is designed to protect against:\n" +
-                        "• Physical device seizure (encrypted-at-rest)\n" +
-                        "• Malicious apps on device (no IPC, FLAG_SECURE)\n" +
-                        "• Keyboard logging (custom in-app keyboard)\n" +
-                        "• Screenshot capture (FLAG_SECURE)\n" +
-                        "• Android backup extraction (backup disabled)\n" +
-                        "• Cloud sync leaks (no internet permission)\n" +
-                        "• Google/OS-level key extraction (no Android Keystore)\n\n" +
-                        "Limitations:\n" +
-                        "• Does not protect against compromised OS kernel\n" +
-                        "• Does not protect against hardware keyloggers\n" +
-                        "• RAM can contain plaintext while note is open",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.fillMaxWidth()
-            )
+            val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+            val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("🔗", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(end = 8.dp))
+                Text(
+                    "🌐 Taybeti Website",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f)
+                )
+                androidx.compose.material3.IconButton(onClick = {
+                    clipboard.setText(androidx.compose.ui.text.AnnotatedString("https://cyberboy161.github.io/Taybeti/"))
+                }) {
+                    Icon(
+                        Icons.Default.ContentCopy,
+                        contentDescription = "Copy",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+            CommunityLink(strings.aboutDiscordApp, "https://discord.gg/Kn3nxyQFq")
+            CommunityLink(strings.aboutDiscordDev, "https://discord.gg/UquQdWTm")
+            CommunityLink(strings.aboutInsta, "https://www.instagram.com/nashat_161?igsh=aGk0ZnNyYTQzY3Z3")
+            CommunityLink("Taybeti Instagram", "https://www.instagram.com/taybeti_offical?igsh=bWFqMDMwaXlvY2pr")
+            CommunityLink("X (Twitter)", "https://x.com/taybeti_offical")
+            CommunityLink(strings.aboutFacebook, "https://www.facebook.com/share/18XHHHPM2W/")
+            CommunityLink("Facebook Group", "https://www.facebook.com/share/1CpbquYqbn/")
+            CommunityLink(strings.aboutSignalGroup, "https://signal.group/#CjQKIB10YPVb7bkSdTA5A61xOA-VX-GeKkcVRT1lbYI49jsAEhD6I4eQUhPEZgjlv-5LxlKx")
         }
+    }
+}
+
+@Composable
+private fun CommunityLink(label: String, url: String) {
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { uriHandler.openUri(url) }
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            "🔗",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }

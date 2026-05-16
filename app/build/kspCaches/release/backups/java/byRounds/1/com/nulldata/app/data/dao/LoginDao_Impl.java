@@ -37,6 +37,10 @@ public final class LoginDao_Impl implements LoginDao {
 
   private final SharedSQLiteStatement __preparedStmtOfDeleteAll;
 
+  private final SharedSQLiteStatement __preparedStmtOfUpdateDecoy;
+
+  private final SharedSQLiteStatement __preparedStmtOfUpdateLogin;
+
   public LoginDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
     this.__insertionAdapterOfLoginInfo = new EntityInsertionAdapter<LoginInfo>(__db) {
@@ -93,6 +97,22 @@ public final class LoginDao_Impl implements LoginDao {
       @NonNull
       public String createQuery() {
         final String _query = "DELETE FROM login_info";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfUpdateDecoy = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "UPDATE login_info SET decoySalt = ?, decoyIv = ?, decoyCiphertext = ?, decoyTag = ?, decoyEnabled = 1 WHERE id = 1";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfUpdateLogin = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "UPDATE login_info SET loginSalt = ?, loginIv = ?, loginCiphertext = ?, loginTag = ? WHERE id = 1";
         return _query;
       }
     };
@@ -162,6 +182,70 @@ public final class LoginDao_Impl implements LoginDao {
           }
         } finally {
           __preparedStmtOfDeleteAll.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object updateDecoy(final byte[] salt, final byte[] iv, final byte[] ct, final byte[] tag,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfUpdateDecoy.acquire();
+        int _argIndex = 1;
+        _stmt.bindBlob(_argIndex, salt);
+        _argIndex = 2;
+        _stmt.bindBlob(_argIndex, iv);
+        _argIndex = 3;
+        _stmt.bindBlob(_argIndex, ct);
+        _argIndex = 4;
+        _stmt.bindBlob(_argIndex, tag);
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfUpdateDecoy.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object updateLogin(final byte[] salt, final byte[] iv, final byte[] ct, final byte[] tag,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfUpdateLogin.acquire();
+        int _argIndex = 1;
+        _stmt.bindBlob(_argIndex, salt);
+        _argIndex = 2;
+        _stmt.bindBlob(_argIndex, iv);
+        _argIndex = 3;
+        _stmt.bindBlob(_argIndex, ct);
+        _argIndex = 4;
+        _stmt.bindBlob(_argIndex, tag);
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfUpdateLogin.release(_stmt);
         }
       }
     }, $completion);

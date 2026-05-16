@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nulldata.app.data.entities.NoteEntity
 import com.nulldata.app.data.repository.NoteRepository
+import com.nulldata.app.util.LocalStrings
 import com.nulldata.app.util.formatTimestamp
 import com.nulldata.app.util.generateNoteId
 import kotlinx.coroutines.launch
@@ -58,6 +59,7 @@ fun NoteListScreen(
     onOpenDrawer: () -> Unit
 ) {
     val context = LocalContext.current
+    val strings = LocalStrings.current
     var notes by remember { mutableStateOf<List<NoteEntity>>(emptyList()) }
     val db = remember { com.nulldata.app.data.database.AppDatabase.getInstance(context) }
     val scope = rememberCoroutineScope()
@@ -74,9 +76,9 @@ fun NoteListScreen(
     LaunchedEffect(showFavorites, isDecoy) { refresh() }
 
     val title = when {
-        showFavorites -> "Favorites"
-        isDecoy -> "Decoy Notes"
-        else -> "All Notes"
+        showFavorites -> strings.favorites
+        isDecoy -> strings.decoyNotes
+        else -> strings.allNotes
     }
 
     Scaffold(
@@ -113,7 +115,11 @@ fun NoteListScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "No notes yet",
+                    text = when {
+                        showFavorites -> strings.noFavorites
+                        isDecoy -> strings.noDecoyNotes
+                        else -> strings.noNotes
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
@@ -128,6 +134,7 @@ fun NoteListScreen(
                 items(notes, key = { it.id }) { note ->
                     NoteListItem(
                         note = note,
+                        strings = strings,
                         db = db,
                         onClick = { onNoteClick(note.id) },
                         onChanged = { refresh() }
@@ -142,6 +149,7 @@ fun NoteListScreen(
 @Composable
 private fun NoteListItem(
     note: NoteEntity,
+    strings: com.nulldata.app.util.AppStrings,
     db: com.nulldata.app.data.database.AppDatabase,
     onClick: () -> Unit,
     onChanged: () -> Unit
@@ -172,7 +180,7 @@ private fun NoteListItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Lock,
-                        contentDescription = "Encrypted",
+                        contentDescription = strings.encryptedNote,
                         modifier = Modifier.height(14.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )

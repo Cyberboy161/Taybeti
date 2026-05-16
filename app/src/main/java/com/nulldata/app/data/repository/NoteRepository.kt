@@ -75,6 +75,65 @@ class NoteRepository(
             }
         }
 
+    suspend fun isDecoyEnabled(): Boolean = withContext(Dispatchers.IO) {
+        loginDao.get()?.decoyEnabled == true
+    }
+
+    suspend fun setupDecoyPassword(decoyPassword: CharArray): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                val info = loginDao.get() ?: return@withContext Result.failure(Exception("No account"))
+                if (info.decoyEnabled) return@withContext Result.failure(Exception("Decoy already set"))
+
+                val decoySalt = CryptoUtils.generateSalt()
+                val decoyKey = CryptoUtils.deriveKey(decoyPassword, decoySalt)
+                SecureMemory.clear(decoyPassword)
+
+                val decoyCanary = DECOY_CANARY.toByteArray(Charsets.UTF_8)
+                val decoyEncResult = CryptoUtils.encrypt(decoyCanary, decoyKey)
+                SecureMemory.clear(decoyKey)
+
+                loginDao.updateDecoy(decoySalt, decoyEncResult.iv, decoyEncResult.ciphertext, decoyEncResult.tag)
+                Result.success(Unit)
+            } catch (e: Throwable) {
+                Result.failure(e as Exception)
+            }
+        }
+
+    suspend fun changePassword(
+        currentPassword: CharArray,
+        newPassword: CharArray
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val info = loginDao.get() ?: return@withContext Result.failure(Exception("No account"))
+
+            val currentKey = CryptoUtils.deriveKey(currentPassword, info.loginSalt)
+            val canaryBytes = CryptoUtils.decrypt(
+                info.loginCiphertext, currentKey, info.loginIv, info.loginTag
+            )
+            SecureMemory.clear(currentKey)
+
+            if (String(canaryBytes, Charsets.UTF_8) != LOGIN_CANARY) {
+                SecureMemory.clear(currentPassword)
+                return@withContext Result.failure(Exception("Current password is incorrect"))
+            }
+
+            val newSalt = CryptoUtils.generateSalt()
+            val newKey = CryptoUtils.deriveKey(newPassword, newSalt)
+            SecureMemory.clear(currentPassword)
+            SecureMemory.clear(newPassword)
+
+            val canary = LOGIN_CANARY.toByteArray(Charsets.UTF_8)
+            val encResult = CryptoUtils.encrypt(canary, newKey)
+            SecureMemory.clear(newKey)
+
+            loginDao.updateLogin(newSalt, encResult.iv, encResult.ciphertext, encResult.tag)
+            Result.success(Unit)
+        } catch (e: Throwable) {
+            Result.failure(e as Exception)
+        }
+    }
+
     data class LoginResult(
         val success: Boolean,
         val isDecoy: Boolean = false,
