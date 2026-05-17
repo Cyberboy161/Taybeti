@@ -95,54 +95,53 @@ internal fun KurdistanFlag(modifier: Modifier = Modifier) {
     val sunGold = Color(0xFFFEBD11)
     val green = Color(0xFF278E43)
 
-    Column(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(red)
-        )
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(Color.White),
-            contentAlignment = Alignment.Center
-        ) {
-            Canvas(modifier = Modifier.size(38.dp)) {
-                val cx = size.width / 2f
-                val cy = size.height / 2f
-                val outerR = size.minDimension / 2f
-                val innerR = outerR * 0.38f
-                val centerR = outerR * 0.28f
-                val rayCount = 16
-
-                // Draw sun rays as triangles from inner to outer radius
-                for (i in 0 until rayCount) {
-                    val angle = (2.0 * Math.PI * i / rayCount) - Math.PI / 2.0
-                    val halfSpan = Math.PI / rayCount * 0.75 // 75% coverage, 25% gap
-
-                    val a1 = angle - halfSpan
-                    val a2 = angle + halfSpan
-
-                    val path = Path().apply {
-                        moveTo(cx + (innerR * cos(a1)).toFloat(), cy + (innerR * sin(a1)).toFloat())
-                        lineTo(cx + (outerR * cos(angle)).toFloat(), cy + (outerR * sin(angle)).toFloat())
-                        lineTo(cx + (innerR * cos(a2)).toFloat(), cy + (innerR * sin(a2)).toFloat())
-                        close()
-                    }
-                    drawPath(path, color = sunGold)
-                }
-
-                // Draw center disc on top
-                drawCircle(color = sunGold, radius = centerR)
-            }
+    Box(modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .background(red)
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .background(Color.White)
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .background(green)
+            )
         }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(green)
-        )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val sunSize = minOf(size.width, size.height) * 0.85f
+            val outerR = sunSize / 2f
+            val innerR = outerR * 0.38f
+            val centerR = outerR * 0.28f
+            val rayCount = 16
+
+            // Draw sun rays
+            for (i in 0 until rayCount) {
+                val angle = (2.0 * Math.PI * i / rayCount) - Math.PI / 2.0
+                val halfSpan = Math.PI / rayCount * 0.75
+
+                val a1 = angle - halfSpan
+                val a2 = angle + halfSpan
+
+                val path = Path().apply {
+                    moveTo(cx + (innerR * cos(a1)).toFloat(), cy + (innerR * sin(a1)).toFloat())
+                    lineTo(cx + (outerR * cos(angle)).toFloat(), cy + (outerR * sin(angle)).toFloat())
+                    lineTo(cx + (innerR * cos(a2)).toFloat(), cy + (innerR * sin(a2)).toFloat())
+                    close()
+                }
+                drawPath(path, color = sunGold)
+            }
+            drawCircle(color = sunGold, radius = centerR)
+        }
     }
 }
