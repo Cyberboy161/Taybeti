@@ -566,26 +566,34 @@ private fun RowScope.LetterKey(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
+        if (longPressChar != null) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    longPressChar.toString(),
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.40f)
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text(
+                    display.toString(),
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+        } else {
             Text(
                 display.toString(),
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = if (longPressChar != null) Modifier.padding(start = 4.dp) else Modifier
+                color = MaterialTheme.colorScheme.onSurface
             )
-            if (longPressChar != null) {
-                Text(
-                    longPressChar.toString(),
-                    fontSize = 9.sp,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                    modifier = Modifier.align(Alignment.BottomStart).padding(start = 2.dp, bottom = 1.dp)
-                )
-            }
         }
     }
 }
