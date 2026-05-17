@@ -113,44 +113,29 @@ internal fun KurdistanFlag(modifier: Modifier = Modifier) {
                 val cx = size.width / 2f
                 val cy = size.height / 2f
                 val outerR = size.minDimension / 2f
-                val innerR = outerR * 0.5f
-                val rayCount = 21
-                val rayWidthAngle = Math.toRadians(360.0 / rayCount)
+                val innerR = outerR * 0.38f
+                val centerR = outerR * 0.28f
+                val rayCount = 16
 
-                // Draw sun rays
+                // Draw sun rays as triangles from inner to outer radius
                 for (i in 0 until rayCount) {
-                    val angle = i * rayWidthAngle - Math.PI / 2
-                    val halfGap = rayWidthAngle * 0.08
-                    val a1 = angle + halfGap
-                    val a2 = angle + rayWidthAngle - halfGap
+                    val angle = (2.0 * Math.PI * i / rayCount) - Math.PI / 2.0
+                    val halfSpan = Math.PI / rayCount * 0.75 // 75% coverage, 25% gap
+
+                    val a1 = angle - halfSpan
+                    val a2 = angle + halfSpan
 
                     val path = Path().apply {
-                        moveTo(
-                            cx + (innerR * cos(a1)).toFloat(),
-                            cy + (innerR * sin(a1)).toFloat()
-                        )
-                        lineTo(
-                            cx + (outerR * cos(a1)).toFloat(),
-                            cy + (outerR * sin(a1)).toFloat()
-                        )
-                        lineTo(
-                            cx + (outerR * cos(a2)).toFloat(),
-                            cy + (outerR * sin(a2)).toFloat()
-                        )
-                        lineTo(
-                            cx + (innerR * cos(a2)).toFloat(),
-                            cy + (innerR * sin(a2)).toFloat()
-                        )
+                        moveTo(cx + (innerR * cos(a1)).toFloat(), cy + (innerR * sin(a1)).toFloat())
+                        lineTo(cx + (outerR * cos(angle)).toFloat(), cy + (outerR * sin(angle)).toFloat())
+                        lineTo(cx + (innerR * cos(a2)).toFloat(), cy + (innerR * sin(a2)).toFloat())
                         close()
                     }
                     drawPath(path, color = sunGold)
                 }
 
-                // Draw center disc
-                drawCircle(
-                    color = sunGold,
-                    radius = innerR * 0.95f
-                )
+                // Draw center disc on top
+                drawCircle(color = sunGold, radius = centerR)
             }
         }
         Box(
