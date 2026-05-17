@@ -125,17 +125,21 @@ internal fun KurdistanFlag(modifier: Modifier = Modifier) {
             val innerR = centerR
             val rayCount = 16
 
-            // Draw sun rays
+            // Draw sun rays — thick at base, thin at tip
             for (i in 0 until rayCount) {
                 val angle = (2.0 * Math.PI * i / rayCount) - Math.PI / 2.0
-                val halfSpan = Math.PI / rayCount * 0.75
+                val baseHalfSpan = Math.PI / rayCount * 0.90  // thick base
+                val tipHalfSpan = Math.PI / rayCount * 0.12   // thin tip
 
-                val a1 = angle - halfSpan
-                val a2 = angle + halfSpan
+                val a1 = angle - baseHalfSpan
+                val a2 = angle + baseHalfSpan
+                val t1 = angle - tipHalfSpan
+                val t2 = angle + tipHalfSpan
 
                 val path = Path().apply {
                     moveTo(cx + (innerR * cos(a1)).toFloat(), cy + (innerR * sin(a1)).toFloat())
-                    lineTo(cx + (outerR * cos(angle)).toFloat(), cy + (outerR * sin(angle)).toFloat())
+                    lineTo(cx + (outerR * cos(t1)).toFloat(), cy + (outerR * sin(t1)).toFloat())
+                    lineTo(cx + (outerR * cos(t2)).toFloat(), cy + (outerR * sin(t2)).toFloat())
                     lineTo(cx + (innerR * cos(a2)).toFloat(), cy + (innerR * sin(a2)).toFloat())
                     close()
                 }
