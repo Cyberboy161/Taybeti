@@ -105,10 +105,11 @@ private val keyboardLanguages = listOf(
     KeyboardLayout("ckb", "\u06A9", listOf(
         "\u0686\u067E\u0642\u06A4\u0641\u063A\u0639\u06BE\u062E\u062D\u062C",
         "\u0634\u0633\u06CC\u0628\u0644\u0627\u062A\u0646\u0645\u06A9\u06AF",
-        "\u062F\u0637\u0698\u0695\u06CE\u0648\u06B5"
+        "\u062F\u0637\u0698\u0631\u06CE\u0648\u06B5"
     ), isRtl = true, longPressMap = mapOf(
         '\u0648' to '\u06C6',   // و → ۆ
-        '\u06BE' to '\u06D5'    // ھ → ە
+        '\u06BE' to '\u06D5',   // ھ → ە
+        '\u0644' to '\u06B5'    // ل → ڵ
     ))
 )
 
@@ -569,6 +570,15 @@ private fun RowScope.LetterKey(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface
         )
+        if (longPressChar != null) {
+            Text(
+                longPressChar.toString(),
+                fontSize = 9.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(end = 2.dp, bottom = 1.dp)
+            )
+        }
     }
 }
 
