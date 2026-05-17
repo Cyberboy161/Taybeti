@@ -249,7 +249,7 @@ fun LanguagePickerDialog(
                             Text(language.flagEmoji, fontSize = MaterialTheme.typography.titleLarge.fontSize)
                             Spacer(modifier = Modifier.padding(start = 8.dp))
                         } else {
-                            KurdistanFlag(modifier = Modifier.size(28.dp, 20.dp))
+                            KurdistanFlag(modifier = Modifier.size(36.dp, 26.dp))
                             Spacer(modifier = Modifier.padding(start = 8.dp))
                         }
                         Text(

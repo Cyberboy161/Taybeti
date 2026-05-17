@@ -72,7 +72,7 @@ fun LanguageScreen(
                 if (language.flagEmoji != null) {
                     Text(language.flagEmoji, fontSize = 28.sp)
                 } else {
-                    KurdistanFlag(modifier = Modifier.size(36.dp, 24.dp))
+                    KurdistanFlag(modifier = Modifier.size(48.dp, 32.dp))
                 }
                 Spacer(modifier = Modifier.width(16.dp))
 
@@ -109,7 +109,7 @@ internal fun KurdistanFlag(modifier: Modifier = Modifier) {
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(modifier = Modifier.fillMaxSize().padding(vertical = 1.dp)) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
                 val cx = size.width / 2f
                 val cy = size.height / 2f
                 val outerR = size.minDimension / 2f
