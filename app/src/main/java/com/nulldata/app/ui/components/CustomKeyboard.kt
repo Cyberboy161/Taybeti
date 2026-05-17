@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -109,7 +110,8 @@ private val keyboardLanguages = listOf(
     ), isRtl = true, longPressMap = mapOf(
         '\u0648' to '\u06C6',   // و → ۆ
         '\u06BE' to '\u06D5',   // ھ → ە
-        '\u0644' to '\u06B5'    // ل → ڵ
+        '\u0644' to '\u06B5',   // ل → ڵ
+        '\u0627' to '\u0626'    // ا → ئ
     ))
 )
 
@@ -564,20 +566,26 @@ private fun RowScope.LetterKey(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            display.toString(),
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        if (longPressChar != null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                longPressChar.toString(),
-                fontSize = 9.sp,
+                display.toString(),
+                fontSize = 16.sp,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(end = 2.dp, bottom = 1.dp)
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = if (longPressChar != null) Modifier.padding(start = 4.dp) else Modifier
             )
+            if (longPressChar != null) {
+                Text(
+                    longPressChar.toString(),
+                    fontSize = 9.sp,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                    modifier = Modifier.align(Alignment.BottomStart).padding(start = 2.dp, bottom = 1.dp)
+                )
+            }
         }
     }
 }
