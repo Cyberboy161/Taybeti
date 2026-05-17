@@ -95,7 +95,7 @@ internal fun KurdistanFlag(modifier: Modifier = Modifier) {
     val sunGold = Color(0xFFFEBD11)
     val green = Color(0xFF278E43)
 
-    Column(modifier = modifier.clip(RoundedCornerShape(4.dp))) {
+    Column(modifier = modifier) {
         Box(
             modifier = Modifier
                 .weight(1f)
