@@ -138,15 +138,34 @@ fun NoteEditorScreen(
         // Edit key verification dialog
         if (showEditKeyDialog) {
             val dialogKeyboardState = remember { KeyboardState() }
-            AlertDialog(
+            Dialog(
                 onDismissRequest = {
                     showEditKeyDialog = false
                     editKeyError = null
                     editKey = ""
                 },
-                title = { Text(strings.enterNoteKey) },
-                text = {
-                    Column {
+                properties = DialogProperties(
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false,
+                    usePlatformDefaultWidth = false
+                )
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = strings.enterNoteKey,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
                         Text(strings.reEnterKeyToUnlock)
                         Spacer(modifier = Modifier.height(8.dp))
                         CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
@@ -169,44 +188,52 @@ fun NoteEditorScreen(
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(editKeyError!!, color = MaterialTheme.colorScheme.error)
                         }
-                    }
-                },
-                confirmButton = {
-                    Button(onClick = {
-                        if (editKey.isEmpty()) {
-                            editKeyError = strings.keyRequired
-                            return@Button
-                        }
-                        scope.launch {
-                            val entity = noteEntity
-                            if (entity != null) {
-                                val result = repository.decryptNoteContent(entity, editKey.toCharArray())
-                                if (result.isSuccess) {
-                                    val decrypted = result.getOrNull()!!
-                                    plaintext = String(decrypted, Charsets.UTF_8)
-                                    title = entity.title
+                        Spacer(modifier = Modifier.weight(1f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextButton(
+                                onClick = {
                                     showEditKeyDialog = false
-                                    showEncryptedOutput = false
-                                    encryptedOutput = ""
-                                    isLocked = false
-                                    SecureMemory.clear(editKey.toCharArray())
-                                    editKey = ""
                                     editKeyError = null
-                                } else {
-                                    editKeyError = strings.wrongKey
-                                }
-                            }
+                                    editKey = ""
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.cancel) }
+                            Button(
+                                onClick = {
+                                    if (editKey.isEmpty()) {
+                                        editKeyError = strings.keyRequired
+                                        return@Button
+                                    }
+                                    scope.launch {
+                                        val entity = noteEntity
+                                        if (entity != null) {
+                                            val result = repository.decryptNoteContent(entity, editKey.toCharArray())
+                                            if (result.isSuccess) {
+                                                val decrypted = result.getOrNull()!!
+                                                plaintext = String(decrypted, Charsets.UTF_8)
+                                                title = entity.title
+                                                showEditKeyDialog = false
+                                                showEncryptedOutput = false
+                                                encryptedOutput = ""
+                                                isLocked = false
+                                                SecureMemory.clear(editKey.toCharArray())
+                                                editKey = ""
+                                                editKeyError = null
+                                            } else {
+                                                editKeyError = strings.wrongKey
+                                            }
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.unlock) }
                         }
-                    }) { Text(strings.unlock) }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showEditKeyDialog = false
-                        editKeyError = null
-                        editKey = ""
-                    }) { Text(strings.cancel) }
+                    }
                 }
-            )
+            }
         }
 
         LaunchedEffect(noteId) {
@@ -232,12 +259,34 @@ fun NoteEditorScreen(
         // Unlock key dialog for existing notes
         if (showKeyDialog) {
             val dialogKeyboardState = remember { KeyboardState() }
-            AlertDialog(
+            Dialog(
                 onDismissRequest = { /* block outside dismiss — user must use Cancel */ },
-                properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
-                title = { Text(strings.enterNoteKey) },
-                text = {
-                    Column {
+                properties = DialogProperties(
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false,
+                    usePlatformDefaultWidth = false
+                )
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = strings.enterNoteKey,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        if (keyError != null) {
+                            Text(keyError!!, color = MaterialTheme.colorScheme.error)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                         CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
                             PasswordField(
                                 value = noteKey,
@@ -254,43 +303,48 @@ fun NoteEditorScreen(
                                 onDone = { dialogKeyboardState.onDone?.invoke() }
                             )
                         }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextButton(
+                                onClick = onBack,
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.cancel) }
+                            Button(
+                                onClick = {
+                                    if (noteKey.isEmpty()) {
+                                        keyError = strings.keyRequired
+                                        return@Button
+                                    }
+                                    scope.launch {
+                                        val entity = noteEntity
+                                        if (entity != null) {
+                                            val result = repository.decryptNoteContent(
+                                                entity, noteKey.toCharArray()
+                                            )
+                                            if (result.isSuccess) {
+                                                val decrypted = result.getOrNull()!!
+                                                plaintext = String(decrypted, Charsets.UTF_8)
+                                                title = entity.title
+                                                isLocked = false
+                                                showKeyDialog = false
+                                                SecureMemory.clear(noteKey.toCharArray())
+                                                noteKey = ""
+                                            } else {
+                                                SecureMemory.clear(noteKey.toCharArray())
+                                                noteKey = ""
+                                                keyError = strings.wrongKey
+                                            }
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.unlock) }
+                        }
                     }
-                },
-                confirmButton = {
-                    Button(onClick = {
-                        if (noteKey.isEmpty()) {
-                            keyError = strings.keyRequired
-                            return@Button
-                        }
-                        scope.launch {
-                            val entity = noteEntity
-                            if (entity != null) {
-                                val result = repository.decryptNoteContent(
-                                    entity, noteKey.toCharArray()
-                                )
-                                if (result.isSuccess) {
-                                    val decrypted = result.getOrNull()!!
-                                    plaintext = String(decrypted, Charsets.UTF_8)
-                                    title = entity.title
-                                    isLocked = false
-                                    showKeyDialog = false
-                                    SecureMemory.clear(noteKey.toCharArray())
-                                    noteKey = ""
-                                } else {
-                                    SecureMemory.clear(noteKey.toCharArray())
-                                    noteKey = ""
-                                    keyError = strings.wrongKey
-                                }
-                            }
-                        }
-                    }) { Text(strings.unlock) }
-                },
-                dismissButton = {
-                    TextButton(onClick = onBack) { Text(strings.cancel) }
                 }
-            )
-            if (keyError != null) {
-                Text(keyError!!, color = MaterialTheme.colorScheme.error)
             }
         }
 
