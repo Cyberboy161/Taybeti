@@ -111,7 +111,8 @@ private val keyboardLanguages = listOf(
         '\u0648' to '\u06C6',   // و → ۆ
         '\u06BE' to '\u06D5',   // ھ → ە
         '\u0644' to '\u06B5',   // ل → ڵ
-        '\u0627' to '\u0626'    // ا → ئ
+        '\u0627' to '\u0626',   // ا → ئ
+        '\u06CC' to '\u06CE'    // ی → ێ
     ))
 )
 
