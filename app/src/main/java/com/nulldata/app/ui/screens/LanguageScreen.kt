@@ -91,9 +91,9 @@ fun LanguageScreen(
 
 @Composable
 internal fun KurdistanFlag(modifier: Modifier = Modifier) {
-    val red = Color(0xFFED2024)
-    val sunGold = Color(0xFFFEBD11)
-    val green = Color(0xFF278E43)
+    val red = Color(0xFFFF0000)
+    val sunGold = Color(0xFFFFCC00)
+    val green = Color(0xFF009E49)
 
     Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -121,14 +121,14 @@ internal fun KurdistanFlag(modifier: Modifier = Modifier) {
             val cy = size.height / 2f
             val sunSize = minOf(size.width, size.height) * 0.85f
             val outerR = sunSize / 2f
-            val centerR = outerR * 0.67f
+            val centerR = outerR * 0.50f
             val innerR = centerR
-            val rayCount = 12
+            val rayCount = 21
 
-            // Draw equilateral sun rays
+            // 21 sun rays — official Kurdistan flag spec
             for (i in 0 until rayCount) {
                 val angle = (2.0 * Math.PI * i / rayCount) - Math.PI / 2.0
-                val halfSpan = Math.PI / rayCount * 0.92
+                val halfSpan = Math.PI / rayCount * 0.80
 
                 val a1 = angle - halfSpan
                 val a2 = angle + halfSpan
