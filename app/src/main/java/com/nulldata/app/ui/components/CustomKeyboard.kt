@@ -342,17 +342,6 @@ private fun LetterLayout(
 
     // Row 4 — bottom bar
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
-        // Language button with globe icon + dropdown
-        Box(modifier = Modifier.weight(1.4f).height(keyHeight.dp), contentAlignment = Alignment.Center) {
-            FlatActionKey(keyBg = keyBg, onClick = onLangTap) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Language, null, Modifier.height(14.dp), tint = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.width(3.dp))
-                    Text(langLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                }
-            }
-            LangPickerDropdown(showLangPicker, onDismiss = { onLangTap() }, selectLang)
-        }
         // 123+ key with long press to jump to Revolutionary
         Box(
             modifier = Modifier
@@ -371,13 +360,27 @@ private fun LetterLayout(
         }
         if (lang.isRtl) {
             LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
-            LetterKey('؟', uppercase = false, onKey, keyBg, 1f, emptyMap())
-            SpaceKey(keyBg) { onKey(' ') }
             LetterKey('\u060C', uppercase = false, onKey, keyBg, 1f, emptyMap()) // Arabic comma
         } else {
             LetterKey(',', uppercase = false, onKey, keyBg, 1f, emptyMap())
-            SpaceKey(keyBg) { onKey(' ') }
             LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
+        }
+        // Language button next to space
+        Box(modifier = Modifier.weight(1.4f).height(keyHeight.dp), contentAlignment = Alignment.Center) {
+            FlatActionKey(keyBg = keyBg, onClick = onLangTap) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Language, null, Modifier.height(14.dp), tint = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.width(3.dp))
+                    Text(langLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+            LangPickerDropdown(showLangPicker, onDismiss = { onLangTap() }, selectLang)
+        }
+        if (lang.isRtl) {
+            LetterKey('؟', uppercase = false, onKey, keyBg, 1f, emptyMap())
+            SpaceKey(keyBg) { onKey(' ') }
+        } else {
+            SpaceKey(keyBg) { onKey(' ') }
             LetterKey('?', uppercase = false, onKey, keyBg, 1f, emptyMap())
         }
         ActionKey(weight = 1.2f, keyBg = keyBg.copy(alpha = 0.6f), onClick = onDone) {
@@ -416,16 +419,6 @@ private fun NumberLayout(
     }
     // Bottom bar
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
-        Box(modifier = Modifier.weight(1.4f).height(keyHeight.dp), contentAlignment = Alignment.Center) {
-            FlatActionKey(keyBg = keyBg, onClick = onLangTap) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Language, null, Modifier.height(14.dp), tint = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.width(3.dp))
-                    Text(langLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                }
-            }
-            LangPickerDropdown(showLangPicker, onDismiss = { onLangTap() }, selectLang)
-        }
         ActionKey(weight = 1.2f, keyBg = keyBg, onClick = onAbc) {
             Text("ABC", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
         }
@@ -436,6 +429,16 @@ private fun NumberLayout(
             SymbolKey('.', onKey, keyBg)
         } else {
             SymbolKey(',', onKey, keyBg)
+        }
+        Box(modifier = Modifier.weight(1.4f).height(keyHeight.dp), contentAlignment = Alignment.Center) {
+            FlatActionKey(keyBg = keyBg, onClick = onLangTap) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Language, null, Modifier.height(14.dp), tint = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.width(3.dp))
+                    Text(langLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+            LangPickerDropdown(showLangPicker, onDismiss = { onLangTap() }, selectLang)
         }
         SpaceKey(keyBg) { onKey(' ') }
         SymbolKey('.', onKey, keyBg)
@@ -481,6 +484,12 @@ private fun SymPageLayout(
         }
     }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
+        ActionKey(weight = 1.2f, keyBg = keyBg, onClick = onAbc) {
+            Text("ABC", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
+        }
+        ActionKey(weight = 1f, keyBg = keyBg, onClick = onNext) {
+            Text("SYM\u00BB", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+        }
         Box(modifier = Modifier.weight(1.4f).height(keyHeight.dp), contentAlignment = Alignment.Center) {
             FlatActionKey(keyBg = keyBg, onClick = onLangTap) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -490,12 +499,6 @@ private fun SymPageLayout(
                 }
             }
             LangPickerDropdown(showLangPicker, onDismiss = { onLangTap() }, selectLang)
-        }
-        ActionKey(weight = 1.2f, keyBg = keyBg, onClick = onAbc) {
-            Text("ABC", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
-        }
-        ActionKey(weight = 1f, keyBg = keyBg, onClick = onNext) {
-            Text("SYM\u00BB", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         }
         SpaceKey(keyBg) { onKey(' ') }
     }
