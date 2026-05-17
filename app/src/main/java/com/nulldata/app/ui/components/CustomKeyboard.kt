@@ -361,6 +361,7 @@ private fun LetterLayout(
         if (lang.isRtl) {
             LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
             LetterKey('\u060C', uppercase = false, onKey, keyBg, 1f, emptyMap()) // Arabic comma
+            LetterKey('؟', uppercase = false, onKey, keyBg, 1f, emptyMap())
         } else {
             LetterKey(',', uppercase = false, onKey, keyBg, 1f, emptyMap())
             LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
@@ -377,7 +378,6 @@ private fun LetterLayout(
             LangPickerDropdown(showLangPicker, onDismiss = { onLangTap() }, selectLang)
         }
         if (lang.isRtl) {
-            LetterKey('؟', uppercase = false, onKey, keyBg, 1f, emptyMap())
             SpaceKey(keyBg) { onKey(' ') }
         } else {
             SpaceKey(keyBg) { onKey(' ') }
