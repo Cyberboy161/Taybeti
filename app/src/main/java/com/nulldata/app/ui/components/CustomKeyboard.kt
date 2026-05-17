@@ -65,7 +65,8 @@ private data class KeyboardLayout(
     val label: String,
     val letterRows: List<String>,
     val isRtl: Boolean = false,
-    val uppercaseOverrides: Map<Char, Char> = emptyMap()
+    val uppercaseOverrides: Map<Char, Char> = emptyMap(),
+    val longPressMap: Map<Char, Char> = emptyMap()
 )
 
 private val keyboardLanguages = listOf(
@@ -104,8 +105,11 @@ private val keyboardLanguages = listOf(
     KeyboardLayout("ckb", "\u06A9", listOf(
         "\u0686\u067E\u0642\u06A4\u0641\u063A\u0639\u06BE\u062E\u062D\u062C",
         "\u0634\u0633\u06CC\u0628\u0644\u0627\u062A\u0646\u0645\u06A9\u06AF",
-        "\u0638\u0637\u0698\u0695\u0626\u0648"
-    ), isRtl = true)
+        "\u062F\u0637\u0698\u0695\u06CE\u0648\u06B5"
+    ), isRtl = true, longPressMap = mapOf(
+        '\u0648' to '\u06C6',   // و → ۆ
+        '\u06BE' to '\u06D5'    // ھ → ە
+    ))
 )
 
 // ─── Shared symbol layout ───
@@ -305,16 +309,17 @@ private fun LetterLayout(
     keyBg: Color
 ) {
     val shiftCaps = lang.uppercaseOverrides
+    val longPress = lang.longPressMap
 
     // Row 1 — top letter row
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
-        lang.letterRows[0].forEach { c -> LetterKey(c, uppercase, onKey, keyBg, 1f, shiftCaps) }
+        lang.letterRows[0].forEach { c -> LetterKey(c, uppercase, onKey, keyBg, 1f, shiftCaps, longPress) }
     }
 
     // Row 2 — middle + backspace
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
         Spacer(modifier = Modifier.weight(0.5f))
-        lang.letterRows[1].forEach { c -> LetterKey(c, uppercase, onKey, keyBg, 1f, shiftCaps) }
+        lang.letterRows[1].forEach { c -> LetterKey(c, uppercase, onKey, keyBg, 1f, shiftCaps, longPress) }
         DeleteKey(weight = 1.5f, keyBg = keyBg, onDelete = onDelete)
     }
 
@@ -324,7 +329,7 @@ private fun LetterLayout(
             Icon(Icons.Default.KeyboardCapslock, "Shift", modifier = Modifier.height(18.dp),
                 tint = if (uppercase) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
         }
-        lang.letterRows[2].forEach { c -> LetterKey(c, uppercase, onKey, keyBg, 1f, shiftCaps) }
+        lang.letterRows[2].forEach { c -> LetterKey(c, uppercase, onKey, keyBg, 1f, shiftCaps, longPress) }
         ActionKey(weight = 1.5f, selected = uppercase, keyBg = keyBg, onClick = onShiftToggle) {
             Icon(Icons.Default.KeyboardCapslock, "Shift", modifier = Modifier.height(18.dp),
                 tint = if (uppercase) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
@@ -531,6 +536,7 @@ private fun flatKeyModifier(bg: Color): Modifier {
         .background(bg)
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RowScope.LetterKey(
     c: Char,
@@ -538,11 +544,23 @@ private fun RowScope.LetterKey(
     onKey: (Char) -> Unit,
     bg: Color,
     weight: Float = 1f,
-    upperMap: Map<Char, Char> = emptyMap()
+    upperMap: Map<Char, Char> = emptyMap(),
+    longPressMap: Map<Char, Char> = emptyMap()
 ) {
     val display = if (uppercase) upperMap[c] ?: c.uppercaseChar() else c.lowercaseChar()
+    val longPressChar = longPressMap[c]
     Box(
-        modifier = rowKeyModifier(weight, bg).clickable { onKey(display) },
+        modifier = rowKeyModifier(weight, bg)
+            .then(
+                if (longPressChar != null) {
+                    Modifier.combinedClickable(
+                        onClick = { onKey(display) },
+                        onLongClick = { onKey(longPressChar) }
+                    )
+                } else {
+                    Modifier.clickable { onKey(display) }
+                }
+            ),
         contentAlignment = Alignment.Center
     ) {
         Text(
