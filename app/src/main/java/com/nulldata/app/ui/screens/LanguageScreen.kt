@@ -121,14 +121,14 @@ internal fun KurdistanFlag(modifier: Modifier = Modifier) {
             val cy = size.height / 2f
             val sunSize = minOf(size.width, size.height) * 0.85f
             val outerR = sunSize / 2f
-            val centerR = outerR * 0.25f
+            val centerR = outerR * 0.67f
             val innerR = centerR
-            val rayCount = 21
+            val rayCount = 12
 
-            // Draw sun rays — 21 triangles, wide base, sharp tip
+            // Draw equilateral sun rays
             for (i in 0 until rayCount) {
                 val angle = (2.0 * Math.PI * i / rayCount) - Math.PI / 2.0
-                val halfSpan = Math.PI / rayCount * 0.92  // wide base
+                val halfSpan = Math.PI / rayCount * 0.92
 
                 val a1 = angle - halfSpan
                 val a2 = angle + halfSpan
