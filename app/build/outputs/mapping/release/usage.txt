@@ -4383,10 +4383,7 @@ androidx.compose.foundation.gestures.ForEachGestureKt$forEachGesture$1
 androidx.compose.foundation.gestures.ForEachGestureKt:
     public static final java.lang.Object awaitAllPointersUp(androidx.compose.ui.input.pointer.PointerInputScope,kotlin.coroutines.Continuation)
     public static final java.lang.Object forEachGesture(androidx.compose.ui.input.pointer.PointerInputScope,kotlin.jvm.functions.Function2,kotlin.coroutines.Continuation)
-androidx.compose.foundation.gestures.GestureCancellationException:
-    public static final int $stable
-    public void <init>()
-    public synthetic void <init>(java.lang.String,int,kotlin.jvm.internal.DefaultConstructorMarker)
+androidx.compose.foundation.gestures.GestureCancellationException
 androidx.compose.foundation.gestures.MapDraggableAnchors
 androidx.compose.foundation.gestures.ModifierLocalScrollableContainerProvider:
     public final boolean getEnabled()
@@ -4407,7 +4404,10 @@ androidx.compose.foundation.gestures.PressGestureScope:
     public static synthetic long access$toSp-0xMU5do$jd(androidx.compose.foundation.gestures.PressGestureScope,float)
     public static synthetic long access$toSp-kPz2Gy4$jd(androidx.compose.foundation.gestures.PressGestureScope,float)
     public static synthetic long access$toSp-kPz2Gy4$jd(androidx.compose.foundation.gestures.PressGestureScope,int)
+    public abstract java.lang.Object awaitRelease(kotlin.coroutines.Continuation)
+androidx.compose.foundation.gestures.PressGestureScopeImpl$awaitRelease$1
 androidx.compose.foundation.gestures.PressGestureScopeImpl:
+    public java.lang.Object awaitRelease(kotlin.coroutines.Continuation)
     public androidx.compose.ui.geometry.Rect toRect(androidx.compose.ui.unit.DpRect)
     public long toSp-kPz2Gy4(int)
 androidx.compose.foundation.gestures.ScrollDraggableState:
@@ -27521,7 +27521,6 @@ androidx.compose.ui.window.AndroidPopup_androidKt:
 androidx.compose.ui.window.DialogProperties:
     public static final int $stable
     public void <init>()
-    public synthetic void <init>(boolean,boolean,androidx.compose.ui.window.SecureFlagPolicy,boolean,boolean,int,kotlin.jvm.internal.DefaultConstructorMarker)
 androidx.compose.ui.window.DialogWindowProvider
 androidx.compose.ui.window.DialogWrapper:
     public androidx.compose.ui.platform.AbstractComposeView getSubCompositionView()
@@ -32291,6 +32290,7 @@ com.nulldata.app.data.repository.NoteRepository$LoginResult:
     public final com.nulldata.app.data.repository.NoteRepository$LoginResult copy(boolean,boolean,java.lang.String,boolean,long)
     public static synthetic com.nulldata.app.data.repository.NoteRepository$LoginResult copy$default(com.nulldata.app.data.repository.NoteRepository$LoginResult,boolean,boolean,java.lang.String,boolean,long,int,java.lang.Object)
 com.nulldata.app.data.repository.NoteRepository:
+    public static final int $stable
     public static final java.lang.String DECOY_CANARY
     public static final long LOCKOUT_DELAY_MS
     public static final java.lang.String LOGIN_CANARY
@@ -32487,6 +32487,7 @@ com.nulldata.app.util.AppStrings:
     public final java.lang.String component185()
     public final java.lang.String component186()
     public final java.lang.String component187()
+    public final java.lang.String component188()
     public final java.lang.String component19()
     public final java.lang.String component2()
     public final java.lang.String component20()
@@ -32607,8 +32608,6 @@ com.nulldata.app.util.AppStringsKt:
 com.nulldata.app.util.Constants
 com.nulldata.app.util.DecoyEncoder:
     public static final int $stable
-com.nulldata.app.util.DecoyPlatform:
-    public static kotlin.enums.EnumEntries getEntries()
 com.nulldata.app.util.ExtensionsKt:
     public static final java.lang.String fromBase64(java.lang.String)
     public static synthetic java.lang.String generateRandomKey$default(int,int,java.lang.Object)
@@ -42035,6 +42034,7 @@ androidx.compose.foundation.HoverableNode:
 androidx.compose.foundation.IndicationKt$LocalIndication$1
 androidx.compose.foundation.IndicationKt$indication$$inlined$debugInspectorInfo$1
 androidx.compose.foundation.IndicationKt$indication$2:
+    public final void invoke(androidx.compose.foundation.layout.ColumnScope,androidx.compose.runtime.Composer,int)
     public final void invoke(androidx.compose.foundation.layout.PaddingValues,androidx.compose.runtime.Composer,int)
     public static void invoke$15()
 androidx.compose.foundation.IndicationKt:
@@ -42320,8 +42320,6 @@ androidx.compose.foundation.gestures.DraggableNode:
 androidx.compose.foundation.gestures.ForEachGestureKt$awaitEachGesture$2:
     public final java.lang.Object invoke$5()
 androidx.compose.foundation.gestures.ForEachGestureKt
-androidx.compose.foundation.gestures.GestureCancellationException:
-    static void <clinit>()
 androidx.compose.foundation.gestures.ModifierLocalScrollableContainerProvider:
     public final void setEnabled()
 androidx.compose.foundation.gestures.MouseWheelScrollNode$1$1$2$1$1$1:
@@ -42603,10 +42601,10 @@ androidx.compose.foundation.layout.BoxScope:
 androidx.compose.foundation.layout.BoxScopeInstance$align$$inlined$debugInspectorInfo$1
 androidx.compose.foundation.layout.ColumnScope:
     public abstract androidx.compose.ui.Modifier align(androidx.compose.ui.Modifier,androidx.compose.ui.BiasAlignment$Horizontal)
-    public abstract androidx.compose.ui.Modifier weight(androidx.compose.ui.Modifier,float,boolean)
+    public abstract androidx.compose.ui.Modifier weight(androidx.compose.ui.Modifier,boolean)
 androidx.compose.foundation.layout.ColumnScopeInstance:
     public final androidx.compose.ui.Modifier align(androidx.compose.ui.Modifier,androidx.compose.ui.BiasAlignment$Horizontal)
-    public final androidx.compose.ui.Modifier weight(androidx.compose.ui.Modifier,float,boolean)
+    public final androidx.compose.ui.Modifier weight(androidx.compose.ui.Modifier,boolean)
 androidx.compose.foundation.layout.CrossAxisAlignment$CenterCrossAxisAlignment
 androidx.compose.foundation.layout.CrossAxisAlignment$Companion
 androidx.compose.foundation.layout.CrossAxisAlignment$EndCrossAxisAlignment
@@ -43364,7 +43362,6 @@ androidx.compose.foundation.lazy.layout.LazyLayoutSemanticsKt$lazyLayoutSemantic
 androidx.compose.foundation.lazy.layout.LazyLayoutSemanticsKt$lazyLayoutSemantics$1$accessibilityScrollState$2
 androidx.compose.foundation.lazy.layout.LazyLayoutSemanticsKt$lazyLayoutSemantics$1$indexForKeyMapping$1:
     public static java.lang.Integer invoke$4()
-    public final void invoke-k-4lQ0M()
     public static long invoke-tuRUvjQ$1()
 androidx.compose.foundation.lazy.layout.LazyLayoutSemanticsKt$lazyLayoutSemantics$1$scrollByAction$1$1:
     public final java.lang.Object invoke$3()
@@ -43482,6 +43479,7 @@ androidx.compose.foundation.text.AndroidCursorHandle_androidKt$drawCursorHandle$
 androidx.compose.foundation.text.AndroidCursorHandle_androidKt$drawCursorHandle$1$1$1:
     public final androidx.compose.ui.draw.DrawResult invoke()
     public final void invoke(androidx.compose.ui.semantics.SemanticsPropertyReceiver)
+    public final void invoke$2()
 androidx.compose.foundation.text.AndroidCursorHandle_androidKt$drawCursorHandle$1:
     public static final androidx.compose.foundation.text.AndroidCursorHandle_androidKt$drawCursorHandle$1 INSTANCE$3
     public static final androidx.compose.foundation.text.AndroidCursorHandle_androidKt$drawCursorHandle$1 INSTANCE$4
@@ -48921,7 +48919,7 @@ androidx.compose.ui.graphics.drawscope.DrawScope:
     public static final androidx.compose.ui.graphics.drawscope.DrawScope$Companion Companion
     static void <clinit>()
     public abstract void drawLine-1RTmtNc(androidx.compose.ui.graphics.Brush,long,long,float,int,float,androidx.compose.ui.graphics.BlendModeColorFilter,int)
-    public abstract void drawPath-LG529CI(androidx.compose.ui.graphics.AndroidPath,long,float,androidx.compose.ui.graphics.drawscope.DrawStyle,androidx.compose.ui.graphics.BlendModeColorFilter,int)
+    public static synthetic void drawPath-LG529CI$default(androidx.compose.ui.graphics.drawscope.DrawScope,androidx.compose.ui.graphics.AndroidPath,long)
     public abstract void drawRoundRect-u-Aw5IA(long,long,long,long,androidx.compose.ui.graphics.drawscope.DrawStyle,float,androidx.compose.ui.graphics.BlendModeColorFilter,int)
 androidx.compose.ui.graphics.drawscope.DrawTransform
 androidx.compose.ui.graphics.drawscope.EmptyCanvas:
@@ -53434,7 +53432,6 @@ androidx.compose.ui.window.DialogLayout:
     public static void setUsePlatformDefaultWidth()
 androidx.compose.ui.window.DialogProperties:
     public final boolean decorFitsSystemWindows
-    public final boolean usePlatformDefaultWidth
     static void <clinit>()
     public static boolean getDecorFitsSystemWindows()
     public static boolean getDismissOnBackPress()
@@ -53753,10 +53750,13 @@ androidx.core.util.LongSparseArrayKt:
     public static java.lang.reflect.Method sSetWindowLayoutTypeMethod
     public static boolean sSetWindowLayoutTypeMethodAttempted
     public static final boolean DecoyEncryptedView$lambda$52(androidx.compose.runtime.MutableState)
+    public static final boolean DecoyEncryptedView$lambda$58(androidx.compose.runtime.MutableState)
     public static final boolean NoteEditorScreen$lambda$10(androidx.compose.runtime.MutableState)
     public static final boolean PasswordField$lambda$4(androidx.compose.runtime.MutableState)
     public static final boolean access$DecoyEncryptedView$lambda$52(androidx.compose.runtime.MutableState)
     public static final void access$DecoyEncryptedView$lambda$53(androidx.compose.runtime.MutableState,boolean)
+    public static final boolean access$DecoyEncryptedView$lambda$58(androidx.compose.runtime.MutableState)
+    public static final void access$DecoyEncryptedView$lambda$59(androidx.compose.runtime.MutableState,boolean)
     public static final boolean access$NoteEditorScreen$lambda$10(androidx.compose.runtime.MutableState)
     public static final void access$NoteEditorScreen$lambda$11(androidx.compose.runtime.MutableState,boolean)
     public static final boolean access$NoteEditorScreen$lambda$13(androidx.compose.runtime.MutableState)
@@ -53913,22 +53913,26 @@ androidx.core.view.ViewKt$ancestors$1:
     public static android.view.ViewParent invoke()
 androidx.core.view.ViewKt:
     public static final boolean AppTextField$lambda$4(androidx.compose.runtime.MutableState)
-    public static final boolean DecoyTab$lambda$54(androidx.compose.runtime.MutableState)
-    public static final boolean DecryptTab$lambda$44(androidx.compose.runtime.MutableState)
+    public static final boolean DecoyTab$lambda$61(androidx.compose.runtime.MutableState)
+    public static final boolean DecryptTab$lambda$51(androidx.compose.runtime.MutableState)
     public static final boolean EncryptTab$lambda$16(androidx.compose.runtime.MutableState)
     public static final boolean EncryptTab$lambda$22(androidx.compose.runtime.MutableState)
+    public static final boolean EncryptTab$lambda$25(androidx.compose.runtime.MutableState)
     public static final void access$AppNavGraph$lambda$14(androidx.compose.runtime.MutableState,boolean)
     public static final void access$AppNavGraph$lambda$2(androidx.compose.runtime.MutableState,boolean)
     public static final void access$AppNavGraph$lambda$23(androidx.compose.runtime.MutableState,boolean)
     public static final void access$ChangePasswordDialog$lambda$81(androidx.compose.runtime.MutableState,boolean)
     public static final boolean access$ChangePasswordDialog$lambda$83(androidx.compose.runtime.MutableState)
     public static final void access$DecoySetupDialog$lambda$64(androidx.compose.runtime.MutableState,boolean)
-    public static final boolean access$DecoyTab$lambda$54(androidx.compose.runtime.MutableState)
-    public static final void access$DecoyTab$lambda$55(androidx.compose.runtime.MutableState,boolean)
-    public static final void access$DecryptTab$lambda$45(androidx.compose.runtime.MutableState,boolean)
+    public static final boolean access$DecoyTab$lambda$61(androidx.compose.runtime.MutableState)
+    public static final void access$DecoyTab$lambda$62(androidx.compose.runtime.MutableState,boolean)
+    public static final void access$DecryptTab$lambda$52(androidx.compose.runtime.MutableState,boolean)
     public static final void access$EncryptTab$lambda$17(androidx.compose.runtime.MutableState,boolean)
     public static final boolean access$EncryptTab$lambda$22(androidx.compose.runtime.MutableState)
     public static final void access$EncryptTab$lambda$23(androidx.compose.runtime.MutableState,boolean)
+    public static final boolean access$EncryptTab$lambda$25(androidx.compose.runtime.MutableState)
+    public static final void access$EncryptTab$lambda$26(androidx.compose.runtime.MutableState,boolean)
+    public static final void access$EncryptTab$lambda$29(androidx.compose.runtime.MutableState,boolean)
     public static final boolean access$LoginScreen$lambda$10(androidx.compose.runtime.MutableState)
     public static final void access$LoginScreen$lambda$11(androidx.compose.runtime.MutableState,boolean)
     public static final boolean access$LoginScreen$lambda$7(androidx.compose.runtime.MutableState)
@@ -55887,7 +55891,6 @@ com.nulldata.app.data.repository.NoteRepository$setupDecoyPassword$2:
 com.nulldata.app.data.repository.NoteRepository$setupMasterPassword$2:
     public final java.lang.Object invoke$3()
 com.nulldata.app.data.repository.NoteRepository:
-    public static final int $stable
     public static final androidx.room.CoroutinesRoom$Companion Companion
     static void <clinit>()
     public static java.lang.Object attemptLogin()
@@ -55965,11 +55968,12 @@ com.nulldata.app.ui.components.CustomKeyboardKt$CustomKeyboard$1:
     public final void invoke(androidx.compose.runtime.Composer,int)
 com.nulldata.app.ui.components.CustomKeyboardKt$CustomKeyboard$2
 com.nulldata.app.ui.components.CustomKeyboardKt$CustomKeyboard$selectLang$1
-com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$1$1:
-    public final java.lang.Object invoke$3()
 com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$1:
-    public final java.lang.Object invoke-d-4ec7I(androidx.compose.foundation.gestures.PressGestureScopeImpl,long,kotlin.coroutines.Continuation)
-com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$2
+    public final java.lang.Object invoke$5()
+com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$2:
+    public final java.lang.Object invoke$5()
+com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1$repeatJob$1:
+    public final java.lang.Object invoke$3()
 com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$1:
     public final java.lang.Object invoke$4()
 com.nulldata.app.ui.components.CustomKeyboardKt$DeleteKey$3
@@ -56011,7 +56015,6 @@ com.nulldata.app.ui.components.CustomKeyboardKt:
     public static final boolean access$CustomKeyboard$lambda$1(androidx.compose.runtime.MutableState)
     public static final void access$CustomKeyboard$lambda$11(androidx.compose.runtime.MutableState,boolean)
     public static final int access$CustomKeyboard$lambda$4(androidx.compose.runtime.MutableState)
-    public static final void access$DeleteKey_cf5BqRc$lambda$50(androidx.compose.runtime.MutableState,boolean)
 com.nulldata.app.ui.components.KeyboardHostKt$KeyboardHost$1$1$2:
     public final androidx.compose.animation.ContentTransform invoke()
     public final void invoke$2()
@@ -56267,9 +56270,11 @@ com.nulldata.app.ui.screens.ComposableSingletons$AboutScreenKt:
     public static kotlin.jvm.functions.Function2 getLambda-1$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-2$app_release()
 com.nulldata.app.ui.screens.ComposableSingletons$EncryptDecryptScreenKt$lambda-1$1
+com.nulldata.app.ui.screens.ComposableSingletons$EncryptDecryptScreenKt$lambda-2$1
 com.nulldata.app.ui.screens.ComposableSingletons$EncryptDecryptScreenKt:
     public static final com.nulldata.app.ui.screens.ComposableSingletons$EncryptDecryptScreenKt INSTANCE
     public static kotlin.jvm.functions.Function2 getLambda-1$app_release()
+    public static kotlin.jvm.functions.Function2 getLambda-2$app_release()
 com.nulldata.app.ui.screens.ComposableSingletons$ExportImportScreenKt$lambda-1$1
 com.nulldata.app.ui.screens.ComposableSingletons$ExportImportScreenKt:
     public static final com.nulldata.app.ui.screens.ComposableSingletons$ExportImportScreenKt INSTANCE
@@ -56280,6 +56285,10 @@ com.nulldata.app.ui.screens.ComposableSingletons$InstructionsScreenKt:
     public static final com.nulldata.app.ui.screens.ComposableSingletons$InstructionsScreenKt INSTANCE
     public static kotlin.jvm.functions.Function2 getLambda-1$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-2$app_release()
+com.nulldata.app.ui.screens.ComposableSingletons$NoteEditorScreenKt$lambda-1$1
+com.nulldata.app.ui.screens.ComposableSingletons$NoteEditorScreenKt:
+    public static final com.nulldata.app.ui.screens.ComposableSingletons$NoteEditorScreenKt INSTANCE
+    public static kotlin.jvm.functions.Function2 getLambda-1$app_release()
 com.nulldata.app.ui.screens.ComposableSingletons$NoteListScreenKt$lambda-1$1
 com.nulldata.app.ui.screens.ComposableSingletons$NoteListScreenKt$lambda-2$1
 com.nulldata.app.ui.screens.ComposableSingletons$NoteListScreenKt$lambda-3$1
@@ -56320,10 +56329,11 @@ com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$2$1:
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$2$2
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$2$3
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$2$4$1
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$2$5:
-    public final void invoke(androidx.compose.material3.ExposedDropdownMenu_androidKt$ExposedDropdownMenuBox$scope$1$1,androidx.compose.runtime.Composer,int)
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$2$5$1$2$1
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$2$5
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$2:
     public final void invoke(androidx.compose.foundation.layout.RowScope,androidx.compose.runtime.Composer,int)
+    public final void invoke(androidx.compose.material3.ExposedDropdownMenu_androidKt$ExposedDropdownMenuBox$scope$1$1,androidx.compose.runtime.Composer,int)
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecoyTab$1$3$1:
     public final void invoke(java.lang.String)
     public final void invoke(boolean)
@@ -56348,6 +56358,7 @@ com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecryptTab$2$4$1$1:
     public final java.lang.Object invoke$3()
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecryptTab$2$4$1:
     public final java.lang.Object invoke$3()
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecryptTab$2$4
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecryptTab$2$6
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecryptTab$2$7$1
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$DecryptTab$2$7$2
@@ -56365,14 +56376,16 @@ com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptDecryptScreen$2$2
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptDecryptScreen$2
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptDecryptScreen$3
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$1$1
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$10$1
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$10$2
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$10$3
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$10$4$1
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$10$5$1$1
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$10$5$1$2$1
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$10$5
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$10
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$11$1
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$12$1
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$12$2
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$12$3
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$12$4$1
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$12$5$2$1
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$13
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$14
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$15$2
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$2$1
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$3$1$1
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$3$2
@@ -56381,11 +56394,14 @@ com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$4$1$1:
     public final java.lang.Object invoke$3()
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$4$1:
     public final java.lang.Object invoke$3()
-com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$4
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$4:
+    public final void invoke()
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$5
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$6
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$7
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$8$1
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$8$2
+com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$8
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$1$9$1
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt$EncryptTab$2
 com.nulldata.app.ui.screens.EncryptDecryptScreenKt
@@ -56422,6 +56438,7 @@ com.nulldata.app.ui.screens.InstructionsScreenKt$InstructionsScreen$2
 com.nulldata.app.ui.screens.InstructionsScreenKt$InstructionsScreen$3
 com.nulldata.app.ui.screens.InstructionsScreenKt$Section$1
 com.nulldata.app.ui.screens.InstructionsScreenKt
+com.nulldata.app.ui.screens.LanguageScreenKt$KurdistanFlag$1$1$1$1
 com.nulldata.app.ui.screens.LanguageScreenKt$KurdistanFlag$2
 com.nulldata.app.ui.screens.LanguageScreenKt$LanguageScreen$1$1$1$1
 com.nulldata.app.ui.screens.LanguageScreenKt$LanguageScreen$2
@@ -56434,6 +56451,10 @@ com.nulldata.app.ui.screens.LoginScreenKt$LoginScreen$2
 com.nulldata.app.ui.screens.LoginScreenKt$LoginScreen$performLogin$1:
     public final java.lang.Object invoke$3()
 com.nulldata.app.ui.screens.LoginScreenKt
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$10
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$11$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$11$2
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$11
 com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$1
 com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$2
 com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$3$1
@@ -56443,13 +56464,18 @@ com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$4$1
 com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$4$2
 com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$4$3
 com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$5$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$6$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$6$2
-com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$6$3$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$6$4$1$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$6$4$1$2$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$6$4
 com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$6
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$7$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8$2
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8$3
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8$4$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8$5$1$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8$5$2$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8$5$2$2$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8$5
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$8
+com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$1$9
 com.nulldata.app.ui.screens.NoteEditorScreenKt$DecoyEncryptedView$2:
     public final void invoke(androidx.compose.runtime.Composer,int)
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$10
@@ -56488,46 +56514,41 @@ com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$18$1$4$1
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$18
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$19
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$2$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1:
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$1$1$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$1$2$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$2$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$3$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$4$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$5$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$6
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$7$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$7$2$1:
     public final void invoke()
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$2
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20:
-    public final synthetic int $MIN_KEY_LEN
-    public final void invoke(androidx.compose.runtime.Composer,int)
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20$1$1$7$3
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$20
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$21$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$21
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$22
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$23$1$1$1$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$23$1$1$2$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$23$1$2$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$23$1$3$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$23$1$4$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$23$1$5$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$23$1$6
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$23
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$24$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$24$2$1$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$24$2$2
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$24$2:
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$21$2$1$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$21$2:
     public final void invoke(androidx.compose.runtime.Composer,int)
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$24$3$1$1:
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$21$3$1$1:
     public final java.lang.Object invoke$3()
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$24$3$2
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$24$3
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$24:
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$21$3$2
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$21$3
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$21:
     public final void invoke(androidx.compose.runtime.Composer,int)
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$25$1$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$25$2$1$1$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$25$2$1$2
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$25$3$1$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$25$3$2$1
-com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$25
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$22$2$1$1$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$22$2$1$2
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$22$3$1$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$22$3$2$1
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$22
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$3$1$1
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$3$2
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$3
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$4$1$1
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$4$2
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$4
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$5
+com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$6
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$8$1$1:
     public final java.lang.Object invoke$3()
 com.nulldata.app.ui.screens.NoteEditorScreenKt$NoteEditorScreen$1$8$1:
@@ -56619,6 +56640,7 @@ com.nulldata.app.ui.screens.SettingsScreenKt:
     public static final java.lang.Object[] copyOfUninitializedElements(int,java.lang.Object[])
     public static final long durationOfMillis(long)
     public static final void ensureActive(kotlinx.coroutines.Job)
+    public static final kotlin.enums.EnumEntriesList enumEntries(java.lang.Enum[])
     public static final boolean equals(char,char,boolean)
     public static java.lang.Object getCOROUTINE_SUSPENDED()
     public static final java.lang.String getCoroutineName()
@@ -56692,7 +56714,6 @@ com.nulldata.app.ui.screens.TrashScreenKt
 com.nulldata.app.ui.theme.ThemeKt$NulldDataTheme$1
 com.nulldata.app.util.AppStrings:
     static void <clinit>()
-    public static com.nulldata.app.util.AppStrings copy()
     public static java.lang.String getAbout()
     public static java.lang.String getAboutCommunityTitle()
     public static java.lang.String getAboutDescription()
@@ -56741,6 +56762,7 @@ com.nulldata.app.util.AppStrings:
     public static java.lang.String getDiscardNoteMsg()
     public static java.lang.String getDiscardNoteTitle()
     public static java.lang.String getDisguiseAs()
+    public static java.lang.String getDisguiseAsLink()
     public static java.lang.String getDisguisedUrl()
     public static java.lang.String getEdit()
     public static java.lang.String getEncrypt()
@@ -56865,7 +56887,6 @@ com.nulldata.app.util.AppStringsKt$LocalLanguageCode$1:
 com.nulldata.app.util.AppStringsKt$LocalStrings$1
 com.nulldata.app.util.DecoyEncoder
 com.nulldata.app.util.DecoyPlatform:
-    public static final synthetic kotlin.enums.EnumEntries $ENTRIES
     public static final enum com.nulldata.app.util.DecoyPlatform INSTAGRAM
     public static final enum com.nulldata.app.util.DecoyPlatform REDDIT
     public static final enum com.nulldata.app.util.DecoyPlatform SOUNDCLOUD
