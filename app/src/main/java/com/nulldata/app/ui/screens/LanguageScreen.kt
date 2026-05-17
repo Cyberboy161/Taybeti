@@ -109,7 +109,7 @@ internal fun KurdistanFlag(modifier: Modifier = Modifier) {
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(modifier = Modifier.size(14.dp)) {
+            Canvas(modifier = Modifier.size(21.dp)) {
                 val cx = size.width / 2f
                 val cy = size.height / 2f
                 val outerR = size.minDimension / 2f
