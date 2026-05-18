@@ -41,6 +41,7 @@ fun PasswordField(
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(150)
         focusRequester.requestFocus()
     }
 
