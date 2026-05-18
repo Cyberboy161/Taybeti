@@ -359,9 +359,11 @@ private fun LetterLayout(
             Text("123+", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         }
         if (lang.isRtl) {
-            LetterKey('.', uppercase = false, onKey, keyBg, 1f, longPressMap = mapOf('.' to '\u060C')) // tap . long-press ،
+            LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
+            LetterKey('\u060C', uppercase = false, onKey, keyBg, 1f, emptyMap()) // Arabic comma
         } else {
-            LetterKey('.', uppercase = false, onKey, keyBg, 1f, longPressMap = mapOf('.' to ',')) // tap . long-press ,
+            LetterKey(',', uppercase = false, onKey, keyBg, 1f, emptyMap())
+            LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
         }
         // Language button next to space
         Box(modifier = Modifier.weight(1.4f).height(keyHeight.dp), contentAlignment = Alignment.Center) {
@@ -424,9 +426,9 @@ private fun NumberLayout(
             Text("SYM\u00BB", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         }
         if (isRtl) {
-            LetterKey('.', uppercase = false, onKey, keyBg, 1f, longPressMap = mapOf('.' to '\u060C'))
+            SymbolKey('.', onKey, keyBg)
         } else {
-            LetterKey('.', uppercase = false, onKey, keyBg, 1f, longPressMap = mapOf('.' to ','))
+            SymbolKey(',', onKey, keyBg)
         }
         Box(modifier = Modifier.weight(1.4f).height(keyHeight.dp), contentAlignment = Alignment.Center) {
             FlatActionKey(keyBg = keyBg, onClick = onLangTap) {
@@ -439,6 +441,7 @@ private fun NumberLayout(
             LangPickerDropdown(showLangPicker, onDismiss = { onLangTap() }, selectLang)
         }
         SpaceKey(keyBg) { onKey(' ') }
+        SymbolKey('.', onKey, keyBg)
     }
 }
 
@@ -617,7 +620,7 @@ private fun RowScope.SymbolKey(c: Char, onKey: (Char) -> Unit, bg: Color) {
 @Composable
 private fun RowScope.SpaceKey(bg: Color, onClick: () -> Unit) {
     Box(
-        modifier = rowKeyModifier(6f, bg).clickable(onClick = onClick),
+        modifier = rowKeyModifier(4f, bg).clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(

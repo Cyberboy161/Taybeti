@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nulldata.app.data.repository.NoteRepository
 import com.nulldata.app.ui.components.KeyboardHost
-import com.nulldata.app.ui.components.LocalKeyboardState
 import com.nulldata.app.ui.components.PasswordField
 import com.nulldata.app.util.LocalStrings
 import kotlinx.coroutines.delay
@@ -68,22 +66,7 @@ fun LoginScreen(
     }
 
     KeyboardHost {
-        val kbState = LocalKeyboardState.current
-        DisposableEffect(Unit) {
-            kbState?.attach(
-                onKey = { password += it; error = null },
-                onDel = { password = password.dropLast(1) },
-                onDone = {
-                    kbState?.detach()
-                    if (password.isNotEmpty() && !isLoading && !lockedOut) {
-                        performLogin()
-                    }
-                }
-            )
-            onDispose { kbState?.detach() }
-        }
-
-        Scaffold { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

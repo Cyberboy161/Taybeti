@@ -2,9 +2,6 @@ package com.nulldata.app.ui.screens
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -43,6 +39,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,6 +61,7 @@ import com.nulldata.app.ui.components.AppTextField
 import com.nulldata.app.ui.components.CustomKeyboard
 import com.nulldata.app.ui.components.KeyboardHost
 import com.nulldata.app.ui.components.KeyboardState
+import com.nulldata.app.ui.components.LocalKeyboardState
 import com.nulldata.app.ui.components.PasswordField
 import com.nulldata.app.util.Constants
 import com.nulldata.app.util.DecoyEncoder
@@ -139,16 +137,7 @@ fun NoteEditorScreen(
 
         // Edit key verification dialog
         if (showEditKeyDialog) {
-            val kbState = remember { KeyboardState() }
-            DisposableEffect(Unit) {
-                kbState.attach(
-                    onKey = { editKey += it; editKeyError = null },
-                    onDel = { editKey = editKey.dropLast(1) },
-                    onDone = { kbState.detach() }
-                )
-                onDispose { kbState.detach() }
-            }
-
+            val dialogKeyboardState = remember { KeyboardState() }
             Dialog(
                 onDismissRequest = {
                     showEditKeyDialog = false
@@ -165,88 +154,82 @@ fun NoteEditorScreen(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
                 ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .verticalScroll(rememberScrollState())
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = strings.enterNoteKey,
-                                style = MaterialTheme.typography.headlineSmall,
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-                            Text(strings.reEnterKeyToUnlock)
-                            Spacer(modifier = Modifier.height(8.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = strings.enterNoteKey,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        Text(strings.reEnterKeyToUnlock)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
                             PasswordField(
                                 value = editKey,
                                 onValueChange = { editKey = it; editKeyError = null },
                                 label = strings.noteKey,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            if (editKeyError != null) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(editKeyError!!, color = MaterialTheme.colorScheme.error)
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        showEditKeyDialog = false
-                                        editKeyError = null
-                                        editKey = ""
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                ) { Text(strings.cancel) }
-                                Button(
-                                    onClick = {
-                                        if (editKey.isEmpty()) {
-                                            editKeyError = strings.keyRequired
-                                            return@Button
-                                        }
-                                        scope.launch {
-                                            val entity = noteEntity
-                                            if (entity != null) {
-                                                val result = repository.decryptNoteContent(entity, editKey.toCharArray())
-                                                if (result.isSuccess) {
-                                                    val decrypted = result.getOrNull()!!
-                                                    plaintext = String(decrypted, Charsets.UTF_8)
-                                                    title = entity.title
-                                                    showEditKeyDialog = false
-                                                    showEncryptedOutput = false
-                                                    encryptedOutput = ""
-                                                    isLocked = false
-                                                    SecureMemory.clear(editKey.toCharArray())
-                                                    editKey = ""
-                                                    editKeyError = null
-                                                } else {
-                                                    editKeyError = strings.wrongKey
-                                                }
+                        }
+                        if (dialogKeyboardState.isVisible) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            CustomKeyboard(
+                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
+                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
+                                onDone = { dialogKeyboardState.onDone?.invoke() }
+                            )
+                        }
+                        if (editKeyError != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(editKeyError!!, color = MaterialTheme.colorScheme.error)
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    showEditKeyDialog = false
+                                    editKeyError = null
+                                    editKey = ""
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.cancel) }
+                            Button(
+                                onClick = {
+                                    if (editKey.isEmpty()) {
+                                        editKeyError = strings.keyRequired
+                                        return@Button
+                                    }
+                                    scope.launch {
+                                        val entity = noteEntity
+                                        if (entity != null) {
+                                            val result = repository.decryptNoteContent(entity, editKey.toCharArray())
+                                            if (result.isSuccess) {
+                                                val decrypted = result.getOrNull()!!
+                                                plaintext = String(decrypted, Charsets.UTF_8)
+                                                title = entity.title
+                                                showEditKeyDialog = false
+                                                showEncryptedOutput = false
+                                                encryptedOutput = ""
+                                                isLocked = false
+                                                SecureMemory.clear(editKey.toCharArray())
+                                                editKey = ""
+                                                editKeyError = null
+                                            } else {
+                                                editKeyError = strings.wrongKey
                                             }
                                         }
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                ) { Text(strings.unlock) }
-                            }
-                        }
-                        AnimatedVisibility(
-                            visible = kbState.isVisible,
-                            enter = slideInVertically(initialOffsetY = { it }),
-                            exit = slideOutVertically(targetOffsetY = { it })
-                        ) {
-                            CustomKeyboard(
-                                onKeyPress = { kbState.onKeyPress?.invoke(it) },
-                                onDelete = { kbState.onDelete?.invoke() },
-                                onDone = { kbState.onDone?.invoke() },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .navigationBarsPadding()
-                            )
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.unlock) }
                         }
                     }
                 }
@@ -275,16 +258,7 @@ fun NoteEditorScreen(
 
         // Unlock key dialog for existing notes
         if (showKeyDialog) {
-            val kbState = remember { KeyboardState() }
-            DisposableEffect(Unit) {
-                kbState.attach(
-                    onKey = { noteKey += it; keyError = null },
-                    onDel = { noteKey = noteKey.dropLast(1) },
-                    onDone = { kbState.detach() }
-                )
-                onDispose { kbState.detach() }
-            }
-
+            val dialogKeyboardState = remember { KeyboardState() }
             Dialog(
                 onDismissRequest = { /* block outside dismiss — user must use Cancel */ },
                 properties = DialogProperties(
@@ -297,83 +271,77 @@ fun NoteEditorScreen(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
                 ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .verticalScroll(rememberScrollState())
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = strings.enterNoteKey,
-                                style = MaterialTheme.typography.headlineSmall,
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-                            if (keyError != null) {
-                                Text(keyError!!, color = MaterialTheme.colorScheme.error)
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = strings.enterNoteKey,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        if (keyError != null) {
+                            Text(keyError!!, color = MaterialTheme.colorScheme.error)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
                             PasswordField(
                                 value = noteKey,
                                 onValueChange = { noteKey = it; keyError = null },
                                 label = strings.noteKey,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                TextButton(
-                                    onClick = onBack,
-                                    modifier = Modifier.weight(1f)
-                                ) { Text(strings.cancel) }
-                                Button(
-                                    onClick = {
-                                        if (noteKey.isEmpty()) {
-                                            keyError = strings.keyRequired
-                                            return@Button
-                                        }
-                                        scope.launch {
-                                            val entity = noteEntity
-                                            if (entity != null) {
-                                                val result = repository.decryptNoteContent(
-                                                    entity, noteKey.toCharArray()
-                                                )
-                                                if (result.isSuccess) {
-                                                    val decrypted = result.getOrNull()!!
-                                                    plaintext = String(decrypted, Charsets.UTF_8)
-                                                    title = entity.title
-                                                    isLocked = false
-                                                    showKeyDialog = false
-                                                    SecureMemory.clear(noteKey.toCharArray())
-                                                    noteKey = ""
-                                                } else {
-                                                    SecureMemory.clear(noteKey.toCharArray())
-                                                    noteKey = ""
-                                                    keyError = strings.wrongKey
-                                                }
+                        }
+                        if (dialogKeyboardState.isVisible) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            CustomKeyboard(
+                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
+                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
+                                onDone = { dialogKeyboardState.onDone?.invoke() }
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextButton(
+                                onClick = onBack,
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.cancel) }
+                            Button(
+                                onClick = {
+                                    if (noteKey.isEmpty()) {
+                                        keyError = strings.keyRequired
+                                        return@Button
+                                    }
+                                    scope.launch {
+                                        val entity = noteEntity
+                                        if (entity != null) {
+                                            val result = repository.decryptNoteContent(
+                                                entity, noteKey.toCharArray()
+                                            )
+                                            if (result.isSuccess) {
+                                                val decrypted = result.getOrNull()!!
+                                                plaintext = String(decrypted, Charsets.UTF_8)
+                                                title = entity.title
+                                                isLocked = false
+                                                showKeyDialog = false
+                                                SecureMemory.clear(noteKey.toCharArray())
+                                                noteKey = ""
+                                            } else {
+                                                SecureMemory.clear(noteKey.toCharArray())
+                                                noteKey = ""
+                                                keyError = strings.wrongKey
                                             }
                                         }
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                ) { Text(strings.unlock) }
-                            }
-                        }
-                        AnimatedVisibility(
-                            visible = kbState.isVisible,
-                            enter = slideInVertically(initialOffsetY = { it }),
-                            exit = slideOutVertically(targetOffsetY = { it })
-                        ) {
-                            CustomKeyboard(
-                                onKeyPress = { kbState.onKeyPress?.invoke(it) },
-                                onDelete = { kbState.onDelete?.invoke() },
-                                onDone = { kbState.onDone?.invoke() },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .navigationBarsPadding()
-                            )
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.unlock) }
                         }
                     }
                 }
@@ -385,30 +353,8 @@ fun NoteEditorScreen(
             var newKey by remember { mutableStateOf(generatedKey) }
             var confirmKey by remember { mutableStateOf("") }
             var createKeyError by remember { mutableStateOf<String?>(null) }
-            var activeField by remember { mutableStateOf(0) }
+            val dialogKb = remember { KeyboardState() }
             val MIN_KEY_LEN = 8
-
-            val kbState = remember { KeyboardState() }
-            DisposableEffect(Unit) {
-                kbState.show()
-                onDispose { kbState.detach() }
-            }
-            DisposableEffect(activeField) {
-                if (activeField == 0) {
-                    kbState.attach(
-                        onKey = { newKey += it; createKeyError = null },
-                        onDel = { newKey = newKey.dropLast(1) },
-                        onDone = { kbState.detach() }
-                    )
-                } else {
-                    kbState.attach(
-                        onKey = { confirmKey += it; createKeyError = null },
-                        onDel = { confirmKey = confirmKey.dropLast(1) },
-                        onDone = { kbState.detach() }
-                    )
-                }
-                onDispose { }
-            }
 
             Dialog(
                 onDismissRequest = { /* block outside dismiss */ },
@@ -422,112 +368,105 @@ fun NoteEditorScreen(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
                 ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .verticalScroll(rememberScrollState())
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = strings.createKey,
-                                style = MaterialTheme.typography.headlineSmall,
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-                            Text(
-                                strings.minChars,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (newKey.length in 1 until MIN_KEY_LEN)
-                                    MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = strings.createKey,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        Text(
+                            strings.minChars,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (newKey.length in 1 until MIN_KEY_LEN)
+                                MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CompositionLocalProvider(LocalKeyboardState provides dialogKb) {
                             PasswordField(
                                 value = newKey,
                                 onValueChange = { newKey = it; createKeyError = null },
                                 label = strings.noteKey,
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { activeField = 0 }
+                                modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             PasswordField(
                                 value = confirmKey,
                                 onValueChange = { confirmKey = it; createKeyError = null },
                                 label = "Confirm key",
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { activeField = 1 }
+                                modifier = Modifier.fillMaxWidth()
                             )
-                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+                        if (dialogKb.isVisible) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            CustomKeyboard(
+                                onKeyPress = { dialogKb.onKeyPress?.invoke(it) },
+                                onDelete = { dialogKb.onDelete?.invoke() },
+                                onDone = { dialogKb.onDone?.invoke() }
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
 
-                            if (createKeyError != null) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(createKeyError!!, color = MaterialTheme.colorScheme.error)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
+                        if (createKeyError != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(createKeyError!!, color = MaterialTheme.colorScheme.error)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                generatedKey = generateRandomKey(Constants.RECOMMENDED_NOTE_KEY_LENGTH)
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(strings.generateKey)
+                        }
+                        if (generatedKey.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                "Generated: $generatedKey",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextButton(
+                                onClick = onBack,
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.cancel) }
                             Button(
                                 onClick = {
-                                    generatedKey = generateRandomKey(Constants.RECOMMENDED_NOTE_KEY_LENGTH)
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(strings.generateKey)
-                            }
-                            if (generatedKey.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    "Generated: $generatedKey",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                TextButton(
-                                    onClick = onBack,
-                                    modifier = Modifier.weight(1f)
-                                ) { Text(strings.cancel) }
-                                Button(
-                                    onClick = {
-                                        when {
-                                            newKey.isEmpty() -> createKeyError = strings.keyRequired
-                                            newKey.length < MIN_KEY_LEN -> createKeyError = strings.keyTooShort
-                                            newKey != confirmKey -> createKeyError = strings.keysMatch
-                                            else -> {
-                                                noteKey = newKey
-                                                showCreateKeyDialog = false
-                                                isLocked = false
-                                                title = ""
-                                                plaintext = ""
-                                            }
+                                    when {
+                                        newKey.isEmpty() -> createKeyError = strings.keyRequired
+                                        newKey.length < MIN_KEY_LEN -> createKeyError = strings.keyTooShort
+                                        newKey != confirmKey -> createKeyError = strings.keysMatch
+                                        else -> {
+                                            noteKey = newKey
+                                            showCreateKeyDialog = false
+                                            isLocked = false
+                                            title = ""
+                                            plaintext = ""
                                         }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = if (newKey.length < MIN_KEY_LEN && newKey.isNotEmpty())
-                                        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                                    else ButtonDefaults.buttonColors()
-                                ) {
-                                    Text(strings.createNote)
-                                }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = if (newKey.length < MIN_KEY_LEN && newKey.isNotEmpty())
+                                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                else ButtonDefaults.buttonColors()
+                            ) {
+                                Text(strings.createNote)
                             }
-                        }
-                        AnimatedVisibility(
-                            visible = kbState.isVisible,
-                            enter = slideInVertically(initialOffsetY = { it }),
-                            exit = slideOutVertically(targetOffsetY = { it })
-                        ) {
-                            CustomKeyboard(
-                                onKeyPress = { kbState.onKeyPress?.invoke(it) },
-                                onDelete = { kbState.onDelete?.invoke() },
-                                onDone = { kbState.onDone?.invoke() },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .navigationBarsPadding()
-                            )
                         }
                     }
                 }
