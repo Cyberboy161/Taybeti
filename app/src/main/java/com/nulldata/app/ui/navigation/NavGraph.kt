@@ -62,6 +62,7 @@ import com.nulldata.app.data.repository.NoteRepository
 import com.nulldata.app.ui.screens.AboutScreen
 import com.nulldata.app.ui.screens.EncryptDecryptScreen
 import com.nulldata.app.ui.screens.ExportImportScreen
+import com.nulldata.app.ui.screens.EncryptionGuideScreen
 import com.nulldata.app.ui.screens.InstructionsScreen
 import com.nulldata.app.ui.screens.LanguagePickerDialog
 import com.nulldata.app.ui.screens.LanguageScreen
@@ -97,6 +98,7 @@ object NavRoutes {
     const val ABOUT = "about"
     const val EXPORT_IMPORT = "export_import"
     const val INSTRUCTIONS = "instructions"
+    const val ENCRYPTION_GUIDE = "encryption_guide"
 
     fun editorRoute(noteId: String) = "editor/$noteId"
 }
@@ -500,9 +502,17 @@ fun MainDrawerScreen(
                 })
             }
             composable(NavRoutes.INSTRUCTIONS) {
-                InstructionsScreen(onOpenDrawer = {
-                    scope.launch { drawerState.open() }
-                })
+                InstructionsScreen(
+                    onOpenDrawer = {
+                        scope.launch { drawerState.open() }
+                    },
+                    onOpenGuide = {
+                        navController.navigate(NavRoutes.ENCRYPTION_GUIDE)
+                    }
+                )
+            }
+            composable(NavRoutes.ENCRYPTION_GUIDE) {
+                EncryptionGuideScreen(onBack = { navController.popBackStack() })
             }
             composable(NavRoutes.EXPORT_IMPORT) {
                 ExportImportScreen(

@@ -30,7 +30,7 @@ import com.nulldata.app.util.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InstructionsScreen(onOpenDrawer: () -> Unit) {
+fun InstructionsScreen(onOpenDrawer: () -> Unit, onOpenGuide: () -> Unit) {
     val strings = LocalStrings.current
 
     Scaffold(
@@ -175,6 +175,17 @@ fun InstructionsScreen(onOpenDrawer: () -> Unit) {
             Text(strings.instructionsWarning2, style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(4.dp))
             Text(strings.instructionsWarning3, style = MaterialTheme.typography.bodyMedium)
+
+            Spacer(modifier = Modifier.height(24.dp))
+            androidx.compose.material3.Button(
+                onClick = onOpenGuide,
+                modifier = Modifier.fillMaxWidth(),
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(strings.encryptionGuideButton)
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
         }
