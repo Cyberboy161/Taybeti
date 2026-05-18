@@ -39,7 +39,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,10 +57,7 @@ import com.nulldata.app.data.entities.NoteEntity
 import com.nulldata.app.data.repository.NoteRepository
 import com.nulldata.app.security.SecureMemory
 import com.nulldata.app.ui.components.AppTextField
-import com.nulldata.app.ui.components.CustomKeyboard
 import com.nulldata.app.ui.components.KeyboardHost
-import com.nulldata.app.ui.components.KeyboardState
-import com.nulldata.app.ui.components.LocalKeyboardState
 import com.nulldata.app.ui.components.PasswordField
 import com.nulldata.app.util.Constants
 import com.nulldata.app.util.DecoyEncoder
@@ -137,7 +133,6 @@ fun NoteEditorScreen(
 
         // Edit key verification dialog
         if (showEditKeyDialog) {
-            val dialogKeyboardState = remember { KeyboardState() }
             Dialog(
                 onDismissRequest = {
                     showEditKeyDialog = false
@@ -168,22 +163,12 @@ fun NoteEditorScreen(
                         )
                         Text(strings.reEnterKeyToUnlock)
                         Spacer(modifier = Modifier.height(8.dp))
-                        CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
-                            PasswordField(
-                                value = editKey,
-                                onValueChange = { editKey = it; editKeyError = null },
-                                label = strings.noteKey,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        if (dialogKeyboardState.isVisible) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            CustomKeyboard(
-                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
-                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
-                                onDone = { dialogKeyboardState.onDone?.invoke() }
-                            )
-                        }
+                        PasswordField(
+                            value = editKey,
+                            onValueChange = { editKey = it; editKeyError = null },
+                            label = strings.noteKey,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         if (editKeyError != null) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(editKeyError!!, color = MaterialTheme.colorScheme.error)
@@ -258,7 +243,6 @@ fun NoteEditorScreen(
 
         // Unlock key dialog for existing notes
         if (showKeyDialog) {
-            val dialogKeyboardState = remember { KeyboardState() }
             Dialog(
                 onDismissRequest = { /* block outside dismiss — user must use Cancel */ },
                 properties = DialogProperties(
@@ -287,22 +271,12 @@ fun NoteEditorScreen(
                             Text(keyError!!, color = MaterialTheme.colorScheme.error)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
-                        CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
-                            PasswordField(
-                                value = noteKey,
-                                onValueChange = { noteKey = it; keyError = null },
-                                label = strings.noteKey,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        if (dialogKeyboardState.isVisible) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            CustomKeyboard(
-                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
-                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
-                                onDone = { dialogKeyboardState.onDone?.invoke() }
-                            )
-                        }
+                        PasswordField(
+                            value = noteKey,
+                            onValueChange = { noteKey = it; keyError = null },
+                            label = strings.noteKey,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         Spacer(modifier = Modifier.weight(1f))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -353,7 +327,6 @@ fun NoteEditorScreen(
             var newKey by remember { mutableStateOf(generatedKey) }
             var confirmKey by remember { mutableStateOf("") }
             var createKeyError by remember { mutableStateOf<String?>(null) }
-            val dialogKb = remember { KeyboardState() }
             val MIN_KEY_LEN = 8
 
             Dialog(
@@ -388,31 +361,20 @@ fun NoteEditorScreen(
                             else MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        CompositionLocalProvider(LocalKeyboardState provides dialogKb) {
-                            PasswordField(
-                                value = newKey,
-                                onValueChange = { newKey = it; createKeyError = null },
-                                label = strings.noteKey,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            PasswordField(
-                                value = confirmKey,
-                                onValueChange = { confirmKey = it; createKeyError = null },
-                                label = "Confirm key",
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        if (dialogKb.isVisible) {
-                            Spacer(modifier = Modifier.weight(1f))
-                            CustomKeyboard(
-                                onKeyPress = { dialogKb.onKeyPress?.invoke(it) },
-                                onDelete = { dialogKb.onDelete?.invoke() },
-                                onDone = { dialogKb.onDone?.invoke() }
-                            )
-                        } else {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
+                        PasswordField(
+                            value = newKey,
+                            onValueChange = { newKey = it; createKeyError = null },
+                            label = strings.noteKey,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        PasswordField(
+                            value = confirmKey,
+                            onValueChange = { confirmKey = it; createKeyError = null },
+                            label = "Confirm key",
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
 
                         if (createKeyError != null) {
                             Spacer(modifier = Modifier.height(4.dp))
