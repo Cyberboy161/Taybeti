@@ -361,7 +361,6 @@ private fun LetterLayout(
         if (lang.isRtl) {
             LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
             LetterKey('\u060C', uppercase = false, onKey, keyBg, 1f, emptyMap()) // Arabic comma
-            LetterKey('؟', uppercase = false, onKey, keyBg, 1f, emptyMap())
         } else {
             LetterKey(',', uppercase = false, onKey, keyBg, 1f, emptyMap())
             LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
@@ -379,6 +378,7 @@ private fun LetterLayout(
         }
         if (lang.isRtl) {
             SpaceKey(keyBg) { onKey(' ') }
+            LetterKey('؟', uppercase = false, onKey, keyBg, 1f, emptyMap())
         } else {
             SpaceKey(keyBg) { onKey(' ') }
             LetterKey('?', uppercase = false, onKey, keyBg, 1f, emptyMap())
