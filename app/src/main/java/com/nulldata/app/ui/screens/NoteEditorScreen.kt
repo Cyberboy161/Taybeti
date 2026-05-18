@@ -173,7 +173,7 @@ fun NoteEditorScreen(
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(editKeyError!!, color = MaterialTheme.colorScheme.error)
                         }
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.height(24.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -277,7 +277,7 @@ fun NoteEditorScreen(
                             label = strings.noteKey,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.height(24.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -374,7 +374,7 @@ fun NoteEditorScreen(
                             label = "Confirm key",
                             modifier = Modifier.fillMaxWidth()
                         )
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         if (createKeyError != null) {
                             Spacer(modifier = Modifier.height(4.dp))

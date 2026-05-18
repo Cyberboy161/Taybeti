@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -66,6 +67,12 @@ fun PasswordField(
         }
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            keyboardState?.detach()
+        }
+    }
+
     Text(
         text = label,
         style = MaterialTheme.typography.labelLarge,
@@ -86,7 +93,6 @@ fun PasswordField(
             .focusRequester(focusRequester)
             .onFocusChanged { fs ->
                 isFocused = fs.isFocused
-                if (!fs.isFocused) keyboardState?.detach()
             },
         shape = MaterialTheme.shapes.small,
         color = MaterialTheme.colorScheme.surface,
