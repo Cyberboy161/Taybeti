@@ -176,14 +176,6 @@ fun NoteEditorScreen(
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
-                        if (dialogKeyboardState.isVisible) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            CustomKeyboard(
-                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
-                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
-                                onDone = { dialogKeyboardState.onDone?.invoke() }
-                            )
-                        }
                         if (editKeyError != null) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(editKeyError!!, color = MaterialTheme.colorScheme.error)
@@ -230,6 +222,14 @@ fun NoteEditorScreen(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) { Text(strings.unlock) }
+                        }
+                        if (dialogKeyboardState.isVisible) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            CustomKeyboard(
+                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
+                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
+                                onDone = { dialogKeyboardState.onDone?.invoke() }
+                            )
                         }
                     }
                 }
@@ -295,14 +295,6 @@ fun NoteEditorScreen(
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
-                        if (dialogKeyboardState.isVisible) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            CustomKeyboard(
-                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
-                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
-                                onDone = { dialogKeyboardState.onDone?.invoke() }
-                            )
-                        }
                         Spacer(modifier = Modifier.weight(1f))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -342,6 +334,14 @@ fun NoteEditorScreen(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) { Text(strings.unlock) }
+                        }
+                        if (dialogKeyboardState.isVisible) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            CustomKeyboard(
+                                onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
+                                onDelete = { dialogKeyboardState.onDelete?.invoke() },
+                                onDone = { dialogKeyboardState.onDone?.invoke() }
+                            )
                         }
                     }
                 }
