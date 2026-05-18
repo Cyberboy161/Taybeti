@@ -56,7 +56,9 @@ fun NoteListScreen(
     isDecoy: Boolean,
     showFavorites: Boolean = false,
     onNoteClick: (String) -> Unit,
-    onOpenDrawer: () -> Unit
+    onOpenDrawer: () -> Unit,
+    showNoteTitle: Boolean = true,
+    showNoteDate: Boolean = true
 ) {
     val context = LocalContext.current
     val strings = LocalStrings.current
@@ -137,7 +139,9 @@ fun NoteListScreen(
                         strings = strings,
                         db = db,
                         onClick = { onNoteClick(note.id) },
-                        onChanged = { refresh() }
+                        onChanged = { refresh() },
+                        showNoteTitle = showNoteTitle,
+                        showNoteDate = showNoteDate
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -152,7 +156,9 @@ private fun NoteListItem(
     strings: com.nulldata.app.util.AppStrings,
     db: com.nulldata.app.data.database.AppDatabase,
     onClick: () -> Unit,
-    onChanged: () -> Unit
+    onChanged: () -> Unit,
+    showNoteTitle: Boolean = true,
+    showNoteDate: Boolean = true
 ) {
     val scope = rememberCoroutineScope()
 
@@ -169,27 +175,31 @@ private fun NoteListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = note.title.ifEmpty { "Untitled" },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = strings.encryptedNote,
-                        modifier = Modifier.height(14.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
+                if (showNoteTitle) {
                     Text(
-                        text = formatTimestamp(note.modifiedDate),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        text = note.title.ifEmpty { "Untitled" },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
+                }
+                if (showNoteDate) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Lock,
+                            contentDescription = strings.encryptedNote,
+                            modifier = Modifier.height(14.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = formatTimestamp(note.modifiedDate),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
             Row {

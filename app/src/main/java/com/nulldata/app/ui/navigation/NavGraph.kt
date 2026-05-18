@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,8 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
@@ -27,6 +31,9 @@ import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Surface
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -262,6 +269,14 @@ fun MainDrawerScreen(
         mutableStateOf(ctx.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
             .getInt("auto_lock_minutes", 5))
     }
+    var showNoteTitle by remember {
+        mutableStateOf(ctx.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+            .getBoolean("show_note_title", true))
+    }
+    var showNoteDate by remember {
+        mutableStateOf(ctx.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+            .getBoolean("show_note_date", true))
+    }
 
     // Auto-lock timer: when app goes to background, record timestamp.
     // On resume, if timeout exceeded, log out.
@@ -443,7 +458,9 @@ fun MainDrawerScreen(
                     },
                     onOpenDrawer = {
                         scope.launch { drawerState.open() }
-                    }
+                    },
+                    showNoteTitle = showNoteTitle,
+                    showNoteDate = showNoteDate
                 )
             }
             composable(NavRoutes.FAVORITES) {
@@ -455,7 +472,9 @@ fun MainDrawerScreen(
                     },
                     onOpenDrawer = {
                         scope.launch { drawerState.open() }
-                    }
+                    },
+                    showNoteTitle = showNoteTitle,
+                    showNoteDate = showNoteDate
                 )
             }
             composable(NavRoutes.EDITOR) { backStackEntry ->
@@ -493,6 +512,18 @@ fun MainDrawerScreen(
                         autoLockMinutes = mins
                         ctx.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
                             .edit().putInt("auto_lock_minutes", mins).commit()
+                    },
+                    showNoteTitle = showNoteTitle,
+                    onShowNoteTitleChange = { show ->
+                        showNoteTitle = show
+                        ctx.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+                            .edit().putBoolean("show_note_title", show).commit()
+                    },
+                    showNoteDate = showNoteDate,
+                    onShowNoteDateChange = { show ->
+                        showNoteDate = show
+                        ctx.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+                            .edit().putBoolean("show_note_date", show).commit()
                     }
                 )
             }
@@ -593,33 +624,91 @@ private fun DecoySetupDialog(
     val scope = rememberCoroutineScope()
     val dialogKeyboardState = remember { KeyboardState() }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text(strings.settingsDecoySetup) },
-        text = {
-            Column {
-                Text(strings.settingsDecoySubtitle, style = MaterialTheme.typography.bodyMedium)
-                Spacer(Modifier.height(12.dp))
-                CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
-                    PasswordField(
-                        value = password,
-                        onValueChange = { password = it; error = null },
-                        label = strings.setupDecoyPassword,
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        strings.settingsDecoySetup,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
-                Spacer(Modifier.height(8.dp))
-                CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
-                    PasswordField(
-                        value = confirm,
-                        onValueChange = { confirm = it; error = null },
-                        label = strings.setupConfirmPassword,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                if (error != null) {
                     Spacer(Modifier.height(8.dp))
-                    Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        strings.settingsDecoySubtitle,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
+                        PasswordField(
+                            value = password,
+                            onValueChange = { password = it; error = null },
+                            label = strings.setupDecoyPassword,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
+                        PasswordField(
+                            value = confirm,
+                            onValueChange = { confirm = it; error = null },
+                            label = strings.setupConfirmPassword,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    if (error != null) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        TextButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.weight(1f)
+                        ) { Text(strings.cancel) }
+                        Button(
+                            onClick = {
+                                when {
+                                    password.length < 8 -> error = "Password must be at least 8 characters"
+                                    password != confirm -> error = "Passwords do not match"
+                                    else -> {
+                                        loading = true
+                                        scope.launch {
+                                            val result = repository.setupDecoyPassword(password.toCharArray())
+                                            password = ""; confirm = ""
+                                            loading = false
+                                            if (result.isSuccess) onComplete()
+                                            else error = "Failed: ${result.exceptionOrNull()?.message}"
+                                        }
+                                    }
+                                }
+                            },
+                            enabled = !loading && password.isNotEmpty() && confirm.isNotEmpty(),
+                            modifier = Modifier.weight(1f)
+                        ) { Text(strings.confirm) }
+                    }
                 }
                 AnimatedVisibility(
                     visible = dialogKeyboardState.isVisible,
@@ -629,40 +718,13 @@ private fun DecoySetupDialog(
                     CustomKeyboard(
                         onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
                         onDelete = { dialogKeyboardState.onDelete?.invoke() },
-                        onDone = { dialogKeyboardState.onDone?.invoke() }
+                        onDone = { dialogKeyboardState.onDone?.invoke() },
+                        modifier = Modifier.fillMaxWidth().navigationBarsPadding()
                     )
                 }
             }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = !loading && password.isNotEmpty() && confirm.isNotEmpty(),
-                onClick = {
-                    when {
-                        password.length < 8 -> error = "Password must be at least 8 characters"
-                        password != confirm -> error = "Passwords do not match"
-                        else -> {
-                            loading = true
-                            scope.launch {
-                                val result = repository.setupDecoyPassword(password.toCharArray())
-                                password = ""; confirm = ""
-                                loading = false
-                                if (result.isSuccess) onComplete()
-                                else error = "Failed: ${result.exceptionOrNull()?.message}"
-                            }
-                        }
-                    }
-                }
-            ) {
-                Text(strings.confirm)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(strings.cancel)
-            }
         }
-    )
+    }
 }
 
 private fun markInstructionsPromptShown(context: android.content.Context) {
@@ -699,102 +761,122 @@ private fun ChangePasswordDialog(
     val scope = rememberCoroutineScope()
     val dialogKeyboardState = remember { KeyboardState() }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text(strings.changePassword) },
-        text = {
-            if (success) {
-                Column {
-                    Text(strings.passwordChanged, style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.height(4.dp))
-                    Text(strings.passwordChangedSubtitle, style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                Column {
-                    CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
-                        PasswordField(
-                            value = current,
-                            onValueChange = { current = it; error = null },
-                            label = strings.currentPassword,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        strings.changePassword,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(Modifier.height(8.dp))
-                    CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
-                        PasswordField(
-                            value = newPw,
-                            onValueChange = { newPw = it; error = null },
-                            label = strings.newPassword,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
-                        PasswordField(
-                            value = confirm,
-                            onValueChange = { confirm = it; error = null },
-                            label = strings.confirmNewPassword,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    if (error != null) {
+                    if (success) {
+                        Text(strings.passwordChanged, style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.height(4.dp))
+                        Text(strings.passwordChangedSubtitle, style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.height(16.dp))
+                        Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
+                            Text(strings.ok)
+                        }
+                    } else {
+                        CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
+                            PasswordField(
+                                value = current,
+                                onValueChange = { current = it; error = null },
+                                label = strings.currentPassword,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                         Spacer(Modifier.height(8.dp))
-                        Text(error!!, color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall)
-                    }
-                    AnimatedVisibility(
-                        visible = dialogKeyboardState.isVisible,
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it })
-                    ) {
-                        CustomKeyboard(
-                            onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
-                            onDelete = { dialogKeyboardState.onDelete?.invoke() },
-                            onDone = { dialogKeyboardState.onDone?.invoke() }
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            if (!success) {
-                TextButton(
-                    enabled = !loading && current.isNotEmpty() && newPw.isNotEmpty() && confirm.isNotEmpty(),
-                    onClick = {
-                        when {
-                            newPw.length < 8 -> error = "New password must be at least 8 characters"
-                            newPw != confirm -> error = "New passwords do not match"
-                            else -> {
-                                loading = true
-                                scope.launch {
-                                    val result = repository.changePassword(
-                                        current.toCharArray(),
-                                        newPw.toCharArray()
-                                    )
-                                    current = ""; newPw = ""; confirm = ""
-                                    loading = false
-                                    if (result.isSuccess) success = true
-                                    else error = "Failed: ${result.exceptionOrNull()?.message}"
-                                }
-                            }
+                        CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
+                            PasswordField(
+                                value = newPw,
+                                onValueChange = { newPw = it; error = null },
+                                label = strings.newPassword,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        CompositionLocalProvider(LocalKeyboardState provides dialogKeyboardState) {
+                            PasswordField(
+                                value = confirm,
+                                onValueChange = { confirm = it; error = null },
+                                label = strings.confirmNewPassword,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        if (error != null) {
+                            Spacer(Modifier.height(8.dp))
+                            Text(error!!, color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall)
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextButton(
+                                onClick = onDismiss,
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.cancel) }
+                            Button(
+                                onClick = {
+                                    when {
+                                        newPw.length < 8 -> error = "New password must be at least 8 characters"
+                                        newPw != confirm -> error = "New passwords do not match"
+                                        else -> {
+                                            loading = true
+                                            scope.launch {
+                                                val result = repository.changePassword(
+                                                    current.toCharArray(),
+                                                    newPw.toCharArray()
+                                                )
+                                                current = ""; newPw = ""; confirm = ""
+                                                loading = false
+                                                if (result.isSuccess) success = true
+                                                else error = "Failed: ${result.exceptionOrNull()?.message}"
+                                            }
+                                        }
+                                    }
+                                },
+                                enabled = !loading && current.isNotEmpty() && newPw.isNotEmpty() && confirm.isNotEmpty(),
+                                modifier = Modifier.weight(1f)
+                            ) { Text(strings.confirm) }
                         }
                     }
+                }
+                AnimatedVisibility(
+                    visible = dialogKeyboardState.isVisible,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
                 ) {
-                    Text(strings.confirm)
-                }
-            }
-        },
-        dismissButton = {
-            if (success) {
-                TextButton(onClick = onDismiss) {
-                    Text(strings.ok)
-                }
-            } else {
-                TextButton(onClick = onDismiss) {
-                    Text(strings.cancel)
+                    CustomKeyboard(
+                        onKeyPress = { dialogKeyboardState.onKeyPress?.invoke(it) },
+                        onDelete = { dialogKeyboardState.onDelete?.invoke() },
+                        onDone = { dialogKeyboardState.onDone?.invoke() },
+                        modifier = Modifier.fillMaxWidth().navigationBarsPadding()
+                    )
                 }
             }
         }
-    )
+    }
 }

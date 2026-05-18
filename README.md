@@ -2,6 +2,8 @@
 
 **Zero‑trust, offline‑only, open‑source secure notes for Android.**
 
+🌐 **[Website & Download](https://cyberboy161.github.io/Taybeti/)**
+
 Taybeti keeps your secrets truly private.  
 No plaintext ever touches storage. No password hash is kept on the device.  
 Even the master login is verified by *decrypting* a known test string — there is nothing to crack.

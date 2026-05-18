@@ -359,11 +359,9 @@ private fun LetterLayout(
             Text("123+", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         }
         if (lang.isRtl) {
-            LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
-            LetterKey('\u060C', uppercase = false, onKey, keyBg, 1f, emptyMap()) // Arabic comma
+            LetterKey('.', uppercase = false, onKey, keyBg, 1.2f, longPressMap = mapOf('.' to '\u060C')) // tap . , hold-press ،
         } else {
-            LetterKey(',', uppercase = false, onKey, keyBg, 1f, emptyMap())
-            LetterKey('.', uppercase = false, onKey, keyBg, 1f, emptyMap())
+            LetterKey('.', uppercase = false, onKey, keyBg, 1.2f, longPressMap = mapOf('.' to ',')) // tap . , hold-press ,
         }
         // Language button next to space
         Box(modifier = Modifier.weight(1.4f).height(keyHeight.dp), contentAlignment = Alignment.Center) {

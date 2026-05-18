@@ -22,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nulldata.app.data.repository.NoteRepository
@@ -43,21 +44,36 @@ fun LoginScreen(
     var remainingSec by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
     val strings = LocalStrings.current
+    val ctx = LocalContext.current
+    val lockoutDelayMs = remember {
+        val mins = ctx.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+            .getInt("auto_lock_minutes", 5)
+        if (mins <= 0) 30_000L else mins * 60_000L
+    }
+
+    // Countdown timer while locked out
+    if (lockedOut) {
+        androidx.compose.runtime.LaunchedEffect(lockedOut) {
+            while (remainingSec > 0) {
+                delay(1000L)
+                remainingSec -= 1
+            }
+            lockedOut = false
+        }
+    }
 
     fun performLogin() {
         if (password.isEmpty() || isLoading || lockedOut) return
         isLoading = true
         error = null
         scope.launch {
-            val result = repository.attemptLogin(password.toCharArray())
+            val result = repository.attemptLogin(password.toCharArray(), lockoutDelayMs)
             password = ""
             isLoading = false
             when {
                 result.lockedOut -> {
                     lockedOut = true
                     remainingSec = ((result.remainingMs) / 1000).toInt()
-                    delay(result.remainingMs)
-                    lockedOut = false
                 }
                 result.success -> onLoginSuccess(result.isDecoy)
                 else -> error = result.error

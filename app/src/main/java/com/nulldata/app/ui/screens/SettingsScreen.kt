@@ -49,7 +49,11 @@ fun SettingsScreen(
     isDecoyEnabled: Boolean = false,
     onSetupDecoy: (() -> Unit)? = null,
     autoLockTimeoutMinutes: Int = 5,
-    onAutoLockTimeoutChange: (Int) -> Unit = {}
+    onAutoLockTimeoutChange: (Int) -> Unit = {},
+    showNoteTitle: Boolean = true,
+    onShowNoteTitleChange: (Boolean) -> Unit = {},
+    showNoteDate: Boolean = true,
+    onShowNoteDateChange: (Boolean) -> Unit = {}
 ) {
     val strings = LocalStrings.current
     var showLanguagePicker by remember { mutableStateOf(false) }
@@ -157,6 +161,23 @@ fun SettingsScreen(
                     }
                 }
             }
+
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = strings.showNoteTitle,
+                subtitle = strings.showNoteTitle,
+                checked = showNoteTitle,
+                onCheckedChange = onShowNoteTitleChange
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = strings.showNoteDate,
+                subtitle = strings.showNoteDate,
+                checked = showNoteDate,
+                onCheckedChange = onShowNoteDateChange
+            )
         }
     }
 

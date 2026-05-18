@@ -17,7 +17,6 @@ class NoteRepository(
         const val LOGIN_CANARY = "Taybeti::login::check::ok"
         const val DECOY_CANARY = "Taybeti::decoy::check::ok"
         const val MAX_FAILED_ATTEMPTS = 5
-        const val LOCKOUT_DELAY_MS = 30_000L
     }
 
     suspend fun hasLoginInfo(): Boolean = withContext(Dispatchers.IO) {
@@ -142,21 +141,23 @@ class NoteRepository(
         val remainingMs: Long = 0L
     )
 
-    suspend fun attemptLogin(password: CharArray): LoginResult = withContext(Dispatchers.IO) {
+    suspend fun attemptLogin(password: CharArray, lockoutDelayMs: Long = 30_000L): LoginResult = withContext(Dispatchers.IO) {
         try {
         val info = loginDao.get() ?: return@withContext LoginResult(false, error = "No account found")
 
         // Lockout check
-        if (info.failedAttempts >= MAX_FAILED_ATTEMPTS) {
+        var currentFails = info.failedAttempts
+        if (currentFails >= MAX_FAILED_ATTEMPTS) {
             val elapsed = System.currentTimeMillis() - info.lastFailedTime
-            if (elapsed < LOCKOUT_DELAY_MS) {
+            if (elapsed < lockoutDelayMs) {
                 return@withContext LoginResult(
                     false,
                     lockedOut = true,
-                    remainingMs = LOCKOUT_DELAY_MS - elapsed
+                    remainingMs = lockoutDelayMs - elapsed
                 )
             }
             loginDao.updateFailedAttempts(0, 0L)
+            currentFails = 0
         }
 
         // Try real password
@@ -192,7 +193,7 @@ class NoteRepository(
         }
 
         SecureMemory.clear(password)
-        val newFails = info.failedAttempts + 1
+        val newFails = currentFails + 1
         loginDao.updateFailedAttempts(newFails, System.currentTimeMillis())
         LoginResult(false, error = "Invalid password")
         } catch (e: Throwable) {
