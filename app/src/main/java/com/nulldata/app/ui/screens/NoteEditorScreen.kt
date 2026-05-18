@@ -58,6 +58,7 @@ import com.nulldata.app.data.repository.NoteRepository
 import com.nulldata.app.security.SecureMemory
 import com.nulldata.app.ui.components.AppTextField
 import com.nulldata.app.ui.components.KeyboardHost
+import com.nulldata.app.ui.components.LocalKeyboardState
 import com.nulldata.app.ui.components.PasswordField
 import com.nulldata.app.util.Constants
 import com.nulldata.app.util.DecoyEncoder
@@ -133,6 +134,16 @@ fun NoteEditorScreen(
 
         // Edit key verification dialog
         if (showEditKeyDialog) {
+            val kbState = LocalKeyboardState.current
+            DisposableEffect(Unit) {
+                kbState?.attach(
+                    onKey = { editKey += it; editKeyError = null },
+                    onDel = { editKey = editKey.dropLast(1) },
+                    onDone = { kbState?.detach() }
+                )
+                onDispose { kbState?.detach() }
+            }
+
             Dialog(
                 onDismissRequest = {
                     showEditKeyDialog = false
@@ -243,6 +254,16 @@ fun NoteEditorScreen(
 
         // Unlock key dialog for existing notes
         if (showKeyDialog) {
+            val kbState = LocalKeyboardState.current
+            DisposableEffect(Unit) {
+                kbState?.attach(
+                    onKey = { noteKey += it; keyError = null },
+                    onDel = { noteKey = noteKey.dropLast(1) },
+                    onDone = { kbState?.detach() }
+                )
+                onDispose { kbState?.detach() }
+            }
+
             Dialog(
                 onDismissRequest = { /* block outside dismiss — user must use Cancel */ },
                 properties = DialogProperties(
@@ -327,7 +348,30 @@ fun NoteEditorScreen(
             var newKey by remember { mutableStateOf(generatedKey) }
             var confirmKey by remember { mutableStateOf("") }
             var createKeyError by remember { mutableStateOf<String?>(null) }
+            var activeField by remember { mutableStateOf(0) }
             val MIN_KEY_LEN = 8
+
+            val kbState = LocalKeyboardState.current
+            DisposableEffect(Unit) {
+                kbState?.show()
+                onDispose { kbState?.detach() }
+            }
+            DisposableEffect(activeField) {
+                if (activeField == 0) {
+                    kbState?.attach(
+                        onKey = { newKey += it; createKeyError = null },
+                        onDel = { newKey = newKey.dropLast(1) },
+                        onDone = { kbState?.detach() }
+                    )
+                } else {
+                    kbState?.attach(
+                        onKey = { confirmKey += it; createKeyError = null },
+                        onDel = { confirmKey = confirmKey.dropLast(1) },
+                        onDone = { kbState?.detach() }
+                    )
+                }
+                onDispose { }
+            }
 
             Dialog(
                 onDismissRequest = { /* block outside dismiss */ },
@@ -365,14 +409,16 @@ fun NoteEditorScreen(
                             value = newKey,
                             onValueChange = { newKey = it; createKeyError = null },
                             label = strings.noteKey,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { activeField = 0 }
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         PasswordField(
                             value = confirmKey,
                             onValueChange = { confirmKey = it; createKeyError = null },
                             label = "Confirm key",
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { activeField = 1 }
                         )
                         Spacer(modifier = Modifier.height(24.dp))
 

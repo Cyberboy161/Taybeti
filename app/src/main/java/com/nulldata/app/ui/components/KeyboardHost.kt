@@ -38,6 +38,10 @@ class KeyboardState {
         isVisible = true
     }
 
+    fun show() {
+        isVisible = true
+    }
+
     fun detach() {
         onKeyPress = null
         onDelete = null
