@@ -90,11 +90,7 @@ fun PasswordField(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .then(borderModifier)
-            .focusRequester(focusRequester)
-            .onFocusChanged { fs ->
-                isFocused = fs.isFocused
-            },
+            .then(borderModifier),
         shape = MaterialTheme.shapes.small,
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 1.dp
@@ -107,7 +103,11 @@ fun PasswordField(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(12.dp)
+                .focusRequester(focusRequester)
+                .onFocusChanged { fs ->
+                    isFocused = fs.isFocused
+                },
             textStyle = TextStyle(
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface
