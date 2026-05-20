@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.nulldata.app"
+    namespace = "com.taybeti.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.nulldata.app"
+        applicationId = "com.taybeti.app"
         minSdk = 26
         targetSdk = 34
         versionCode = 3
@@ -21,7 +21,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("nulldata.keystore")
+            storeFile = file("taybeti.keystore")
             storePassword = "nulldata"
             keyAlias = "nulldata"
             keyPassword = "nulldata"

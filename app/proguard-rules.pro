@@ -9,7 +9,7 @@
 }
 
 # Keep Room entities
--keep class com.nulldata.app.data.entities.** { *; }
+-keep class com.taybeti.app.data.entities.** { *; }
 
 # Keep Argon2
 -keep class de.mkammerer.argon2.** { *; }
