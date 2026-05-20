@@ -12,6 +12,10 @@ Even the master login is verified by *decrypting* a known test string — there 
 
 - **Zero‑trust master auth** — no password hash, no Keystore, no persistent secrets
 - **Per‑note encryption** — every note has its own passphrase and independent key
+- **File encryption** — encrypt any file (images, videos, documents) with AES‑256‑GCM + Argon2id
+- **Encrypt from camera** — capture and encrypt photos directly, no camera permission needed
+- **Encrypt filename & extension** — hide original name and replace extension with `.taybeti`
+- **Confirm passphrase** — double‑entry field prevents typos when encrypting files
 - **Covert sharing** — disguise encrypted messages as a set of normal‑looking YouTube/Instagram links
 - **100% offline** — no internet permission, no cloud, no telemetry
 - **Open source (MIT)** — auditable by anyone, anytime
@@ -131,3 +135,15 @@ Security Audit
 
 No third‑party security audit has been performed. Use at your own risk.
 Review the code — it’s open for anyone to inspect, improve, and trust.
+
+## Releases
+
+| Version | Date | Description |
+|---------|------|-------------|
+| [v1.0.23](https://github.com/Cyberboy161/Taybeti/releases/tag/v1.0.23) | 2026-05-20 | File encryption, camera capture, confirm passphrase, encrypt filename/extension |
+| [v1.0.22](https://github.com/Cyberboy161/Taybeti/releases/tag/v1.0.22) | 2026-05-18 | Dynamic lockout timer, full-screen dialogs, hold-press comma, show/hide title+date |
+| [v1.0.21](https://github.com/Cyberboy161/Taybeti/releases/tag/v1.0.21) | 2026-05-18 | Interactive animated encryption sharing guide |
+| [v1.0.20](https://github.com/Cyberboy161/Taybeti/releases/tag/v1.0.20) | 2026-05-18 | Encrypted note view: raw blob first, None option |
+| [v1.0.19](https://github.com/Cyberboy161/Taybeti/releases/tag/v1.0.19) | 2026-05-17 | 12 equilateral triangle sun rays |
+
+[View all releases →](https://github.com/Cyberboy161/Taybeti/releases)

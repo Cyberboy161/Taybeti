@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
@@ -114,6 +115,7 @@ private fun FileEncryptTab() {
     var success by remember { mutableStateOf(false) }
     var encryptFilename by remember { mutableStateOf(true) }
     var encryptExtension by remember { mutableStateOf(true) }
+    var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
     val pickFileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -131,6 +133,16 @@ private fun FileEncryptTab() {
             }
             error = null
             success = false
+        }
+    }
+
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && cameraPhotoUri != null) {
+            sourceUri = cameraPhotoUri
+            sourceFileName = "camera_photo_${System.currentTimeMillis()}.jpg"
+            error = null
         }
     }
 
@@ -213,15 +225,36 @@ private fun FileEncryptTab() {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                ) {
                     Button(
                         onClick = { pickFileLauncher.launch(arrayOf("*/*")) },
                         enabled = !isEncrypting,
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(Icons.Default.Folder, contentDescription = null)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(strings.selectFile)
+                    }
+                    Button(
+                        onClick = {
+                            val photoFile = File(context.cacheDir, "camera_photo_${System.currentTimeMillis()}.jpg")
+                            cameraPhotoUri = androidx.core.content.FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.fileprovider",
+                                photoFile
+                            )
+                            takePictureLauncher.launch(cameraPhotoUri!!)
+                        },
+                        enabled = !isEncrypting,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(strings.encryptFromCamera)
                     }
                 }
 
