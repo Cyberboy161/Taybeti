@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -48,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -416,7 +417,7 @@ fun MainDrawerScreen(
                         scope.launch { drawerState.close() }
                         navController.navigate(NavRoutes.ENCRYPT_DECRYPT)
                     }
-                    DrawerItem(Icons.Default.Lock, strings.sidebarFileEncrypt) {
+                    DrawerItem(Icons.Default.Lock, strings.sidebarFileEncrypt, iconSize = 32.dp) {
                         scope.launch { drawerState.close() }
                         navController.navigate(NavRoutes.FILE_ENCRYPT_DECRYPT)
                     }
@@ -745,14 +746,14 @@ private fun markInstructionsPromptShown(context: android.content.Context) {
 }
 
 @Composable
-private fun DrawerItem(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun DrawerItem(icon: ImageVector, label: String, iconSize: androidx.compose.ui.unit.Dp = 24.dp, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
-        Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.onSurface)
+        Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(iconSize))
         Spacer(modifier = Modifier.width(16.dp))
         Text(label, style = MaterialTheme.typography.titleMedium)
     }
