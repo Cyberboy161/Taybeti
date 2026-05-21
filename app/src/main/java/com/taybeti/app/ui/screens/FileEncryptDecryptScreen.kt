@@ -164,11 +164,14 @@ private fun FileEncryptTab() {
                             }
                         }
 
+                        require(tempInput.length() > 0) { "Source file is empty or unreadable" }
+
                         withContext(Dispatchers.IO) {
                             CryptoUtils.encryptFile(
                                 tempInput,
                                 tempOutput,
-                                passphrase.toCharArray()
+                                passphrase.toCharArray(),
+                                originalFilename = sourceFileName ?: "unknown"
                             ) { processed, total ->
                                 progress = processed.toFloat() / total.toFloat()
                             }
@@ -431,6 +434,7 @@ private fun FileDecryptTab() {
 
     var sourceUri by remember { mutableStateOf<Uri?>(null) }
     var sourceFileName by remember { mutableStateOf("") }
+    var recoveredFilename by remember { mutableStateOf("") }
     var passphrase by remember { mutableStateOf("") }
     var isDecrypting by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(0f) }
@@ -451,6 +455,23 @@ private fun FileDecryptTab() {
                     }
                 }
             }
+            // Read original filename from encrypted file header
+            try {
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    val nameLenHi = input.read()
+                    val nameLenLo = input.read()
+                    if (nameLenHi != -1 && nameLenLo != -1) {
+                        val nameLen = (nameLenHi shl 8) or nameLenLo
+                        if (nameLen > 0 && nameLen < 1024) {
+                            val nameBytes = ByteArray(nameLen)
+                            val read = input.read(nameBytes)
+                            if (read == nameLen) {
+                                recoveredFilename = String(nameBytes, Charsets.UTF_8)
+                            }
+                        }
+                    }
+                }
+            } catch (_: Exception) {}
             error = null
             success = false
         }
@@ -473,14 +494,18 @@ private fun FileDecryptTab() {
                             }
                         }
 
+                        require(tempInput.length() > 0) { "Source file is empty or unreadable" }
+
+                        var recoveredName = ""
                         withContext(Dispatchers.IO) {
-                            CryptoUtils.decryptFile(
+                            val result = CryptoUtils.decryptFile(
                                 tempInput,
                                 tempOutput,
                                 passphrase.toCharArray()
                             ) { processed, total ->
                                 progress = processed.toFloat() / total.toFloat()
                             }
+                            recoveredName = result.originalFilename
                         }
 
                         context.contentResolver.openOutputStream(uri)?.use { output ->
@@ -498,7 +523,7 @@ private fun FileDecryptTab() {
                         tempOutput.delete()
                     }
                 } catch (e: Exception) {
-                    error = strings.decryptFailed
+                    error = strings.decryptFailed + ": ${e.message}"
                     SecureMemory.clear(passphrase.toCharArray())
                 }
                 isDecrypting = false
@@ -542,6 +567,13 @@ private fun FileDecryptTab() {
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    if (recoveredFilename.isNotEmpty()) {
+                        Text(
+                            "${strings.recoveredFilename}: $recoveredFilename",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
         }
@@ -567,7 +599,7 @@ private fun FileDecryptTab() {
                     error = strings.keyRequired
                     return@Button
                 }
-                val outputName = sourceFileName.replace(".taybeti", "")
+                val outputName = if (recoveredFilename.isNotEmpty()) recoveredFilename else sourceFileName.replace(".taybeti", "")
                 saveFileLauncher.launch(outputName)
             },
             enabled = !isDecrypting && sourceUri != null && passphrase.isNotEmpty(),

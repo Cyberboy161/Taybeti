@@ -23,7 +23,13 @@ object CryptoUtils {
     private const val LENGTH_PREFIX_BYTES = 2
 
     private const val STREAM_BUFFER_SIZE = 8192
-    private const val FILE_HEADER_LENGTH = 32 + GCM_IV_LENGTH // salt(32) + iv(12) = 44
+    private const val NAME_LEN_BYTES = 2
+    private const val SALT_IV_LENGTH = 32 + GCM_IV_LENGTH // 44
+
+    data class DecryptionResult(
+        val originalFilename: String,
+        val outputFile: File
+    )
 
     private val secureRandom = SecureRandom()
 
@@ -127,15 +133,19 @@ object CryptoUtils {
 
     /**
      * Encrypt a file using AES-256-GCM with Argon2id key derivation.
-     * File format: [salt:32][iv:12][ciphertext...][tag:16]
+     * File format: [nameLen:2][nameBytes:variable][salt:32][iv:12][ciphertext...][tag:16]
      * Uses manual chunked cipher.update()/doFinal() — reliable for GCM.
      */
     fun encryptFile(
         inputFile: File,
         outputFile: File,
         passphrase: CharArray,
+        originalFilename: String = inputFile.name,
         progressCallback: ((Long, Long) -> Unit)? = null
     ) {
+        val nameBytes = originalFilename.toByteArray(Charsets.UTF_8)
+        require(nameBytes.size <= 65535) { "Filename too long" }
+
         val salt = generateSalt()
         val key = deriveKey(passphrase, salt)
         SecureMemory.clear(passphrase)
@@ -151,7 +161,10 @@ object CryptoUtils {
 
         inputFile.inputStream().use { input ->
             outputFile.outputStream().use { output ->
-                // Write header
+                // Write header: name length + name + salt + iv
+                output.write((nameBytes.size shr 8) and 0xFF)
+                output.write(nameBytes.size and 0xFF)
+                output.write(nameBytes)
                 output.write(salt)
                 output.write(iv)
 
@@ -178,29 +191,42 @@ object CryptoUtils {
 
     /**
      * Decrypt a file encrypted with encryptFile().
-     * File format: [salt:32][iv:12][ciphertext...][tag:16]
+     * File format: [nameLen:2][nameBytes:variable][salt:32][iv:12][ciphertext...][tag:16]
      * Reads all ciphertext into memory, then calls doFinal(ciphertext + tag) — matches working in-memory decrypt.
+     * Returns the original filename stored in the header.
      */
     fun decryptFile(
         inputFile: File,
         outputFile: File,
         passphrase: CharArray,
         progressCallback: ((Long, Long) -> Unit)? = null
-    ) {
+    ): DecryptionResult {
         val inputSize = inputFile.length()
-        require(inputSize > FILE_HEADER_LENGTH + GCM_TAG_BYTES) { "File too small to be valid" }
 
         inputFile.inputStream().use { input ->
-            // Read header
+            // Read header: name length + name
+            val nameLenHi = input.read()
+            val nameLenLo = input.read()
+            if (nameLenHi == -1 || nameLenLo == -1) throw java.io.EOFException("Invalid file header")
+            val nameLen = (nameLenHi shl 8) or nameLenLo
+            require(nameLen > 0 && nameLen < 1024) { "Invalid filename length: $nameLen" }
+            val nameBytes = ByteArray(nameLen)
+            input.readFully(nameBytes)
+            val originalFilename = String(nameBytes, Charsets.UTF_8)
+
+            // Read salt + iv
             val salt = ByteArray(32)
             val iv = ByteArray(GCM_IV_LENGTH)
             input.readFully(salt)
             input.readFully(iv)
 
+            val headerSize = NAME_LEN_BYTES + nameLen + SALT_IV_LENGTH
+            require(inputSize > headerSize + GCM_TAG_BYTES) { "File too small to be valid" }
+
             val key = deriveKey(passphrase, salt)
             SecureMemory.clear(passphrase)
 
-            val ciphertextSize = (inputSize - FILE_HEADER_LENGTH - GCM_TAG_BYTES).toInt()
+            val ciphertextSize = (inputSize - headerSize - GCM_TAG_BYTES).toInt()
             val ciphertext = ByteArray(ciphertextSize)
             input.readFully(ciphertext)
 
@@ -216,6 +242,8 @@ object CryptoUtils {
             val padded = cipher.doFinal(ciphertext + tag)
             outputFile.writeBytes(padded)
             progressCallback?.invoke(inputSize, inputSize)
+
+            return DecryptionResult(originalFilename, outputFile)
         }
     }
 

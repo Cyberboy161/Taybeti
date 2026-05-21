@@ -309,7 +309,7 @@ fun stringsFor(languageCode: String): AppStrings = when (languageCode) {
 }
 
 val englishStrings = AppStrings(
-    appName = "Taybeti",
+    appName = "Taybeti Notesharing",
     continueBtn = "Continue",
     cancel = "Cancel",
     copy = "Copy",
