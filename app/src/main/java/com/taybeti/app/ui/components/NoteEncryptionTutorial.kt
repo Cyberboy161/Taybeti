@@ -1,19 +1,12 @@
 package com.taybeti.app.ui.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -29,20 +22,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
@@ -56,11 +48,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -83,55 +72,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
-data class TutorialNoteStep(
-    val icon: String,
-    val title: String,
-    val description: String,
-    val interactive: Boolean = false
-)
-
-private val tutorialSteps = listOf(
-    TutorialNoteStep(
-        icon = "1",
-        title = "Write your secret note",
-        description = "Type any message you want to keep private. This is your plaintext — the content only you should see."
-    ),
-    TutorialNoteStep(
-        icon = "2",
-        title = "Create a passphrase",
-        description = "This passphrase locks your note. Use something strong and memorable. Never share it digitally!"
-    ),
-    TutorialNoteStep(
-        icon = "3",
-        title = "Encrypt your note",
-        description = "Watch how your readable text turns into scrambled, unreadable data. This is AES-256-GCM encryption in action."
-    ),
-    TutorialNoteStep(
-        icon = "4",
-        title = "See the encrypted result",
-        description = "This is what your note looks like when stored. Without the passphrase, this is just random gibberish — even to hackers."
-    ),
-    TutorialNoteStep(
-        icon = "5",
-        title = "Decrypt to read it back",
-        description = "Enter the same passphrase to unlock your note. See how it transforms back into readable text instantly."
-    ),
-    TutorialNoteStep(
-        icon = "6",
-        title = "You're ready!",
-        description = "Now you understand how Taybeti protects your notes. Every note uses its own unique passphrase for maximum security."
-    )
-)
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 
 @Composable
 fun NoteEncryptionTutorialDialog(
     onDismiss: () -> Unit
 ) {
     var step by remember { mutableIntStateOf(0) }
-    val totalSteps = tutorialSteps.size
+    val totalSteps = 6
     val progress by animateFloatAsState(
         targetValue = (step + 1).toFloat() / totalSteps,
         animationSpec = tween(400)
@@ -143,11 +93,14 @@ fun NoteEncryptionTutorialDialog(
     var showPassphrase by remember { mutableStateOf(false) }
     var isEncrypting by remember { mutableStateOf(false) }
     var encryptedResult by remember { mutableStateOf("") }
-    var decryptInput by remember { mutableStateOf("") }
     var decryptPassphrase by remember { mutableStateOf("") }
     var decryptedResult by remember { mutableStateOf("") }
     var isDecrypting by remember { mutableStateOf(false) }
     var passphrasesMatch by remember { mutableStateOf<Boolean?>(null) }
+
+    // Keyboard state
+    var activeField by remember { mutableStateOf<String?>(null) }
+    val keyboardState = remember { KeyboardState() }
 
     LaunchedEffect(userPassphrase, confirmPassphrase) {
         if (userPassphrase.isNotEmpty() && confirmPassphrase.isNotEmpty()) {
@@ -169,16 +122,36 @@ fun NoteEncryptionTutorialDialog(
     }
 
     fun simulateDecrypt() {
-        if (decryptInput.isBlank() || decryptPassphrase.isBlank()) return
+        if (decryptPassphrase.isBlank()) return
         isDecrypting = true
         decryptedResult = ""
-        if (decryptPassphrase == userPassphrase && decryptInput == encryptedResult) {
+        if (decryptPassphrase == userPassphrase) {
             decryptedResult = userMessage
         } else {
             decryptedResult = "ERROR: Wrong passphrase or corrupted data"
         }
         isDecrypting = false
     }
+
+    fun handleKeyPress(key: Char) {
+        when (activeField) {
+            "message" -> userMessage += key
+            "passphrase" -> userPassphrase += key
+            "confirmPassphrase" -> confirmPassphrase += key
+            "decryptPassphrase" -> decryptPassphrase += key
+        }
+    }
+
+    fun handleDelete() {
+        when (activeField) {
+            "message" -> if (userMessage.isNotEmpty()) userMessage = userMessage.dropLast(1)
+            "passphrase" -> if (userPassphrase.isNotEmpty()) userPassphrase = userPassphrase.dropLast(1)
+            "confirmPassphrase" -> if (confirmPassphrase.isNotEmpty()) confirmPassphrase = confirmPassphrase.dropLast(1)
+            "decryptPassphrase" -> if (decryptPassphrase.isNotEmpty()) decryptPassphrase = decryptPassphrase.dropLast(1)
+        }
+    }
+
+    fun handleDone() {}
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -258,17 +231,21 @@ fun NoteEncryptionTutorialDialog(
                             .verticalScroll(rememberScrollState())
                     ) {
                         when (currentStep) {
-                            0 -> Step1_WriteNote(userMessage) { userMessage = it }
+                            0 -> Step1_WriteNote(
+                                userMessage,
+                                isActive = activeField == "message",
+                                onActivate = { activeField = "message" }
+                            )
                             1 -> Step2_CreatePassphrase(
                                 userPassphrase,
                                 confirmPassphrase,
                                 showPassphrase,
-                                passphrasesMatch
-                            ) { passphrase, confirm, show ->
-                                userPassphrase = passphrase
-                                confirmPassphrase = confirm
-                                showPassphrase = show
-                            }
+                                passphrasesMatch,
+                                activeField,
+                                onActivatePassphrase = { activeField = "passphrase" },
+                                onActivateConfirm = { activeField = "confirmPassphrase" },
+                                onToggleShow = { showPassphrase = !showPassphrase }
+                            )
                             2 -> Step3_Encrypt(
                                 userMessage,
                                 userPassphrase,
@@ -280,7 +257,8 @@ fun NoteEncryptionTutorialDialog(
                                 decryptPassphrase,
                                 decryptedResult,
                                 isDecrypting,
-                                onPassphraseChange = { decryptPassphrase = it },
+                                isActive = activeField == "decryptPassphrase",
+                                onActivate = { activeField = "decryptPassphrase" },
                                 onDecrypt = { simulateDecrypt() }
                             )
                             5 -> Step6_Done()
@@ -297,7 +275,7 @@ fun NoteEncryptionTutorialDialog(
                 ) {
                     if (step > 0) {
                         Button(
-                            onClick = { step-- },
+                            onClick = { step--; activeField = null },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant
                             )
@@ -320,7 +298,7 @@ fun NoteEncryptionTutorialDialog(
                             else -> true
                         }
                         Button(
-                            onClick = { step++ },
+                            onClick = { step++; activeField = null },
                             enabled = canProceed
                         ) {
                             Text("Next")
@@ -356,6 +334,83 @@ fun NoteEncryptionTutorialDialog(
                     }
                 }
             }
+
+            // Custom keyboard at bottom
+            val needsKeyboard = step == 0 || step == 1 || step == 4
+            AnimatedVisibility(
+                visible = needsKeyboard && activeField != null,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it })
+            ) {
+                CustomKeyboard(
+                    onKeyPress = { handleKeyPress(it) },
+                    onDelete = { handleDelete() },
+                    onDone = { handleDone() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TutorialTextField(
+    label: String,
+    value: String,
+    isActive: Boolean,
+    placeholder: String,
+    isPassword: Boolean = false,
+    showPassword: Boolean = false,
+    onActivate: () -> Unit,
+    onTogglePassword: (() -> Unit)? = null,
+    isError: Boolean = false
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    if (isError) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
+                    else if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+                .border(
+                    width = 1.dp,
+                    color = if (isError) MaterialTheme.colorScheme.error
+                    else if (isActive) MaterialTheme.colorScheme.primary
+                    else Color.Transparent,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .clickable(onClick = onActivate)
+                .padding(horizontal = 12.dp, vertical = 10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (value.isEmpty()) placeholder else if (isPassword && !showPassword) "•".repeat(value.length) else value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (value.isEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    else MaterialTheme.colorScheme.onSurface
+                )
+                if (onTogglePassword != null) {
+                    IconButton(onClick = onTogglePassword, modifier = Modifier.size(24.dp)) {
+                        Icon(
+                            if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -363,7 +418,8 @@ fun NoteEncryptionTutorialDialog(
 @Composable
 private fun Step1_WriteNote(
     message: String,
-    onMessageChange: (String) -> Unit
+    isActive: Boolean,
+    onActivate: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("1", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -376,7 +432,7 @@ private fun Step1_WriteNote(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Type any message you want to keep private.",
+            "Tap the field below and use the keyboard to type.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -391,16 +447,12 @@ private fun Step1_WriteNote(
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Your note:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
+                TutorialTextField(
+                    label = "Your note:",
                     value = message,
-                    onValueChange = onMessageChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Type your secret message here...") },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                    )
+                    isActive = isActive,
+                    placeholder = "Tap to type your secret message...",
+                    onActivate = onActivate
                 )
             }
         }
@@ -413,7 +465,10 @@ private fun Step2_CreatePassphrase(
     confirmPassphrase: String,
     showPassphrase: Boolean,
     passphrasesMatch: Boolean?,
-    onValuesChange: (String, String, Boolean) -> Unit
+    activeField: String?,
+    onActivatePassphrase: () -> Unit,
+    onActivateConfirm: () -> Unit,
+    onToggleShow: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("2", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -447,21 +502,15 @@ private fun Step2_CreatePassphrase(
                     Text("Passphrase", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
+                TutorialTextField(
+                    label = "",
                     value = passphrase,
-                    onValueChange = { onValuesChange(it, confirmPassphrase, showPassphrase) },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Enter passphrase (min 4 chars)") },
-                    visualTransformation = if (showPassphrase) androidx.compose.ui.text.input.VisualTransformation.None else androidx.compose.ui.text.input.PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { onValuesChange(passphrase, confirmPassphrase, !showPassphrase) }) {
-                            Icon(
-                                if (showPassphrase) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
+                    isActive = activeField == "passphrase",
+                    placeholder = "Tap to enter passphrase (min 4 chars)",
+                    isPassword = true,
+                    showPassword = showPassphrase,
+                    onActivate = onActivatePassphrase,
+                    onTogglePassword = onToggleShow
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -472,12 +521,14 @@ private fun Step2_CreatePassphrase(
                     Text("Confirm passphrase", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
+                TutorialTextField(
+                    label = "",
                     value = confirmPassphrase,
-                    onValueChange = { onValuesChange(passphrase, it, showPassphrase) },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Re-enter passphrase") },
-                    visualTransformation = if (showPassphrase) androidx.compose.ui.text.input.VisualTransformation.None else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    isActive = activeField == "confirmPassphrase",
+                    placeholder = "Tap to re-enter passphrase",
+                    isPassword = true,
+                    showPassword = showPassphrase,
+                    onActivate = onActivateConfirm,
                     isError = passphrasesMatch == false
                 )
 
@@ -639,7 +690,8 @@ private fun Step5_Decrypt(
     decryptPassphrase: String,
     decryptedResult: String,
     isDecrypting: Boolean,
-    onPassphraseChange: (String) -> Unit,
+    isActive: Boolean,
+    onActivate: () -> Unit,
     onDecrypt: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -685,12 +737,13 @@ private fun Step5_Decrypt(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
+                TutorialTextField(
+                    label = "Enter passphrase to decrypt:",
                     value = decryptPassphrase,
-                    onValueChange = onPassphraseChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Enter the passphrase to decrypt") },
-                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+                    isActive = isActive,
+                    placeholder = "Tap to enter passphrase",
+                    isPassword = true,
+                    onActivate = onActivate
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -818,7 +871,6 @@ private fun AnimatedEncryptionGraphic() {
         val endX = size.width - 20f
         val totalWidth = endX - startX
 
-        // Background track
         drawLine(
             color = Color.Gray.copy(alpha = 0.3f),
             start = Offset(startX, y),
@@ -827,7 +879,6 @@ private fun AnimatedEncryptionGraphic() {
             cap = StrokeCap.Round
         )
 
-        // Animated progress
         drawLine(
             brush = Brush.horizontalGradient(
                 colors = listOf(Color(0xFF2E7D32), primaryColor),
@@ -840,7 +891,6 @@ private fun AnimatedEncryptionGraphic() {
             cap = StrokeCap.Round
         )
 
-        // Moving dot
         drawCircle(
             color = primaryColor,
             radius = 6f,
