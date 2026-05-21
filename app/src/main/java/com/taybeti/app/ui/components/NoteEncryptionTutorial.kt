@@ -279,11 +279,10 @@ fun NoteEncryptionTutorialDialog(
                                 encryptedResult,
                                 decryptPassphrase,
                                 decryptedResult,
-                                isDecrypting
-                            ) { passphrase ->
-                                decryptPassphrase = passphrase
-                                simulateDecrypt()
-                            }
+                                isDecrypting,
+                                onPassphraseChange = { decryptPassphrase = it },
+                                onDecrypt = { simulateDecrypt() }
+                            )
                             5 -> Step6_Done()
                         }
                     }
@@ -640,7 +639,8 @@ private fun Step5_Decrypt(
     decryptPassphrase: String,
     decryptedResult: String,
     isDecrypting: Boolean,
-    onDecrypt: (String) -> Unit
+    onPassphraseChange: (String) -> Unit,
+    onDecrypt: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("5", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -687,16 +687,15 @@ private fun Step5_Decrypt(
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(
                     value = decryptPassphrase,
-                    onValueChange = {},
+                    onValueChange = onPassphraseChange,
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Enter the passphrase to decrypt") },
-                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
-                    enabled = false
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
-                    onClick = { onDecrypt(decryptPassphrase) },
+                    onClick = onDecrypt,
                     enabled = !isDecrypting && decryptPassphrase.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
