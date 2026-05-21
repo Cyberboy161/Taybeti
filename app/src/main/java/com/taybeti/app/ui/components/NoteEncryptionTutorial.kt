@@ -169,11 +169,13 @@ fun NoteEncryptionTutorialDialog(
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surface
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Main content area (takes remaining space)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(20.dp)
+                ) {
                 // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -333,7 +335,7 @@ fun NoteEncryptionTutorialDialog(
                         )
                     }
                 }
-            }
+            } // end scrollable content Column
 
             // Custom keyboard at bottom
             val needsKeyboard = step == 0 || step == 1 || step == 4
@@ -351,8 +353,9 @@ fun NoteEncryptionTutorialDialog(
                         .navigationBarsPadding()
                 )
             }
-        }
-    }
+        } // end outer Column
+    } // end Surface
+    } // end Dialog
 }
 
 @Composable
