@@ -1,7 +1,10 @@
 package com.taybeti.app
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,11 +17,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import com.taybeti.app.security.SecurityChecker
 import com.taybeti.app.ui.navigation.AppNavGraph
 import com.taybeti.app.ui.theme.NulldDataTheme
 import com.taybeti.app.util.LocaleManager
 
 class MainActivity : ComponentActivity() {
+
+    private var isMirroringPaused = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +57,33 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (SecurityChecker.isScreenMirroring(this)) {
+            if (!isMirroringPaused) {
+                isMirroringPaused = true
+                Toast.makeText(
+                    this,
+                    "Screen mirroring detected. App paused for security.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            moveTaskToBack(true)
+            return
+        }
+
+        isMirroringPaused = false
+
+        if (SecurityChecker.isRooted(this)) {
+            Toast.makeText(
+                this,
+                "Warning: Rooted device detected",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 

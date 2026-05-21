@@ -86,6 +86,9 @@ import com.taybeti.app.ui.components.PasswordField
 import com.taybeti.app.ui.components.KeyboardState
 import com.taybeti.app.ui.components.LocalKeyboardState
 import com.taybeti.app.ui.components.CustomKeyboard
+import com.taybeti.app.ui.components.SecurityWarningDialog
+import com.taybeti.app.ui.components.PeriodicSecurityCheck
+import com.taybeti.app.security.SecurityChecker
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -319,6 +322,31 @@ fun MainDrawerScreen(
         )
     }
 
+    // Security check state
+    var showSecurityWarning by remember { mutableStateOf(false) }
+    var hasShownSecurityWarning by remember { mutableStateOf(false) }
+    var securityWarnings by remember { mutableStateOf<List<String>>(emptyList()) }
+
+    // Initial security check
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        val warnings = SecurityChecker.getSecurityWarnings(ctx)
+        if (warnings.isNotEmpty()) {
+            securityWarnings = warnings
+            showSecurityWarning = true
+            hasShownSecurityWarning = true
+        }
+    }
+
+    // Periodic security check
+    PeriodicSecurityCheck(
+        onWarningsFound = { warnings ->
+            if (warnings.isNotEmpty() && !hasShownSecurityWarning) {
+                securityWarnings = warnings
+                showSecurityWarning = true
+            }
+        }
+    )
+
     BackHandler {
         showExitDialog = true
     }
@@ -359,6 +387,18 @@ fun MainDrawerScreen(
         ChangePasswordDialog(
             repository = repository,
             onDismiss = { showChangePasswordDialog = false }
+        )
+    }
+
+    if (showSecurityWarning) {
+        SecurityWarningDialog(
+            onDismiss = {
+                showSecurityWarning = false
+                hasShownSecurityWarning = true
+            },
+            onExit = {
+                (navController.context as? android.app.Activity)?.finish()
+            }
         )
     }
 
