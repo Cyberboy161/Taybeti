@@ -116,6 +116,7 @@ private fun FileEncryptTab() {
     var encryptFilename by remember { mutableStateOf(true) }
     var encryptExtension by remember { mutableStateOf(true) }
     var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var showTutorial by remember { mutableStateOf(true) }
 
     val pickFileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -410,6 +411,13 @@ private fun FileEncryptTab() {
                 strings.fileEncryptedSuccess,
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        if (showTutorial) {
+            Spacer(modifier = Modifier.height(20.dp))
+            com.taybeti.app.ui.components.FileEncryptionTutorial(
+                onDismiss = { showTutorial = false }
             )
         }
     }

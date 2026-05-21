@@ -115,12 +115,15 @@ object NavRoutes {
 }
 
 @Composable
-fun AppNavGraph(repository: NoteRepository) {
+fun AppNavGraph(
+    repository: NoteRepository,
+    isDarkTheme: Boolean = true,
+    onToggleTheme: (Boolean) -> Unit = {}
+) {
     val navController = rememberNavController()
     var isLoggedIn by remember { mutableStateOf(false) }
     var isDecoy by remember { mutableStateOf(false) }
     var needsSetup by remember { mutableStateOf<Boolean?>(null) }
-    var isDarkTheme by remember { mutableStateOf(true) }
     var isDecoyEnabled by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
@@ -230,7 +233,7 @@ fun AppNavGraph(repository: NoteRepository) {
                 repository = repository,
                 isDecoy = isDecoy,
                 isDarkTheme = isDarkTheme,
-                onToggleTheme = { isDarkTheme = it },
+                onToggleTheme = onToggleTheme,
                 onLogout = {
                     isLoggedIn = false
                     navController.navigate(NavRoutes.LOGIN) {

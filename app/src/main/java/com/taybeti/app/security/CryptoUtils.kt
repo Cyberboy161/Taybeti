@@ -7,14 +7,13 @@ import java.io.InputStream
 import java.nio.ByteBuffer
 import java.security.SecureRandom
 import javax.crypto.Cipher
-import javax.crypto.CipherInputStream
-import javax.crypto.CipherOutputStream
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object CryptoUtils {
 
     private const val GCM_TAG_LENGTH = 128
+    private const val GCM_TAG_BYTES = GCM_TAG_LENGTH / 8 // 16 bytes
     private const val GCM_IV_LENGTH = 12
     private const val KEY_LENGTH = 32
     private const val ARGON2_ITERATIONS = 6
@@ -24,6 +23,7 @@ object CryptoUtils {
     private const val LENGTH_PREFIX_BYTES = 2
 
     private const val STREAM_BUFFER_SIZE = 8192
+    private const val FILE_HEADER_LENGTH = 32 + GCM_IV_LENGTH // salt(32) + iv(12) = 44
 
     private val secureRandom = SecureRandom()
 
@@ -75,9 +75,8 @@ object CryptoUtils {
         val spec = GCMParameterSpec(GCM_TAG_LENGTH, iv)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec)
         val output = cipher.doFinal(padded)
-        val tagSize = GCM_TAG_LENGTH / 8
-        val ciphertext = output.copyOfRange(0, output.size - tagSize)
-        val tag = output.copyOfRange(output.size - tagSize, output.size)
+        val ciphertext = output.copyOfRange(0, output.size - GCM_TAG_BYTES)
+        val tag = output.copyOfRange(output.size - GCM_TAG_BYTES, output.size)
         return EncryptionResult(iv, ciphertext, tag)
     }
 
@@ -126,6 +125,11 @@ object CryptoUtils {
         val tag: ByteArray
     )
 
+    /**
+     * Encrypt a file using AES-256-GCM with Argon2id key derivation.
+     * File format: [salt:32][iv:12][ciphertext...][tag:16]
+     * Uses manual chunked cipher.update()/doFinal() — reliable for GCM.
+     */
     fun encryptFile(
         inputFile: File,
         outputFile: File,
@@ -147,22 +151,36 @@ object CryptoUtils {
 
         inputFile.inputStream().use { input ->
             outputFile.outputStream().use { output ->
+                // Write header
                 output.write(salt)
                 output.write(iv)
 
-                CipherOutputStream(output, cipher).use { cipherOut ->
-                    val buffer = ByteArray(STREAM_BUFFER_SIZE)
-                    var bytesRead: Int
-                    while (input.read(buffer).also { bytesRead = it } != -1) {
-                        cipherOut.write(buffer, 0, bytesRead)
-                        processed += bytesRead
+                // Stream encrypt in chunks
+                val buffer = ByteArray(STREAM_BUFFER_SIZE)
+                var bytesRead: Int
+                var lastProgress = 0L
+                while (input.read(buffer).also { bytesRead = it } != -1) {
+                    val encrypted = cipher.update(buffer, 0, bytesRead)
+                    if (encrypted != null) output.write(encrypted)
+                    processed += bytesRead
+                    val pct = if (inputSize > 0) processed * 100 / inputSize else 0
+                    if (pct != lastProgress) {
+                        lastProgress = pct
                         progressCallback?.invoke(processed, inputSize)
                     }
                 }
+                // Finalize: produces the 16-byte GCM authentication tag
+                val tag = cipher.doFinal()
+                output.write(tag)
             }
         }
     }
 
+    /**
+     * Decrypt a file encrypted with encryptFile().
+     * File format: [salt:32][iv:12][ciphertext...][tag:16]
+     * Reads all ciphertext into memory, then calls doFinal(ciphertext + tag) — matches working in-memory decrypt.
+     */
     fun decryptFile(
         inputFile: File,
         outputFile: File,
@@ -170,34 +188,34 @@ object CryptoUtils {
         progressCallback: ((Long, Long) -> Unit)? = null
     ) {
         val inputSize = inputFile.length()
+        require(inputSize > FILE_HEADER_LENGTH + GCM_TAG_BYTES) { "File too small to be valid" }
 
         inputFile.inputStream().use { input ->
+            // Read header
             val salt = ByteArray(32)
-            val iv = ByteArray(12)
+            val iv = ByteArray(GCM_IV_LENGTH)
             input.readFully(salt)
             input.readFully(iv)
 
             val key = deriveKey(passphrase, salt)
             SecureMemory.clear(passphrase)
 
+            val ciphertextSize = (inputSize - FILE_HEADER_LENGTH - GCM_TAG_BYTES).toInt()
+            val ciphertext = ByteArray(ciphertextSize)
+            input.readFully(ciphertext)
+
+            val tag = ByteArray(GCM_TAG_BYTES)
+            input.readFully(tag)
+
             val secretKey = SecretKeySpec(key, "AES")
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             val spec = GCMParameterSpec(GCM_TAG_LENGTH, iv)
             cipher.init(Cipher.DECRYPT_MODE, secretKey, spec)
 
-            var processed: Long = 44L
-
-            CipherInputStream(input, cipher).use { cipherIn ->
-                outputFile.outputStream().use { output ->
-                    val buffer = ByteArray(STREAM_BUFFER_SIZE)
-                    var bytesRead: Int
-                    while (cipherIn.read(buffer).also { bytesRead = it } != -1) {
-                        output.write(buffer, 0, bytesRead)
-                        processed += bytesRead
-                        progressCallback?.invoke(processed, inputSize)
-                    }
-                }
-            }
+            progressCallback?.invoke(inputSize - GCM_TAG_BYTES, inputSize)
+            val padded = cipher.doFinal(ciphertext + tag)
+            outputFile.writeBytes(padded)
+            progressCallback?.invoke(inputSize, inputSize)
         }
     }
 

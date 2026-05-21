@@ -273,6 +273,22 @@ data class AppStrings(
     val recoveredFilename: String,
     val confirmEncryptionKey: String,
     val keysDoNotMatch: String,
+
+    // File Encryption Tutorial
+    val tutWhyTitle: String,
+    val tutWhyBody: String,
+    val tutCloudTitle: String,
+    val tutCloudBody: String,
+    val tutSendTitle: String,
+    val tutSendBody: String,
+    val tutHowTitle: String,
+    val tutHowSteps: String,
+    val tutMistakesTitle: String,
+    val tutMistake1: String,
+    val tutMistake2: String,
+    val tutMistake3: String,
+    val tutGotIt: String,
+    val tutDismiss: String,
 )
 
 val LocalStrings = compositionLocalOf { englishStrings }
@@ -540,6 +556,21 @@ val englishStrings = AppStrings(
     recoveredFilename = "Recovered filename",
     confirmEncryptionKey = "Confirm encryption key",
     keysDoNotMatch = "Keys do not match",
+
+    tutWhyTitle = "🔒 Why Encrypt Files?",
+    tutWhyBody = "Files you send or store can be read by anyone — cloud providers, hackers, or the platform itself. Encryption ensures only YOU and trusted people can see the content.",
+    tutCloudTitle = "☁️ Cloud Storage Is Not Private",
+    tutCloudBody = "Google Drive, iCloud, Dropbox — they store your files on servers you don't control. Employees, hackers, or legal requests can access your photos and documents.",
+    tutSendTitle = "📤 Sending Files Exposes Them",
+    tutSendBody = "When you send a file through email, WhatsApp, or any app, it passes through multiple servers. Each hop is a potential leak. Encrypted files look like random noise to interceptors.",
+    tutHowTitle = "📋 How to Use This Tool",
+    tutHowSteps = "1️⃣ Select a file or take a photo\n2️⃣ Choose to hide filename/extension\n3️⃣ Create a strong passphrase (8+ chars)\n4️⃣ Tap Encrypt and save the .taybeti file\n5️⃣ Share the encrypted file safely",
+    tutMistakesTitle = "⚠️ Common Mistakes",
+    tutMistake1 = "❌ Sending the passphrase over chat or email",
+    tutMistake2 = "❌ Using weak or predictable passwords",
+    tutMistake3 = "❌ Storing the passphrase digitally anywhere",
+    tutGotIt = "Got it!",
+    tutDismiss = "Don't show again",
 )
 
 val germanStrings = englishStrings.copy(
@@ -770,6 +801,21 @@ val germanStrings = englishStrings.copy(
     recoveredFilename = "Wiederhergestellter Dateiname",
     confirmEncryptionKey = "Verschlüsselungsschlüssel bestätigen",
     keysDoNotMatch = "Schlüssel stimmen nicht überein",
+
+    tutWhyTitle = "🔒 Warum Dateien verschlüsseln?",
+    tutWhyBody = "Dateien, die du sendest oder speicherst, können von jedem gelesen werden — Cloud-Anbieter, Hacker oder die Plattform selbst. Verschlüsselung stellt sicher, dass nur DU und vertraute Personen den Inhalt sehen können.",
+    tutCloudTitle = "☁️ Cloud-Speicher ist nicht privat",
+    tutCloudBody = "Google Drive, iCloud, Dropbox — sie speichern deine Dateien auf Servern, die du nicht kontrollierst. Mitarbeiter, Hacker oder gerichtliche Anfragen können auf deine Fotos und Dokumente zugreifen.",
+    tutSendTitle = "📤 Dateien senden macht sie sichtbar",
+    tutSendBody = "Wenn du eine Datei per E-Mail, WhatsApp oder einer anderen App sendest, passiert sie mehrere Server. Jeder Hop ist ein potenzieller Leckpunkt. Verschlüsselte Dateien sehen für Abfänger wie zufälliges Rauschen aus.",
+    tutHowTitle = "📋 So benutzt du dieses Tool",
+    tutHowSteps = "1️⃣ Wähle eine Datei oder mache ein Foto\n2️⃣ Wähle Dateiname/Endung verstecken\n3️⃣ Erstelle eine starke Passphrase (8+ Zeichen)\n4️⃣ Tippe auf Verschlüsseln und speichere die .taybeti-Datei\n5️⃣ Teile die verschlüsselte Datei sicher",
+    tutMistakesTitle = "⚠️ Häufige Fehler",
+    tutMistake1 = "❌ Passphrase über Chat oder E-Mail senden",
+    tutMistake2 = "❌ Schwache oder vorhersehbare Passwörter verwenden",
+    tutMistake3 = "❌ Passphrase digital irgendwo speichern",
+    tutGotIt = "Verstanden!",
+    tutDismiss = "Nicht mehr anzeigen",
 )
 
 val soraniStrings = englishStrings.copy(
@@ -1000,6 +1046,21 @@ val soraniStrings = englishStrings.copy(
     recoveredFilename = "ناوی فایلە وەرگیراوەکە",
     confirmEncryptionKey = "دووپاتکردنەوەی کلیلی کۆدکردن",
     keysDoNotMatch = "کلیلەکان یەک ناگرن",
+
+    tutWhyTitle = "🔒 بۆچی فایلەکان کۆد بکەین؟",
+    tutWhyBody = "ئەو فایلانەی دەینێریت یان هەڵیان دەگریت دەتوانرێت لەلایەن هەر کەسێکەوە بخوێنرێنەوە — دابینکەرانی هەور، هاکەرەکان، یان پلاتفۆرمەکە خۆی. کۆدکردن دڵنیادەکاتەوە کە تەنها تۆ و کەسە متمانەپێکراوەکان دەتوانن ناوەڕۆکەکە ببینن.",
+    tutCloudTitle = "☁️ هەڵگرتنی هەور تایبەت نییە",
+    tutCloudBody = "Google Drive، iCloud، Dropbox — هەموویان فایلەکانت لەسەر سێرڤەرەکانی خۆیان هەڵدەگرن کە تۆ کۆنتڕۆڵیان ناکەیت. کارمەندان، هاکەرەکان، یان داواکارییە یاساییەکان دەتوانن دەست بگەیەننە وێنە و بەڵگەنامەکانت.",
+    tutSendTitle = "📤 ناردنی فایلەکان ئاشکرایان دەکات",
+    tutSendBody = "کاتێک فایلێک دەنێریت لە ڕێگەی ئیمەیڵ، واتسئەپ، یان هەر ئەپێک، لە چەندین سێرڤەر تێدەپەڕێت. هەر هۆپێک خاڵێکی لەکەیەکی ئەگەرییە. فایلە کۆدکراوەکان بۆ هەر کەسێک کە دەیانگرێت وەک دەنگی هەڕەمەکی دەردەکەون.",
+    tutHowTitle = "📋 چۆن ئەم ئامرازە بەکاربهێنیت",
+    tutHowSteps = "1️⃣ فایلێک هەڵبژێرە یان وێنەیەک بگرە\n2️⃣ هەڵبژێرە ناوی فایل/پاشگری بشارەوە\n3️⃣ پاسفرەیزێکی بەهێز دروست بکە (8+ پیت)\n4️⃣ دوگمەی کۆدکردن دابگرە و فایلە .taybeti هەڵبگرە\n5️⃣ فایلە کۆدکراوەکە بە سەلامەتی هاوبەش بکە",
+    tutMistakesTitle = "⚠️ هەڵە باوەکان",
+    tutMistake1 = "❌ ناردنی پاسفرەیز لە ڕێگەی چات یان ئیمەیڵ",
+    tutMistake2 = "❌ بەکارهێنانی تێپەڕەوشەی لاواز یان پێشبینیکراو",
+    tutMistake3 = "❌ هەڵگرتنی پاسفرەیز بە شێوەیەکی دیجیتاڵ لە هەرشوێنێک",
+    tutGotIt = "تێگەشتم!",
+    tutDismiss = "زیاتر نەینیشاندەیت",
 )
 
 val kurmanjiStrings = englishStrings.copy(
@@ -1230,6 +1291,21 @@ val kurmanjiStrings = englishStrings.copy(
     recoveredFilename = "Navê pelê hatî vejandin",
     confirmEncryptionKey = "Kilîla şîfrekirinê piştrast bike",
     keysDoNotMatch = "Kilîl li hev nakin",
+
+    tutWhyTitle = "🔒 Çima Pelan Şîfre Bikin?",
+    tutWhyBody = "Pelên ku tu dişînî an tomar dikin dikarin ji hêla her kesî ve werin xwendin — peydakerên ewr, hacker, an jî platforma bi xwe. Şîfrekirin piştrast dike ku tenê TU û kesên ku tu pê bawer dikin dikarin naverokê bibînin.",
+    tutCloudTitle = "☁️ Hilgirtina ewr taybet nîne",
+    tutCloudBody = "Google Drive, iCloud, Dropbox — hemû pelên te li ser serverên ku tu kontrol nakî tomar dikin. Karmend, hacker, an daxwazên yasayî dikarin bigihîjin wêne û belgeyên te.",
+    tutSendTitle = "📤 Şandina pelan wan eşkere dike",
+    tutSendBody = "Dema ku tu pelek bi e-name, WhatsApp, an her sepanekê dişînî, ew di gelek serveran re derbas dibe. Her derbasek xalek leakê ya gengaz e. Pelên şîfrekirî ji bo her kesê ku wan digire wekî dengê rasthatinî xuya dikin.",
+    tutHowTitle = "📋 Meriv çawa vê amûrê bikar tîne",
+    tutHowSteps = "1️⃣ Pelekê hilbijêre an wêneyekî nû bigire\n2️⃣ Hilbijêre navê pel/pêvekê veşêre\n3️⃣ Şîfreyekî xurt çêke (8+ tîp)\n4️⃣ Li Şîfre bike bitikîne û pelê .taybeti tomar bike\n5️⃣ Pelê şîfrekirî bi ewlehî parve bike",
+    tutMistakesTitle = "⚠️ Şaşiyên hevpar",
+    tutMistake1 = "❌ Şîfreyê bi chat an e-nameyê bişîne",
+    tutMistake2 = "❌ Şîfreyên lawaz an pêşbînîkirî bikar bîne",
+    tutMistake3 = "❌ Şîfreyê bi awayekî dîjîtal li her derê hilîne",
+    tutGotIt = "Fêm kir!",
+    tutDismiss = "Dîsa nîşan nede",
 )
 
 val turkishStrings = englishStrings.copy(
@@ -1460,4 +1536,19 @@ val turkishStrings = englishStrings.copy(
     recoveredFilename = "Kurtarılan dosya adı",
     confirmEncryptionKey = "Şifreleme anahtarını onayla",
     keysDoNotMatch = "Anahtarlar eşleşmiyor",
+
+    tutWhyTitle = "🔒 Neden Dosya Şifrelemeli?",
+    tutWhyBody = "Gönderdiğiniz veya sakladığınız dosyalar herkes tarafından okunabilir — bulut sağlayıcıları, hackerlar veya platformun kendisi. Şifreleme, içeriği yalnızca SİZİN ve güvendiğiniz kişilerin görmesini sağlar.",
+    tutCloudTitle = "☁️ Bulut Depolama Gizli Değildir",
+    tutCloudBody = "Google Drive, iCloud, Dropbox — hepsi dosyalarınızı kontrol etmediğiniz sunucularda saklar. Çalışanlar, hackerlar veya yasal talepler fotoğraflarınıza ve belgelerinize erişebilir.",
+    tutSendTitle = "📤 Dosya Göndermek Onları Açığa Çıkarır",
+    tutSendBody = "E-posta, WhatsApp veya herhangi bir uygulama aracılığıyla bir dosya gönderdiğinizde, birden fazla sunucudan geçer. Her atlama potansiyel bir sızıntı noktasıdır. Şifreli dosyalar, ele geçiren herkes için rastgele gürültü gibi görünür.",
+    tutHowTitle = "📋 Bu Aracı Nasıl Kullanırsınız",
+    tutHowSteps = "1️⃣ Bir dosya seçin veya fotoğraf çekin\n2️⃣ Dosya adını/uzantıyı gizlemeyi seçin\n3️⃣ Güçlü bir parola oluşturun (8+ karakter)\n4️⃣ Şifrele'ye dokunun ve .taybeti dosyasını kaydedin\n5️⃣ Şifreli dosyayı güvenli şekilde paylaşın",
+    tutMistakesTitle = "⚠️ Yaygın Hatalar",
+    tutMistake1 = "❌ Parolayı sohbet veya e-posta ile göndermek",
+    tutMistake2 = "❌ Zayıf veya tahmin edilebilir şifreler kullanmak",
+    tutMistake3 = "❌ Parolayı dijital olarak herhangi bir yerde saklamak",
+    tutGotIt = "Anladım!",
+    tutDismiss = "Bir daha gösterme",
 )

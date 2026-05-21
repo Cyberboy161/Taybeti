@@ -7,6 +7,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
@@ -19,11 +23,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Apply saved locale on every launch
         val langCode = LocaleManager.getCurrentLanguage(this)
         LocaleManager.applyLocale(this, langCode)
 
-        // FLAG_SECURE — prevent screenshots and screen recording
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
@@ -34,13 +36,18 @@ class MainActivity : ComponentActivity() {
         val app = application as TaybetiApp
 
         setContent {
+            var isDarkTheme by rememberSaveable { mutableStateOf(true) }
             val layoutDirection = if (langCode == "ckb") LayoutDirection.Rtl else LayoutDirection.Ltr
-            NulldDataTheme(darkTheme = true) {
+            NulldDataTheme(darkTheme = isDarkTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     androidx.compose.runtime.CompositionLocalProvider(
                         LocalLayoutDirection provides layoutDirection
                     ) {
-                        AppNavGraph(repository = app.container.noteRepository)
+                        AppNavGraph(
+                            repository = app.container.noteRepository,
+                            isDarkTheme = isDarkTheme,
+                            onToggleTheme = { isDarkTheme = it }
+                        )
                     }
                 }
             }
@@ -49,7 +56,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        // Hint to clear decrypted content
         System.gc()
     }
 
