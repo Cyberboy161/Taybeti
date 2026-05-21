@@ -22,16 +22,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.taybeti.app.ui.components.NoteEncryptionTutorialDialog
 import com.taybeti.app.util.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InstructionsScreen(onOpenDrawer: () -> Unit, onOpenGuide: () -> Unit) {
     val strings = LocalStrings.current
+    var showNoteTutorial by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -187,8 +193,26 @@ fun InstructionsScreen(onOpenDrawer: () -> Unit, onOpenGuide: () -> Unit) {
                 Text(strings.encryptionGuideButton)
             }
 
+            Spacer(modifier = Modifier.height(12.dp))
+            androidx.compose.material3.Button(
+                onClick = { showNoteTutorial = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            ) {
+                Text("📝 Interactive Note Encryption Demo")
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+
+    if (showNoteTutorial) {
+        NoteEncryptionTutorialDialog(
+            onDismiss = { showNoteTutorial = false }
+        )
     }
 }
 

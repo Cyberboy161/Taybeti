@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.taybeti.app.data.repository.NoteRepository
 import com.taybeti.app.ui.components.KeyboardHost
+import com.taybeti.app.ui.components.NoteEncryptionTutorialDialog
 import com.taybeti.app.ui.components.PasswordField
 import com.taybeti.app.util.Constants
 import com.taybeti.app.util.LocalStrings
@@ -54,6 +55,7 @@ fun SetupScreen(
     var showDecoyInfo by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var showTutorial by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     KeyboardHost {
@@ -107,24 +109,22 @@ fun SetupScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        strings.setupEnableDecoy,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (enableDecoy) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.error
+                Text(
+                    strings.setupEnableDecoy,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (enableDecoy) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.error
+                )
+                IconButton(onClick = { showDecoyInfo = true }) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = "Why enable decoy?",
+                        tint = if (enableDecoy) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.error
                     )
-                    IconButton(onClick = { showDecoyInfo = true }) {
-                        Icon(
-                            Icons.Default.Info,
-                            contentDescription = "Why enable decoy?",
-                            tint = if (enableDecoy) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.error
-                        )
-                    }
                 }
                 Switch(
                     checked = enableDecoy,
@@ -239,8 +239,9 @@ fun SetupScreen(
                             confirmPassword = ""
                             decoyPassword = ""
                             confirmDecoy = ""
-                            if (result.isSuccess) onSetupComplete()
-                            else error = "Setup failed: ${result.exceptionOrNull()?.message}"
+                            if (result.isSuccess) {
+                                showTutorial = true
+                            } else error = "Setup failed: ${result.exceptionOrNull()?.message}"
                         }
                     }
                 }
@@ -248,10 +249,20 @@ fun SetupScreen(
             enabled = !isLoading,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp, top = 12.dp)
         ) {
             Text(if (isLoading) "Setting up..." else strings.setupCreateBtn)
         }
     } // end outer Column
+    }
+
+    if (showTutorial) {
+        NoteEncryptionTutorialDialog(
+            onDismiss = {
+                showTutorial = false
+                onSetupComplete()
+            }
+        )
     }
 }
