@@ -206,7 +206,8 @@ class NoteRepository(
         noteId: String,
         title: String,
         plaintext: ByteArray,
-        passphrase: CharArray
+        passphrase: CharArray,
+        attachmentsJson: String = "[]"
     ): Result<NoteEntity> = withContext(Dispatchers.IO) {
         try {
             val salt = CryptoUtils.generateSalt()
@@ -231,7 +232,8 @@ class NoteRepository(
                 isDeleted = false,
                 isDecoyNote = existing?.isDecoyNote ?: false,
                 createdDate = existing?.createdDate ?: now,
-                modifiedDate = now
+                modifiedDate = now,
+                attachments = attachmentsJson
             )
             noteDao.insert(note)
             Result.success(note)

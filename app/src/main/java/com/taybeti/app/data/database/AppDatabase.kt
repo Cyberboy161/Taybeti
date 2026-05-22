@@ -11,7 +11,7 @@ import com.taybeti.app.data.entities.NoteEntity
 
 @Database(
     entities = [LoginInfo::class, NoteEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

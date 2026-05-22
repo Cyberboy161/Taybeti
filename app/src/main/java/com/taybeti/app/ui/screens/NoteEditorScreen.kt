@@ -1,7 +1,14 @@
 package com.taybeti.app.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,14 +18,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.VideoFile
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -47,8 +63,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -56,13 +74,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.taybeti.app.data.entities.NoteEntity
 import com.taybeti.app.data.repository.NoteRepository
+import com.taybeti.app.security.AttachmentManager
+import com.taybeti.app.security.AttachmentManager.getAttachmentsList
+import com.taybeti.app.security.AttachmentManager.attachmentsToJson
+import com.taybeti.app.security.NoteAttachment
 import com.taybeti.app.security.SecureMemory
 import com.taybeti.app.ui.components.AppTextField
 import com.taybeti.app.ui.components.CustomKeyboard
 import com.taybeti.app.ui.components.KeyboardHost
 import com.taybeti.app.ui.components.KeyboardState
 import com.taybeti.app.ui.components.LocalKeyboardState
+import com.taybeti.app.ui.components.NoteFormattingToolbar
 import com.taybeti.app.ui.components.PasswordField
+import com.taybeti.app.ui.components.AttachmentType
+import com.taybeti.app.ui.components.toMimePattern
 import com.taybeti.app.util.Constants
 import com.taybeti.app.util.DecoyEncoder
 import com.taybeti.app.util.DecoyPlatform
@@ -100,6 +125,27 @@ fun NoteEditorScreen(
     var editKey by remember { mutableStateOf("") }
     var editKeyError by remember { mutableStateOf<String?>(null) }
     val clipboard = LocalClipboardManager.current
+
+    val attachments = remember { mutableStateListOf<NoteAttachment>() }
+    var pendingAttachmentType by remember { mutableStateOf<AttachmentType?>(null) }
+
+    val attachmentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null && pendingAttachmentType != null) {
+            scope.launch {
+                val result = AttachmentManager.copyAttachment(
+                    context, noteId, uri, context.contentResolver
+                )
+                result.onSuccess { attachment ->
+                    attachments.add(attachment)
+                }.onFailure {
+                    Toast.makeText(context, "Failed to attach file", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        pendingAttachmentType = null
+    }
 
     val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || plaintext.isNotEmpty())
 
@@ -245,6 +291,8 @@ fun NoteEditorScreen(
                     isNewNote = false
                     showCreateKeyDialog = false
                     showKeyDialog = true
+                    attachments.clear()
+                    attachments.addAll(getAttachmentsList(existing.attachments))
                 }
             }
         }
@@ -499,8 +547,9 @@ fun NoteEditorScreen(
                                 onClick = {
                                     scope.launch {
                                         val plainBytes = plaintext.toByteArray(Charsets.UTF_8)
+                                        val attachmentsJson = attachmentsToJson(attachments.toList())
                                         val result = repository.encryptNoteContent(
-                                            noteId, title, plainBytes, noteKey.toCharArray()
+                                            noteId, title, plainBytes, noteKey.toCharArray(), attachmentsJson
                                         )
                                         if (result.isSuccess) {
                                             val note = result.getOrNull()!!
@@ -581,7 +630,20 @@ fun NoteEditorScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    NoteFormattingToolbar(
+                        onInsertFormat = { format ->
+                            plaintext = plaintext + format
+                        },
+                        onAddAttachment = { type ->
+                            pendingAttachmentType = type
+                            attachmentLauncher.launch(type.toMimePattern())
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     AppTextField(
                         value = plaintext,
                         onValueChange = { plaintext = it },
@@ -592,6 +654,77 @@ fun NoteEditorScreen(
                         singleLine = false,
                         minLines = 1
                     )
+
+                    if (attachments.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Attachments", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            attachments.forEach { att ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Icon(
+                                            imageVector = when (att.type) {
+                                                com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE -> Icons.Default.Image
+                                                com.taybeti.app.security.NoteAttachment.AttachmentType.AUDIO -> Icons.Default.MusicNote
+                                                com.taybeti.app.security.NoteAttachment.AttachmentType.VIDEO -> Icons.Default.VideoFile
+                                                else -> Icons.Default.Description
+                                            },
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column {
+                                            Text(
+                                                att.originalName,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontWeight = FontWeight.Medium,
+                                                maxLines = 1
+                                            )
+                                            Text(
+                                                "${att.size / 1024} KB",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                            )
+                                        }
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch {
+                                                AttachmentManager.deleteAttachment(context, noteId, att.id, att.storedPath)
+                                                attachments.remove(att)
+                                            }
+                                        },
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Close,
+                                            "Remove",
+                                            modifier = Modifier.size(16.dp),
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
