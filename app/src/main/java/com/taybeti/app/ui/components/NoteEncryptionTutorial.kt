@@ -375,35 +375,17 @@ fun NoteEncryptionTutorialDialog(
                     AnimatedVisibility(
                         visible = isKeyboardVisible,
                         enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it })
+                        exit = slideOutVertically(targetOffsetY = { it }),
+                        modifier = Modifier.align(Alignment.BottomCenter)
                     ) {
-                        Column(
+                        CustomKeyboard(
+                            onKeyPress = { handleKeyPress(it) },
+                            onDelete = { handleDelete() },
+                            onDone = { activeField = null },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .align(Alignment.BottomCenter)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                IconButton(onClick = ::handleCopy, modifier = Modifier.size(32.dp)) {
-                                    Icon(Icons.Default.ContentCopy, "Copy", modifier = Modifier.size(18.dp))
-                                }
-                                IconButton(onClick = ::handlePaste, modifier = Modifier.size(32.dp)) {
-                                    Icon(Icons.Default.ContentPaste, "Paste", modifier = Modifier.size(18.dp))
-                                }
-                            }
-                            CustomKeyboard(
-                                onKeyPress = { handleKeyPress(it) },
-                                onDelete = { handleDelete() },
-                                onDone = { activeField = null },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .navigationBarsPadding()
-                            )
-                        }
+                                .navigationBarsPadding()
+                        )
                     }
                 }
             }
