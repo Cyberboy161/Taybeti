@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
@@ -26,6 +27,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -63,6 +65,8 @@ fun NoteListScreen(
     val context = LocalContext.current
     val strings = LocalStrings.current
     var notes by remember { mutableStateOf<List<NoteEntity>>(emptyList()) }
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
     val db = remember { com.taybeti.app.data.database.AppDatabase.getInstance(context) }
     val scope = rememberCoroutineScope()
 
@@ -77,6 +81,17 @@ fun NoteListScreen(
 
     LaunchedEffect(showFavorites, isDecoy) { refresh() }
 
+    val filteredNotes = remember(notes, searchQuery, isSearchActive) {
+        if (!isSearchActive || searchQuery.isBlank()) {
+            notes
+        } else {
+            val query = searchQuery.lowercase()
+            notes.filter { note ->
+                note.title.lowercase().contains(query)
+            }
+        }
+    }
+
     val title = when {
         showFavorites -> strings.favorites
         isDecoy -> strings.decoyNotes
@@ -87,7 +102,17 @@ fun NoteListScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(title, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                    if (isSearchActive) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Search notes...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    } else {
+                        Text(title, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onOpenDrawer) {
@@ -95,6 +120,19 @@ fun NoteListScreen(
                             Icons.Default.Menu,
                             contentDescription = "Menu",
                             tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        isSearchActive = !isSearchActive
+                        if (!isSearchActive) searchQuery = ""
+                    }) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = if (isSearchActive) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -133,7 +171,7 @@ fun NoteListScreen(
                     .padding(padding)
                     .padding(horizontal = 16.dp)
             ) {
-                items(notes, key = { it.id }) { note ->
+                items(filteredNotes, key = { it.id }) { note ->
                     NoteListItem(
                         note = note,
                         strings = strings,

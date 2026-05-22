@@ -707,7 +707,7 @@ fun NoteEditorScreen(
                                     IconButton(
                                         onClick = {
                                             scope.launch {
-                                                AttachmentManager.deleteAttachment(context, noteId, att.id, att.storedPath)
+                                                AttachmentManager.deleteAttachment(context, noteId, att)
                                                 attachments.remove(att)
                                             }
                                         },

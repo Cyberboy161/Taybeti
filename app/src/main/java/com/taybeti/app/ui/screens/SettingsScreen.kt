@@ -30,11 +30,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.taybeti.app.security.SecuritySettingsManager
 import com.taybeti.app.util.LocaleManager
 import com.taybeti.app.util.LocalStrings
 
@@ -55,10 +57,37 @@ fun SettingsScreen(
     showNoteDate: Boolean = true,
     onShowNoteDateChange: (Boolean) -> Unit = {}
 ) {
+    val context = LocalContext.current
     val strings = LocalStrings.current
     var showLanguagePicker by remember { mutableStateOf(false) }
     var showLockTimerDropdown by remember { mutableStateOf(false) }
-    var rootDetectionEnabled by remember { mutableStateOf(true) }
+
+    // Memory & Data settings
+    var autoClearClipboard by remember { mutableStateOf(false) }
+    var shredDeletedNotes by remember { mutableStateOf(false) }
+    var excludeFromRecents by remember { mutableStateOf(false) }
+    var disableLockscreenPreview by remember { mutableStateOf(false) }
+
+    // App Integrity settings
+    var checkAppSignature by remember { mutableStateOf(false) }
+    var detectEmulator by remember { mutableStateOf(false) }
+    var antiDebugging by remember { mutableStateOf(false) }
+    var checkSuspiciousProcesses by remember { mutableStateOf(false) }
+
+    // File Security settings
+    var secureFileDeletion by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        autoClearClipboard = SecuritySettingsManager.getAutoClearClipboard(context)
+        shredDeletedNotes = SecuritySettingsManager.getShredDeletedNotes(context)
+        excludeFromRecents = SecuritySettingsManager.getExcludeFromRecents(context)
+        disableLockscreenPreview = SecuritySettingsManager.getDisableLockscreenPreview(context)
+        checkAppSignature = SecuritySettingsManager.getCheckAppSignature(context)
+        detectEmulator = SecuritySettingsManager.getDetectEmulator(context)
+        antiDebugging = SecuritySettingsManager.getAntiDebugging(context)
+        checkSuspiciousProcesses = SecuritySettingsManager.getCheckSuspiciousProcesses(context)
+        secureFileDeletion = SecuritySettingsManager.getSecureFileDeletion(context)
+    }
 
     val lockOptions = remember {
         listOf(
@@ -96,14 +125,6 @@ fun SettingsScreen(
                 subtitle = strings.darkThemeSubtitle,
                 checked = isDarkTheme,
                 onCheckedChange = onToggleTheme
-            )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-            SettingsToggle(
-                title = strings.rootDetectionTitle,
-                subtitle = strings.rootDetectionSubtitle,
-                checked = rootDetectionEnabled,
-                onCheckedChange = { rootDetectionEnabled = it }
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
@@ -178,6 +199,134 @@ fun SettingsScreen(
                 checked = showNoteDate,
                 onCheckedChange = onShowNoteDateChange
             )
+
+            // Memory & Data Section
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Memory & Data",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Clear clipboard after copy",
+                subtitle = "Auto-clear clipboard 30s after copying decrypted content",
+                checked = autoClearClipboard,
+                onCheckedChange = {
+                    autoClearClipboard = it
+                    SecuritySettingsManager.setAutoClearClipboard(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Shred deleted notes",
+                subtitle = "Overwrite with random data before deletion",
+                checked = shredDeletedNotes,
+                onCheckedChange = {
+                    shredDeletedNotes = it
+                    SecuritySettingsManager.setShredDeletedNotes(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Hide from recent apps",
+                subtitle = "Prevent app content from showing in Android's recent apps screen",
+                checked = excludeFromRecents,
+                onCheckedChange = {
+                    excludeFromRecents = it
+                    SecuritySettingsManager.setExcludeFromRecents(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Disable lock screen preview",
+                subtitle = "Disable notification preview on lock screen",
+                checked = disableLockscreenPreview,
+                onCheckedChange = {
+                    disableLockscreenPreview = it
+                    SecuritySettingsManager.setDisableLockscreenPreview(context, it)
+                }
+            )
+
+            // App Integrity Section
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "App Integrity",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Check app signature",
+                subtitle = "Detect tampered APKs at runtime",
+                checked = checkAppSignature,
+                onCheckedChange = {
+                    checkAppSignature = it
+                    SecuritySettingsManager.setCheckAppSignature(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Detect emulator",
+                subtitle = "Check if app is running on an emulator",
+                checked = detectEmulator,
+                onCheckedChange = {
+                    detectEmulator = it
+                    SecuritySettingsManager.setDetectEmulator(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Anti-debugging",
+                subtitle = "Detect Frida, Xposed, or other hooking frameworks",
+                checked = antiDebugging,
+                onCheckedChange = {
+                    antiDebugging = it
+                    SecuritySettingsManager.setAntiDebugging(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Check suspicious processes",
+                subtitle = "Scan for suspicious running processes",
+                checked = checkSuspiciousProcesses,
+                onCheckedChange = {
+                    checkSuspiciousProcesses = it
+                    SecuritySettingsManager.setCheckSuspiciousProcesses(context, it)
+                }
+            )
+
+            // File Security Section
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "File Security",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = "Secure file deletion",
+                subtitle = "Shred exported decrypted files after viewing",
+                checked = secureFileDeletion,
+                onCheckedChange = {
+                    secureFileDeletion = it
+                    SecuritySettingsManager.setSecureFileDeletion(context, it)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 
