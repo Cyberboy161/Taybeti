@@ -100,6 +100,7 @@ fun NoteListScreen(
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
     var showLoadNoteDialog by remember { mutableStateOf(false) }
+    var searchFieldActive by remember { mutableStateOf(false) }
     val db = remember { com.taybeti.app.data.database.AppDatabase.getInstance(context) }
     val scope = rememberCoroutineScope()
 
@@ -136,13 +137,26 @@ fun NoteListScreen(
             TopAppBar(
                 title = {
                     if (isSearchActive) {
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            placeholder = { Text("Search notes...") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                .border(
+                                    width = 1.dp,
+                                    color = if (searchFieldActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .clickable { searchFieldActive = true }
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = if (searchQuery.isEmpty()) "Search notes..." else searchQuery,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (searchQuery.isEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     } else {
                         Text(title, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                     }
@@ -159,6 +173,7 @@ fun NoteListScreen(
                 actions = {
                     IconButton(onClick = {
                         isSearchActive = !isSearchActive
+                        searchFieldActive = isSearchActive
                         if (!isSearchActive) searchQuery = ""
                     }) {
                         Icon(
@@ -228,6 +243,22 @@ fun NoteListScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
+        }
+    }
+
+    if (isSearchActive && searchFieldActive) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CustomKeyboard(
+                onKeyPress = { char -> searchQuery += char },
+                onDelete = { if (searchQuery.isNotEmpty()) searchQuery = searchQuery.dropLast(1) },
+                onDone = { searchFieldActive = false },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+            )
         }
     }
 
@@ -362,27 +393,23 @@ private fun LoadNoteDialog(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surface
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text("Load Encrypted Note") },
-                        navigationIcon = {
-                            IconButton(onClick = onDismiss) {
-                                Icon(Icons.Default.ArrowBack, "Back")
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopAppBar(
+                    title = { Text("Load Encrypted Note") },
+                    navigationIcon = {
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Default.ArrowBack, "Back")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
-                }
-            ) { padding ->
+                )
+
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(16.dp)
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
                     Text(
@@ -455,139 +482,133 @@ private fun LoadNoteDialog(
                         Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    TextButton(
+                        onClick = onDismiss,
+                        enabled = !isLoading,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        TextButton(
-                            onClick = onDismiss,
-                            enabled = !isLoading,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Cancel")
-                        }
-                        Button(
-                            onClick = {
-                                if (title.isBlank()) {
-                                    error = "Title is required"
-                                    return@Button
-                                }
-                                if (encryptedBlob.isBlank()) {
-                                    error = "Encrypted blob is required"
-                                    return@Button
-                                }
-                                if (passphrase.isBlank()) {
-                                    error = "Passphrase is required"
-                                    return@Button
-                                }
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+                            if (title.isBlank()) {
+                                error = "Title is required"
+                                return@Button
+                            }
+                            if (encryptedBlob.isBlank()) {
+                                error = "Encrypted blob is required"
+                                return@Button
+                            }
+                            if (passphrase.isBlank()) {
+                                error = "Passphrase is required"
+                                return@Button
+                            }
 
-                                isLoading = true
-                                scope.launch {
+                            isLoading = true
+                            scope.launch {
+                                try {
+                                    var rawBlob = encryptedBlob.trim()
+
+                                    for (platform in DecoyPlatform.entries) {
+                                        val decoded = DecoyEncoder.decode(rawBlob, platform)
+                                        if (decoded != null) {
+                                            rawBlob = decoded
+                                            break
+                                        }
+                                    }
+
+                                    val parts = rawBlob.split("::")
+                                    if (parts.size != 4) {
+                                        error = "Invalid blob format. Expected salt::iv::tag::ciphertext"
+                                        isLoading = false
+                                        return@launch
+                                    }
+
+                                    val b64 = Base64.getDecoder()
+                                    val salt = b64.decode(parts[0])
+                                    val iv = b64.decode(parts[1])
+                                    val tag = b64.decode(parts[2])
+                                    val ciphertext = b64.decode(parts[3])
+
+                                    val key = CryptoUtils.deriveKey(passphrase.toCharArray(), salt)
+                                    val plaintextBytes = CryptoUtils.decrypt(ciphertext, key, iv, tag)
+                                    SecureMemory.clear(key)
+                                    SecureMemory.clear(passphrase.toCharArray())
+
+                                    val plaintext = String(plaintextBytes, Charsets.UTF_8)
+                                    val noteId = generateNoteId()
+                                    val now = System.currentTimeMillis()
+
+                                    var noteContent = plaintext
+                                    var attachmentsJson = "[]"
+
                                     try {
-                                        var rawBlob = encryptedBlob.trim()
-
-                                        for (platform in DecoyPlatform.entries) {
-                                            val decoded = DecoyEncoder.decode(rawBlob, platform)
-                                            if (decoded != null) {
-                                                rawBlob = decoded
-                                                break
-                                            }
+                                        val json = JSONObject(plaintext)
+                                        if (json.has("content")) {
+                                            noteContent = json.getString("content")
                                         }
-
-                                        val parts = rawBlob.split("::")
-                                        if (parts.size != 4) {
-                                            error = "Invalid blob format. Expected salt::iv::tag::ciphertext"
-                                            isLoading = false
-                                            return@launch
+                                        if (json.has("attachments")) {
+                                            attachmentsJson = json.getJSONArray("attachments").toString()
                                         }
+                                    } catch (_: Exception) {
+                                    }
 
-                                        val b64 = Base64.getDecoder()
-                                        val salt = b64.decode(parts[0])
-                                        val iv = b64.decode(parts[1])
-                                        val tag = b64.decode(parts[2])
-                                        val ciphertext = b64.decode(parts[3])
+                                    val note = NoteEntity(
+                                        id = noteId,
+                                        title = title,
+                                        salt = salt,
+                                        iv = iv,
+                                        ciphertext = ciphertext,
+                                        tag = tag,
+                                        isEncrypted = true,
+                                        isFavorite = false,
+                                        isDeleted = false,
+                                        isDecoyNote = false,
+                                        createdDate = now,
+                                        modifiedDate = now,
+                                        attachments = attachmentsJson
+                                    )
+                                    db.noteDao().insert(note)
 
-                                        val key = CryptoUtils.deriveKey(passphrase.toCharArray(), salt)
-                                        val plaintextBytes = CryptoUtils.decrypt(ciphertext, key, iv, tag)
-                                        SecureMemory.clear(key)
-                                        SecureMemory.clear(passphrase.toCharArray())
-
-                                        val plaintext = String(plaintextBytes, Charsets.UTF_8)
-                                        val noteId = generateNoteId()
-                                        val now = System.currentTimeMillis()
-
-                                        var noteContent = plaintext
-                                        var attachmentsJson = "[]"
-
-                                        try {
-                                            val json = JSONObject(plaintext)
-                                            if (json.has("content")) {
-                                                noteContent = json.getString("content")
-                                            }
-                                            if (json.has("attachments")) {
-                                                attachmentsJson = json.getJSONArray("attachments").toString()
-                                            }
-                                        } catch (_: Exception) {
-                                        }
-
-                                        val note = NoteEntity(
-                                            id = noteId,
-                                            title = title,
-                                            salt = salt,
-                                            iv = iv,
-                                            ciphertext = ciphertext,
-                                            tag = tag,
-                                            isEncrypted = true,
-                                            isFavorite = false,
-                                            isDeleted = false,
-                                            isDecoyNote = false,
-                                            createdDate = now,
-                                            modifiedDate = now,
-                                            attachments = attachmentsJson
-                                        )
-                                        db.noteDao().insert(note)
-
-                                        val attachments = getAttachmentsList(attachmentsJson)
-                                        if (attachments.isNotEmpty()) {
-                                            for (att in attachments) {
-                                                if (att.encryptedPath.isNotEmpty()) {
-                                                    val encFile = java.io.File(att.encryptedPath)
-                                                    if (encFile.exists()) {
-                                                        val destDir = AttachmentManager.getNoteDir(context, noteId)
-                                                        val destFile = java.io.File(destDir, encFile.name)
-                                                        encFile.copyTo(destFile, overwrite = true)
-                                                    }
+                                    val attachments = getAttachmentsList(attachmentsJson)
+                                    if (attachments.isNotEmpty()) {
+                                        for (att in attachments) {
+                                            if (att.encryptedPath.isNotEmpty()) {
+                                                val encFile = java.io.File(att.encryptedPath)
+                                                if (encFile.exists()) {
+                                                    val destDir = AttachmentManager.getNoteDir(context, noteId)
+                                                    val destFile = java.io.File(destDir, encFile.name)
+                                                    encFile.copyTo(destFile, overwrite = true)
                                                 }
                                             }
                                         }
-
-                                        onSuccess()
-                                    } catch (e: Exception) {
-                                        error = "Failed to decrypt: ${e.message ?: "Wrong passphrase"}"
-                                    } finally {
-                                        isLoading = false
                                     }
+
+                                    onSuccess()
+                                } catch (e: Exception) {
+                                    error = "Failed to decrypt: ${e.message ?: "Wrong passphrase"}"
+                                } finally {
+                                    isLoading = false
                                 }
-                            },
-                            enabled = !isLoading,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(if (isLoading) "Loading..." else "Load Note")
-                        }
+                            }
+                        },
+                        enabled = !isLoading,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(if (isLoading) "Loading..." else "Load Note")
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
-            }
 
-            if (activeField != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                ) {
+                if (activeField != null) {
                     CustomKeyboard(
                         onKeyPress = { char ->
                             when (activeField) {
@@ -612,7 +633,6 @@ private fun LoadNoteDialog(
             }
         }
     }
-}
 }
 
 @Composable
