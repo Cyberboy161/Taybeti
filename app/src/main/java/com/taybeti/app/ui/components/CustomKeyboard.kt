@@ -560,10 +560,17 @@ private fun RowScope.LetterKey(
                 if (longPressChar != null) {
                     Modifier.combinedClickable(
                         onClick = { onKey(display) },
-                        onLongClick = { onKey(longPressChar) }
+                        onLongClick = {
+                            repeat(8) { onKey(display) }
+                        }
                     )
                 } else {
-                    Modifier.clickable { onKey(display) }
+                    Modifier.combinedClickable(
+                        onClick = { onKey(display) },
+                        onLongClick = {
+                            repeat(8) { onKey(display) }
+                        }
+                    )
                 }
             ),
         contentAlignment = Alignment.Center

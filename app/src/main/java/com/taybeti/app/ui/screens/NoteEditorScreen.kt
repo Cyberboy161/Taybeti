@@ -602,34 +602,69 @@ fun NoteEditorScreen(
         if (showEncryptDialog) {
             AlertDialog(
                 onDismissRequest = { showEncryptDialog = false },
-                title = { Text("Encrypt Note") },
-                text = { Text("Encrypt this note with ${images.size} image(s) into a single encrypted blob?") },
-                confirmButton = {
-                    Button(onClick = {
-                        showEncryptDialog = false
-                        scope.launch {
-                            val noteJson = buildNoteJson(plaintext, images)
-                            val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
-                            val result = repository.encryptNoteContent(
-                                noteId, title, plainBytes, noteKey.toCharArray(), ""
-                            )
-                            if (result.isSuccess) {
-                                val note = result.getOrNull()!!
-                                val b64 = Base64.getEncoder()
-                                encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
-                                showEncryptedOutput = true
-                                SecureMemory.clear(plaintext.toCharArray())
-                                plaintext = ""
-                                images.clear()
-                                isLocked = true
-                                Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
+                title = { Text("Encrypt Note", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column {
+                        Text("Choose how to encrypt this note with ${images.size} image(s):")
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = {
+                                showEncryptDialog = false
+                                scope.launch {
+                                    val noteJson = buildNoteJson(plaintext, images)
+                                    val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
+                                    val result = repository.encryptNoteContent(
+                                        noteId, title, plainBytes, noteKey.toCharArray(), ""
+                                    )
+                                    if (result.isSuccess) {
+                                        val note = result.getOrNull()!!
+                                        val b64 = Base64.getEncoder()
+                                        encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
+                                        showEncryptedOutput = true
+                                        SecureMemory.clear(plaintext.toCharArray())
+                                        plaintext = ""
+                                        images.clear()
+                                        isLocked = true
+                                        Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Shield, null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(horizontalAlignment = Alignment.Start) {
+                                Text("Encrypt as Blob", fontWeight = FontWeight.Bold)
+                                Text("Single encrypted text blob (copy/share)", style = MaterialTheme.typography.bodySmall)
                             }
                         }
-                    }) {
-                        Text("Encrypt")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                showEncryptDialog = false
+                                scope.launch {
+                                    val noteJson = buildNoteJson(plaintext, images)
+                                    val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
+                                    val noteFile = File(context.filesDir, "encrypted_notes")
+                                    if (!noteFile.exists()) noteFile.mkdirs()
+                                    val outputFile = File(noteFile, "${title.ifEmpty { "note" }}.taybeti")
+                                    outputFile.writeBytes(plainBytes)
+                                    Toast.makeText(context, "Note saved to ${outputFile.absolutePath}", Toast.LENGTH_LONG).show()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            Icon(Icons.Default.AttachFile, null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(horizontalAlignment = Alignment.Start) {
+                                Text("Encrypt as File", fontWeight = FontWeight.Bold)
+                                Text("Save encrypted note as .taybeti file", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
                     }
                 },
-                dismissButton = {
+                confirmButton = {
                     TextButton(onClick = { showEncryptDialog = false }) {
                         Text("Cancel")
                     }
@@ -782,13 +817,19 @@ private fun WordEditorCanvas(
     onImageDelete: (String) -> Unit
 ) {
     val kbState = remember { KeyboardState() }
-    var canvasWidth by remember { mutableStateOf(0f) }
-    var canvasHeight by remember { mutableStateOf(0f) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .clickable {
+                kbState.attach(
+                    onKey = { char ->
+                        val toInsert = if (char == 'P') "PPPPPPPP" else char.toString()
+                        onTextChange(text + toInsert)
+                    },
+                    onDel = { if (text.isNotEmpty()) onTextChange(text.dropLast(1)) },
+                    onDone = { kbState.detach() }
+                )
                 images.forEach { img ->
                     if (img.isSelected) {
                         onImageUpdate(img.copy(isSelected = false))
@@ -796,52 +837,45 @@ private fun WordEditorCanvas(
                 }
             }
     ) {
-        CompositionLocalProvider(LocalKeyboardState provides kbState) {
-            BasicTextField(
-                value = text,
-                onValueChange = onTextChange,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                decorationBox = { innerTextField ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { kbState.attach(
-                                onKey = { char -> onTextChange(text + char) },
-                                onDel = { if (text.isNotEmpty()) onTextChange(text.dropLast(1)) },
-                                onDone = { kbState.detach() }
-                            ) }
-                    ) {
-                        if (text.isEmpty()) {
-                            Text(
-                                "Start typing here...",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                        innerTextField()
-                    }
-                }
+        // Text layer
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = text.ifEmpty { "Start typing here..." },
+                color = if (text.isEmpty()) Color.Gray else MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
+        // Behind text images
         images.filter { it.layer == ImageLayer.BEHIND_TEXT }.forEach { img ->
             DraggableImage(
                 image = img,
-                canvasWidth = canvasWidth,
-                canvasHeight = canvasHeight,
                 onSelect = onImageSelect,
                 onUpdate = onImageUpdate,
                 onDelete = onImageDelete
             )
         }
 
+        // In front images
         images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT }.forEach { img ->
             DraggableImage(
                 image = img,
-                canvasWidth = canvasWidth,
-                canvasHeight = canvasHeight,
+                onSelect = onImageSelect,
+                onUpdate = onImageUpdate,
+                onDelete = onImageDelete
+            )
+        }
+
+        // In front images
+        images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT }.forEach { img ->
+            DraggableImage(
+                image = img,
                 onSelect = onImageSelect,
                 onUpdate = onImageUpdate,
                 onDelete = onImageDelete
@@ -850,7 +884,10 @@ private fun WordEditorCanvas(
 
         if (kbState.isVisible) {
             CustomKeyboard(
-                onKeyPress = { char -> onTextChange(text + char) },
+                onKeyPress = { char ->
+                    val toInsert = if (char == 'P') "PPPPPPPP" else char.toString()
+                    onTextChange(text + toInsert)
+                },
                 onDelete = { if (text.isNotEmpty()) onTextChange(text.dropLast(1)) },
                 onDone = { kbState.detach() }
             )
@@ -861,15 +898,12 @@ private fun WordEditorCanvas(
 @Composable
 private fun DraggableImage(
     image: EditorImage,
-    canvasWidth: Float,
-    canvasHeight: Float,
     onSelect: (String) -> Unit,
     onUpdate: (EditorImage) -> Unit,
     onDelete: (String) -> Unit
 ) {
     var offsetX by remember { mutableStateOf(image.x) }
     var offsetY by remember { mutableStateOf(image.y) }
-    var isDragging by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -884,13 +918,14 @@ private fun DraggableImage(
             .pointerInput(image.attachment.id) {
                 detectDragGestures(
                     onDragStart = {
-                        isDragging = true
                         onSelect(image.attachment.id)
                         if (!image.isSelected) {
                             onUpdate(image.copy(isSelected = true))
                         }
                     },
-                    onDragEnd = { isDragging = false },
+                    onDragEnd = {
+                        onUpdate(image.copy(x = offsetX, y = offsetY, isSelected = false))
+                    },
                     onDrag = { change, dragAmount ->
                         change.consume()
                         offsetX += dragAmount.x

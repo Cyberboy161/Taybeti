@@ -1,5 +1,9 @@
 package com.taybeti.app.ui.screens
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +30,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -101,8 +106,82 @@ fun NoteListScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     var showLoadNoteDialog by remember { mutableStateOf(false) }
     var searchFieldActive by remember { mutableStateOf(false) }
+    var showLoadFilePicker by remember { mutableStateOf(false) }
     val db = remember { com.taybeti.app.data.database.AppDatabase.getInstance(context) }
     val scope = rememberCoroutineScope()
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                try {
+                    val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    if (bytes != null) {
+                        val plaintext = String(bytes, Charsets.UTF_8)
+                        val noteId = generateNoteId()
+                        val now = System.currentTimeMillis()
+                        
+                        val (content, attJson) = try {
+                            val json = org.json.JSONObject(plaintext)
+                            if (json.has("images")) {
+                                val c = json.optString("content", "")
+                                val imagesArray = json.getJSONArray("images")
+                                val imagesList = mutableListOf<String>()
+                                for (i in 0 until imagesArray.length()) {
+                                    imagesList.add(imagesArray.getJSONObject(i).toString())
+                                }
+                                c to "[" + imagesList.joinToString(",") + "]"
+                            } else {
+                                json.optString("content", plaintext) to (json.optJSONArray("attachments")?.toString() ?: "[]")
+                            }
+                        } catch (_: Exception) {
+                            plaintext to "[]"
+                        }
+                        
+                        val note = NoteEntity(
+                            id = noteId,
+                            title = "Loaded Note",
+                            salt = byteArrayOf(),
+                            iv = byteArrayOf(),
+                            ciphertext = bytes,
+                            tag = byteArrayOf(),
+                            isEncrypted = true,
+                            isFavorite = false,
+                            isDeleted = false,
+                            isDecoyNote = false,
+                            createdDate = now,
+                            modifiedDate = now,
+                            attachments = attJson
+                        )
+                        db.noteDao().insert(note)
+                        
+                        val attachments = getAttachmentsList(attJson, context, noteId)
+                        if (attachments.isNotEmpty()) {
+                            for (att in attachments) {
+                                if (att.encryptedPath.isNotEmpty()) {
+                                    val encFile = java.io.File(att.encryptedPath)
+                                    if (encFile.exists()) {
+                                        val destDir = AttachmentManager.getNoteDir(context, noteId)
+                                        val destFile = java.io.File(destDir, encFile.name)
+                                        encFile.copyTo(destFile, overwrite = true)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        Toast.makeText(context, "Note loaded successfully", Toast.LENGTH_SHORT).show()
+                        notes = when {
+                            showFavorites -> db.noteDao().getFavorites(isDecoy)
+                            else -> db.noteDao().getAllActive(isDecoy)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Failed to load note: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
     fun refresh() {
         scope.launch {
@@ -192,6 +271,12 @@ fun NoteListScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FloatingActionButton(
+                    onClick = { showLoadFilePicker = true },
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                ) {
+                    Icon(Icons.Default.FolderOpen, contentDescription = "Load from File")
+                }
+                FloatingActionButton(
                     onClick = { showLoadNoteDialog = true },
                     containerColor = MaterialTheme.colorScheme.secondary
                 ) {
@@ -270,6 +355,11 @@ fun NoteListScreen(
                 refresh()
             }
         )
+    }
+
+    if (showLoadFilePicker) {
+        filePickerLauncher.launch("*/*")
+        showLoadFilePicker = false
     }
 }
 
