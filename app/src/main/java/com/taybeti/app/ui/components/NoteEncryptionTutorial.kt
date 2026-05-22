@@ -36,7 +36,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
@@ -63,7 +62,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -110,11 +108,7 @@ fun NoteEncryptionTutorialDialog(
     var passphrasesMatch by remember { mutableStateOf<Boolean?>(null) }
 
     var activeField by remember { mutableStateOf<String?>(null) }
-
-    val currentMessage by rememberUpdatedState(userMessage)
-    val currentPassphrase by rememberUpdatedState(userPassphrase)
-    val currentConfirm by rememberUpdatedState(confirmPassphrase)
-    val currentDecryptPass by rememberUpdatedState(decryptPassphrase)
+    val isKeyboardVisible = activeField != null
 
     LaunchedEffect(userPassphrase, confirmPassphrase) {
         if (userPassphrase.isNotEmpty() && confirmPassphrase.isNotEmpty()) {
@@ -167,10 +161,10 @@ fun NoteEncryptionTutorialDialog(
 
     fun handleCopy() {
         val textToCopy = when (activeField) {
-            "message" -> currentMessage
-            "passphrase" -> currentPassphrase
-            "confirmPassphrase" -> currentConfirm
-            "decryptPassphrase" -> currentDecryptPass
+            "message" -> userMessage
+            "passphrase" -> userPassphrase
+            "confirmPassphrase" -> confirmPassphrase
+            "decryptPassphrase" -> decryptPassphrase
             else -> return
         }
         if (textToCopy.isNotEmpty()) {
@@ -210,10 +204,10 @@ fun NoteEncryptionTutorialDialog(
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surface
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxSize()
                         .padding(20.dp)
                 ) {
                     Row(
@@ -377,31 +371,39 @@ fun NoteEncryptionTutorialDialog(
                     }
                 }
 
-                AnimatedVisibility(
-                    visible = needsKeyboard && activeField != null,
-                    enter = slideInVertically(initialOffsetY = { it }),
-                    exit = slideOutVertically(targetOffsetY = { it })
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            IconButton(onClick = ::handleCopy, modifier = Modifier.size(32.dp)) {
-                                Icon(Icons.Default.ContentCopy, "Copy", modifier = Modifier.size(18.dp))
-                            }
-                            IconButton(onClick = ::handlePaste, modifier = Modifier.size(32.dp)) {
-                                Icon(Icons.Default.ContentPaste, "Paste", modifier = Modifier.size(18.dp))
-                            }
-                        }
-                        CustomKeyboard(
-                            onKeyPress = { handleKeyPress(it) },
-                            onDelete = { handleDelete() },
-                            onDone = {},
+                if (needsKeyboard) {
+                    AnimatedVisibility(
+                        visible = isKeyboardVisible,
+                        enter = slideInVertically(initialOffsetY = { it }),
+                        exit = slideOutVertically(targetOffsetY = { it })
+                    ) {
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .navigationBarsPadding()
-                        )
+                                .align(Alignment.BottomCenter)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                IconButton(onClick = ::handleCopy, modifier = Modifier.size(32.dp)) {
+                                    Icon(Icons.Default.ContentCopy, "Copy", modifier = Modifier.size(18.dp))
+                                }
+                                IconButton(onClick = ::handlePaste, modifier = Modifier.size(32.dp)) {
+                                    Icon(Icons.Default.ContentPaste, "Paste", modifier = Modifier.size(18.dp))
+                                }
+                            }
+                            CustomKeyboard(
+                                onKeyPress = { handleKeyPress(it) },
+                                onDelete = { handleDelete() },
+                                onDone = { activeField = null },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .navigationBarsPadding()
+                            )
+                        }
                     }
                 }
             }

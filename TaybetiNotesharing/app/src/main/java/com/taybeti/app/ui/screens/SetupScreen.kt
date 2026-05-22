@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.taybeti.app.data.repository.NoteRepository
 import com.taybeti.app.ui.components.KeyboardHost
+import com.taybeti.app.ui.components.NoteEncryptionTutorialDialog
 import com.taybeti.app.ui.components.PasswordField
 import com.taybeti.app.util.Constants
 import com.taybeti.app.util.LocalStrings
@@ -54,6 +55,7 @@ fun SetupScreen(
     var showDecoyInfo by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var showTutorial by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     KeyboardHost {
@@ -237,8 +239,9 @@ fun SetupScreen(
                             confirmPassword = ""
                             decoyPassword = ""
                             confirmDecoy = ""
-                            if (result.isSuccess) onSetupComplete()
-                            else error = "Setup failed: ${result.exceptionOrNull()?.message}"
+                            if (result.isSuccess) {
+                                showTutorial = true
+                            } else error = "Setup failed: ${result.exceptionOrNull()?.message}"
                         }
                     }
                 }
@@ -252,5 +255,14 @@ fun SetupScreen(
             Text(if (isLoading) "Setting up..." else strings.setupCreateBtn)
         }
     } // end outer Column
+    }
+
+    if (showTutorial) {
+        NoteEncryptionTutorialDialog(
+            onDismiss = {
+                showTutorial = false
+                onSetupComplete()
+            }
+        )
     }
 }
