@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -382,6 +383,7 @@ private fun LoadNoteDialog(
                         .fillMaxSize()
                         .padding(padding)
                         .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
                     Text(
                         "Paste the encrypted blob or disguised URL, then enter the passphrase.",
@@ -410,7 +412,8 @@ private fun LoadNoteDialog(
                                 isActive = activeField == "blob",
                                 onActivate = { activeField = "blob" },
                                 onValueChange = { encryptedBlob = it; error = null },
-                                minLines = 5
+                                minLines = 2,
+                                maxLines = 3
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
@@ -620,7 +623,8 @@ private fun LoadTextField(
     onActivate: () -> Unit,
     onValueChange: (String) -> Unit,
     isPassword: Boolean = false,
-    minLines: Int = 1
+    minLines: Int = 1,
+    maxLines: Int = 1
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
@@ -628,6 +632,7 @@ private fun LoadTextField(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(if (maxLines > 1) Modifier.heightIn(max = (maxLines * 24).dp) else Modifier)
                 .clip(RoundedCornerShape(8.dp))
                 .background(
                     if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
