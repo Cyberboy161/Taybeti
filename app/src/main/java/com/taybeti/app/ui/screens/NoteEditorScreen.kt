@@ -10,7 +10,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +22,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -84,7 +86,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -117,19 +118,20 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Base64
 
-enum class ImagePosition {
+data class EditorImage(
+    val attachment: NoteAttachment,
+    var x: Float = 0f,
+    var y: Float = 0f,
+    var width: Float = 200f,
+    var height: Float = 200f,
+    var layer: ImageLayer = ImageLayer.INLINE,
+    var isSelected: Boolean = false
+)
+
+enum class ImageLayer {
     INLINE,
     BEHIND_TEXT,
     IN_FRONT_OF_TEXT
-}
-
-sealed class ContentBlock {
-    data class TextBlock(val content: String) : ContentBlock()
-    data class ImageBlock(
-        val attachment: NoteAttachment,
-        val position: ImagePosition = ImagePosition.INLINE,
-        val widthFraction: Float = 0.8f
-    ) : ContentBlock()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,6 +148,7 @@ fun NoteEditorScreen(
 
     var noteEntity by remember { mutableStateOf<NoteEntity?>(null) }
     var title by remember { mutableStateOf("") }
+    var plaintext by remember { mutableStateOf("") }
     var isLocked by remember { mutableStateOf(true) }
     var showKeyDialog by remember { mutableStateOf(false) }
     var showCreateKeyDialog by remember { mutableStateOf(true) }
@@ -161,10 +164,11 @@ fun NoteEditorScreen(
     var editKeyError by remember { mutableStateOf<String?>(null) }
     val clipboard = LocalClipboardManager.current
 
-    val blocks = remember { mutableStateListOf<ContentBlock>() }
+    val images = remember { mutableStateListOf<EditorImage>() }
     var pendingAttachmentType by remember { mutableStateOf<AttachmentType?>(null) }
-    var showEncryptAttachmentsDialog by remember { mutableStateOf(false) }
-    var showImageEditor by remember { mutableStateOf<Pair<Int, NoteAttachment>?>(null) }
+    var showEncryptDialog by remember { mutableStateOf(false) }
+    var selectedImageId by remember { mutableStateOf<String?>(null) }
+    var showImageOptions by remember { mutableStateOf(false) }
 
     val attachmentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -175,10 +179,14 @@ fun NoteEditorScreen(
                     context, noteId, uri, context.contentResolver
                 )
                 result.onSuccess { attachment ->
-                    blocks.add(
-                        ContentBlock.ImageBlock(
+                    images.add(
+                        EditorImage(
                             attachment = attachment,
-                            position = ImagePosition.INLINE
+                            x = 0f,
+                            y = 0f,
+                            width = 200f,
+                            height = 200f,
+                            layer = ImageLayer.IN_FRONT_OF_TEXT
                         )
                     )
                 }.onFailure {
@@ -189,7 +197,7 @@ fun NoteEditorScreen(
         pendingAttachmentType = null
     }
 
-    val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || blocks.any { it is ContentBlock.TextBlock && (it as ContentBlock.TextBlock).content.isNotEmpty() })
+    val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || plaintext.isNotEmpty() || images.isNotEmpty())
 
     KeyboardHost {
         BackHandler {
@@ -213,10 +221,9 @@ fun NoteEditorScreen(
                 dismissButton = {
                     TextButton(onClick = {
                         showUnsavedDialog = false
-                        blocks.filterIsInstance<ContentBlock.ImageBlock>().forEach {
-                            SecureMemory.clear(it.attachment.storedPath.toCharArray())
-                        }
-                        blocks.clear()
+                        SecureMemory.clear(plaintext.toCharArray())
+                        plaintext = ""
+                        images.clear()
                         onBack()
                     }) {
                         Text(strings.discard, color = MaterialTheme.colorScheme.error)
@@ -296,14 +303,18 @@ fun NoteEditorScreen(
                                                 val decrypted = result.getOrNull()!!
                                                 val decryptedStr = String(decrypted, Charsets.UTF_8)
                                                 val (content, attJson) = parseNoteJson(decryptedStr)
-                                                blocks.clear()
-                                                blocks.add(ContentBlock.TextBlock(content))
+                                                plaintext = content
+                                                images.clear()
                                                 val atts = getAttachmentsList(attJson, context, noteId)
                                                 atts.forEach { att ->
-                                                    blocks.add(
-                                                        ContentBlock.ImageBlock(
+                                                    images.add(
+                                                        EditorImage(
                                                             attachment = att,
-                                                            position = ImagePosition.INLINE
+                                                            x = 0f,
+                                                            y = 0f,
+                                                            width = 200f,
+                                                            height = 200f,
+                                                            layer = ImageLayer.IN_FRONT_OF_TEXT
                                                         )
                                                     )
                                                 }
@@ -352,9 +363,7 @@ fun NoteEditorScreen(
 
         DisposableEffect(Unit) {
             onDispose {
-                blocks.filterIsInstance<ContentBlock.TextBlock>().forEach {
-                    SecureMemory.clear(it.content.toCharArray())
-                }
+                SecureMemory.clear(plaintext.toCharArray())
                 SecureMemory.clear(noteKey.toCharArray())
             }
         }
@@ -422,14 +431,18 @@ fun NoteEditorScreen(
                                                 val decrypted = result.getOrNull()!!
                                                 val decryptedStr = String(decrypted, Charsets.UTF_8)
                                                 val (content, attJson) = parseNoteJson(decryptedStr)
-                                                blocks.clear()
-                                                blocks.add(ContentBlock.TextBlock(content))
+                                                plaintext = content
+                                                images.clear()
                                                 val atts = getAttachmentsList(attJson, context, noteId)
                                                 atts.forEach { att ->
-                                                    blocks.add(
-                                                        ContentBlock.ImageBlock(
+                                                    images.add(
+                                                        EditorImage(
                                                             attachment = att,
-                                                            position = ImagePosition.INLINE
+                                                            x = 0f,
+                                                            y = 0f,
+                                                            width = 200f,
+                                                            height = 200f,
+                                                            layer = ImageLayer.IN_FRONT_OF_TEXT
                                                         )
                                                     )
                                                 }
@@ -569,8 +582,7 @@ fun NoteEditorScreen(
                                             showCreateKeyDialog = false
                                             isLocked = false
                                             title = ""
-                                            blocks.clear()
-                                            blocks.add(ContentBlock.TextBlock(""))
+                                            plaintext = ""
                                         }
                                     }
                                 },
@@ -587,57 +599,40 @@ fun NoteEditorScreen(
             }
         }
 
-        if (showEncryptAttachmentsDialog) {
-            EncryptAttachmentsDialog(
-                attachments = blocks.filterIsInstance<ContentBlock.ImageBlock>().map { it.attachment },
-                onDismiss = { showEncryptAttachmentsDialog = false },
-                onEncrypt = { encryptAttachmentsTogether ->
-                    showEncryptAttachmentsDialog = false
-                    scope.launch {
-                        val noteJson = buildNoteJsonFromBlocks(blocks)
-                        val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
-                        val result = repository.encryptNoteContent(
-                            noteId, title, plainBytes, noteKey.toCharArray(), ""
-                        )
-                        if (result.isSuccess) {
-                            val note = result.getOrNull()!!
-                            val b64 = Base64.getEncoder()
-                            encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
-                            showEncryptedOutput = true
-                            blocks.filterIsInstance<ContentBlock.TextBlock>().forEach {
-                                SecureMemory.clear(it.content.toCharArray())
+        if (showEncryptDialog) {
+            AlertDialog(
+                onDismissRequest = { showEncryptDialog = false },
+                title = { Text("Encrypt Note") },
+                text = { Text("Encrypt this note with ${images.size} image(s) into a single encrypted blob?") },
+                confirmButton = {
+                    Button(onClick = {
+                        showEncryptDialog = false
+                        scope.launch {
+                            val noteJson = buildNoteJson(plaintext, images)
+                            val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
+                            val result = repository.encryptNoteContent(
+                                noteId, title, plainBytes, noteKey.toCharArray(), ""
+                            )
+                            if (result.isSuccess) {
+                                val note = result.getOrNull()!!
+                                val b64 = Base64.getEncoder()
+                                encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
+                                showEncryptedOutput = true
+                                SecureMemory.clear(plaintext.toCharArray())
+                                plaintext = ""
+                                images.clear()
+                                isLocked = true
+                                Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
                             }
-                            blocks.clear()
-                            isLocked = true
-                            Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
                         }
+                    }) {
+                        Text("Encrypt")
                     }
-                }
-            )
-        }
-
-        if (showImageEditor != null) {
-            val (blockIndex, attachment) = showImageEditor!!
-            ImagePositionDialog(
-                attachment = attachment,
-                currentPosition = (blocks[blockIndex] as? ContentBlock.ImageBlock)?.position ?: ImagePosition.INLINE,
-                onDismiss = { showImageEditor = null },
-                onSave = { newPosition, newAttachment ->
-                    val existingBlock = blocks[blockIndex] as? ContentBlock.ImageBlock
-                    if (existingBlock != null) {
-                        blocks[blockIndex] = existingBlock.copy(
-                            attachment = newAttachment,
-                            position = newPosition
-                        )
-                    }
-                    showImageEditor = null
                 },
-                onRemove = {
-                    scope.launch {
-                        AttachmentManager.deleteAttachment(context, noteId, attachment)
+                dismissButton = {
+                    TextButton(onClick = { showEncryptDialog = false }) {
+                        Text("Cancel")
                     }
-                    blocks.removeAt(blockIndex)
-                    showImageEditor = null
                 }
             )
         }
@@ -664,33 +659,8 @@ fun NoteEditorScreen(
                     },
                     actions = {
                         if (!isLocked) {
-                            val hasImages = blocks.any { it is ContentBlock.ImageBlock }
                             Button(
-                                onClick = {
-                                    if (hasImages) {
-                                        showEncryptAttachmentsDialog = true
-                                    } else {
-                                        scope.launch {
-                                            val noteJson = buildNoteJsonFromBlocks(blocks)
-                                            val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
-                                            val result = repository.encryptNoteContent(
-                                                noteId, title, plainBytes, noteKey.toCharArray(), ""
-                                            )
-                                            if (result.isSuccess) {
-                                                val note = result.getOrNull()!!
-                                                val b64 = Base64.getEncoder()
-                                                encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
-                                                showEncryptedOutput = true
-                                                blocks.filterIsInstance<ContentBlock.TextBlock>().forEach {
-                                                    SecureMemory.clear(it.content.toCharArray())
-                                                }
-                                                blocks.clear()
-                                                isLocked = true
-                                                Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                    }
-                                },
+                                onClick = { showEncryptDialog = true },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primary
                                 )
@@ -758,15 +728,11 @@ fun NoteEditorScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     NoteFormattingToolbar(
                         onInsertFormat = { format ->
-                            val textBlockIdx = blocks.indexOfLast { it is ContentBlock.TextBlock }
-                            if (textBlockIdx >= 0) {
-                                val existing = blocks[textBlockIdx] as ContentBlock.TextBlock
-                                blocks[textBlockIdx] = ContentBlock.TextBlock(existing.content + format)
-                            }
+                            plaintext += format
                         },
                         onAddAttachment = { type ->
                             pendingAttachmentType = type
@@ -774,122 +740,32 @@ fun NoteEditorScreen(
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        items(blocks.toList(), key = { 
-                            when (it) {
-                                is ContentBlock.TextBlock -> "text_${it.content.hashCode()}"
-                                is ContentBlock.ImageBlock -> "img_${it.attachment.id}"
+                    WordEditorCanvas(
+                        text = plaintext,
+                        onTextChange = { plaintext = it },
+                        images = images,
+                        onImageSelect = { id ->
+                            selectedImageId = id
+                            showImageOptions = true
+                        },
+                        onImageUpdate = { updatedImage ->
+                            val idx = images.indexOfFirst { it.attachment.id == updatedImage.attachment.id }
+                            if (idx >= 0) {
+                                images[idx] = updatedImage
                             }
-                        }) { block ->
-                            when (block) {
-                                is ContentBlock.TextBlock -> {
-                                    val kbState = remember { KeyboardState() }
-                                    Column {
-                                        CompositionLocalProvider(LocalKeyboardState provides kbState) {
-                                            BasicTextField(
-                                                value = block.content,
-                                                onValueChange = { newText ->
-                                                    val idx = blocks.indexOf(block)
-                                                    if (idx >= 0) {
-                                                        blocks[idx] = ContentBlock.TextBlock(newText)
-                                                    }
-                                                },
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(horizontal = 8.dp),
-                                                decorationBox = { innerTextField ->
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .clickable { kbState.attach(
-                                                                onKey = { char ->
-                                                                    val idx = blocks.indexOf(block)
-                                                                    if (idx >= 0) {
-                                                                        blocks[idx] = ContentBlock.TextBlock(block.content + char)
-                                                                    }
-                                                                },
-                                                                onDel = {
-                                                                    val idx = blocks.indexOf(block)
-                                                                    if (idx >= 0 && block.content.isNotEmpty()) {
-                                                                        blocks[idx] = ContentBlock.TextBlock(block.content.dropLast(1))
-                                                                    }
-                                                                },
-                                                                onDone = { kbState.detach() }
-                                                            ) }
-                                                            .padding(8.dp)
-                                                    ) {
-                                                        if (block.content.isEmpty()) {
-                                                            Text(
-                                                                "Type here...",
-                                                                color = Color.Gray,
-                                                                style = MaterialTheme.typography.bodyLarge
-                                                            )
-                                                        }
-                                                        innerTextField()
-                                                    }
-                                                }
-                                            )
-                                        }
-                                        if (kbState.isVisible) {
-                                            CustomKeyboard(
-                                                onKeyPress = { char ->
-                                                    val idx = blocks.indexOf(block)
-                                                    if (idx >= 0) {
-                                                        blocks[idx] = ContentBlock.TextBlock(block.content + char)
-                                                    }
-                                                },
-                                                onDelete = {
-                                                    val idx = blocks.indexOf(block)
-                                                    if (idx >= 0 && block.content.isNotEmpty()) {
-                                                        blocks[idx] = ContentBlock.TextBlock(block.content.dropLast(1))
-                                                    }
-                                                },
-                                                onDone = { kbState.detach() }
-                                            )
-                                        }
-                                    }
+                        },
+                        onImageDelete = { id ->
+                            val img = images.find { it.attachment.id == id }
+                            if (img != null) {
+                                scope.launch {
+                                    AttachmentManager.deleteAttachment(context, noteId, img.attachment)
                                 }
-                                is ContentBlock.ImageBlock -> {
-                                    ImageBlockCard(
-                                        block = block,
-                                        onEdit = {
-                                            val idx = blocks.indexOf(block)
-                                            if (idx >= 0) {
-                                                showImageEditor = idx to block.attachment
-                                            }
-                                        },
-                                        onRemove = {
-                                            scope.launch {
-                                                AttachmentManager.deleteAttachment(context, noteId, block.attachment)
-                                            }
-                                            blocks.remove(block)
-                                        },
-                                        onMoveUp = {
-                                            val idx = blocks.indexOf(block)
-                                            if (idx > 0) {
-                                                blocks.removeAt(idx)
-                                                blocks.add(idx - 1, block)
-                                            }
-                                        },
-                                        onMoveDown = {
-                                            val idx = blocks.indexOf(block)
-                                            if (idx < blocks.size - 1) {
-                                                blocks.removeAt(idx)
-                                                blocks.add(idx + 1, block)
-                                            }
-                                        }
-                                    )
-                                }
+                                images.remove(img)
                             }
                         }
-                    }
+                    )
                 }
             }
         }
@@ -897,185 +773,298 @@ fun NoteEditorScreen(
 }
 
 @Composable
-private fun ImageBlockCard(
-    block: ContentBlock.ImageBlock,
-    onEdit: () -> Unit,
-    onRemove: () -> Unit,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit
+private fun WordEditorCanvas(
+    text: String,
+    onTextChange: (String) -> Unit,
+    images: List<EditorImage>,
+    onImageSelect: (String) -> Unit,
+    onImageUpdate: (EditorImage) -> Unit,
+    onImageDelete: (String) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    block.attachment.originalName,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    when (block.position) {
-                        ImagePosition.INLINE -> "Inline"
-                        ImagePosition.BEHIND_TEXT -> "Behind Text"
-                        ImagePosition.IN_FRONT_OF_TEXT -> "In Front"
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
+    val kbState = remember { KeyboardState() }
+    var canvasWidth by remember { mutableStateOf(0f) }
+    var canvasHeight by remember { mutableStateOf(0f) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable {
+                images.forEach { img ->
+                    if (img.isSelected) {
+                        onImageUpdate(img.copy(isSelected = false))
+                    }
+                }
             }
-            
-            if (block.position == ImagePosition.INLINE) {
-                Spacer(modifier = Modifier.height(4.dp))
-                AsyncImage(
-                    model = block.attachment.storedPath,
-                    contentDescription = block.attachment.originalName,
-                    modifier = Modifier
-                        .fillMaxWidth(block.widthFraction)
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    contentScale = ContentScale.Fit
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .background(Color.Black.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
-                ) {
-                    AsyncImage(
-                        model = block.attachment.storedPath,
-                        contentDescription = block.attachment.originalName,
+    ) {
+        CompositionLocalProvider(LocalKeyboardState provides kbState) {
+            BasicTextField(
+                value = text,
+                onValueChange = onTextChange,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                decorationBox = { innerTextField ->
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(4.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                    Text(
-                        when (block.position) {
-                            ImagePosition.BEHIND_TEXT -> "Will appear behind text"
-                            ImagePosition.IN_FRONT_OF_TEXT -> "Will appear over text"
-                            else -> ""
-                        },
-                        modifier = Modifier.align(Alignment.Center),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                            .clickable { kbState.attach(
+                                onKey = { char -> onTextChange(text + char) },
+                                onDel = { if (text.isNotEmpty()) onTextChange(text.dropLast(1)) },
+                                onDone = { kbState.detach() }
+                            ) }
+                    ) {
+                        if (text.isEmpty()) {
+                            Text(
+                                "Start typing here...",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        innerTextField()
+                    }
                 }
-            }
+            )
+        }
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                IconButton(onClick = onMoveUp, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Move Up", modifier = Modifier.size(16.dp))
-                }
-                IconButton(onClick = onMoveDown, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Move Down", modifier = Modifier.size(16.dp).graphicsLayer(rotationZ = 180f))
-                }
-                IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
-                }
-                IconButton(onClick = onRemove, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.Delete, contentDescription = "Remove", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
-                }
-            }
+        images.filter { it.layer == ImageLayer.BEHIND_TEXT }.forEach { img ->
+            DraggableImage(
+                image = img,
+                canvasWidth = canvasWidth,
+                canvasHeight = canvasHeight,
+                onSelect = onImageSelect,
+                onUpdate = onImageUpdate,
+                onDelete = onImageDelete
+            )
+        }
+
+        images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT }.forEach { img ->
+            DraggableImage(
+                image = img,
+                canvasWidth = canvasWidth,
+                canvasHeight = canvasHeight,
+                onSelect = onImageSelect,
+                onUpdate = onImageUpdate,
+                onDelete = onImageDelete
+            )
+        }
+
+        if (kbState.isVisible) {
+            CustomKeyboard(
+                onKeyPress = { char -> onTextChange(text + char) },
+                onDelete = { if (text.isNotEmpty()) onTextChange(text.dropLast(1)) },
+                onDone = { kbState.detach() }
+            )
         }
     }
 }
 
 @Composable
-private fun ImagePositionDialog(
-    attachment: NoteAttachment,
-    currentPosition: ImagePosition,
-    onDismiss: () -> Unit,
-    onSave: (ImagePosition, NoteAttachment) -> Unit,
-    onRemove: () -> Unit
+private fun DraggableImage(
+    image: EditorImage,
+    canvasWidth: Float,
+    canvasHeight: Float,
+    onSelect: (String) -> Unit,
+    onUpdate: (EditorImage) -> Unit,
+    onDelete: (String) -> Unit
 ) {
-    var selectedPosition by remember { mutableStateOf(currentPosition) }
-    var scale by remember { mutableStateOf(1f) }
+    var offsetX by remember { mutableStateOf(image.x) }
+    var offsetY by remember { mutableStateOf(image.y) }
+    var isDragging by remember { mutableStateOf(false) }
 
+    Box(
+        modifier = Modifier
+            .offset { IntOffset(offsetX.toInt(), offsetY.toInt()) }
+            .size(width = image.width.dp, height = image.height.dp)
+            .clickable { onSelect(image.attachment.id) }
+            .border(
+                width = if (image.isSelected) 2.dp else 0.dp,
+                color = if (image.isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .pointerInput(image.attachment.id) {
+                detectDragGestures(
+                    onDragStart = {
+                        isDragging = true
+                        onSelect(image.attachment.id)
+                        if (!image.isSelected) {
+                            onUpdate(image.copy(isSelected = true))
+                        }
+                    },
+                    onDragEnd = { isDragging = false },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        offsetX += dragAmount.x
+                        offsetY += dragAmount.y
+                        onUpdate(
+                            image.copy(
+                                x = offsetX,
+                                y = offsetY,
+                                isSelected = true
+                            )
+                        )
+                    }
+                )
+            }
+    ) {
+        AsyncImage(
+            model = image.attachment.storedPath,
+            contentDescription = image.attachment.originalName,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(4.dp)),
+            contentScale = ContentScale.Fit
+        )
+
+        if (image.isSelected) {
+            ResizeHandle(
+                alignment = Alignment.BottomEnd,
+                onResize = { dx, dy ->
+                    onUpdate(
+                        image.copy(
+                            width = (image.width + dx).coerceAtLeast(50f),
+                            height = (image.height + dy).coerceAtLeast(50f)
+                        )
+                    )
+                }
+            )
+            ResizeHandle(
+                alignment = Alignment.BottomStart,
+                onResize = { dx, dy ->
+                    onUpdate(
+                        image.copy(
+                            width = (image.width - dx).coerceAtLeast(50f),
+                            height = (image.height + dy).coerceAtLeast(50f)
+                        )
+                    )
+                }
+            )
+            ResizeHandle(
+                alignment = Alignment.TopEnd,
+                onResize = { dx, dy ->
+                    onUpdate(
+                        image.copy(
+                            width = (image.width + dx).coerceAtLeast(50f),
+                            height = (image.height - dy).coerceAtLeast(50f)
+                        )
+                    )
+                }
+            )
+            ResizeHandle(
+                alignment = Alignment.TopStart,
+                onResize = { dx, dy ->
+                    onUpdate(
+                        image.copy(
+                            width = (image.width - dx).coerceAtLeast(50f),
+                            height = (image.height - dy).coerceAtLeast(50f)
+                        )
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ResizeHandle(
+    alignment: Alignment,
+    onResize: (Float, Float) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(20.dp)
+            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
+            .clickable { }
+    )
+}
+
+@Composable
+private fun ImageOptionsDialog(
+    image: EditorImage,
+    onDismiss: () -> Unit,
+    onUpdate: (EditorImage) -> Unit,
+    onDelete: () -> Unit
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Image Position", fontWeight = FontWeight.Bold) },
+        title = { Text("Image Options", fontWeight = FontWeight.Bold) },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column {
                 AsyncImage(
-                    model = attachment.storedPath,
-                    contentDescription = attachment.originalName,
+                    model = image.attachment.storedPath,
+                    contentDescription = image.attachment.originalName,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
+                        .height(150.dp)
                         .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Fit
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                
-                Text("Position:", fontWeight = FontWeight.Medium)
+
+                Text("Layer:", fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(4.dp))
-                
-                ImagePosition.entries.forEach { position ->
+
+                ImageLayer.entries.forEach { layer ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { selectedPosition = position }
+                            .clickable {
+                                onUpdate(image.copy(layer = layer))
+                                onDismiss()
+                            }
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = when (position) {
-                                ImagePosition.INLINE -> "Inline with text"
-                                ImagePosition.BEHIND_TEXT -> "Behind text (background)"
-                                ImagePosition.IN_FRONT_OF_TEXT -> "In front of text (overlay)"
+                            text = when (layer) {
+                                ImageLayer.INLINE -> "Inline with text"
+                                ImageLayer.BEHIND_TEXT -> "Behind text (background)"
+                                ImageLayer.IN_FRONT_OF_TEXT -> "In front of text"
                             },
                             modifier = Modifier.weight(1f)
                         )
-                        if (selectedPosition == position) {
+                        if (image.layer == layer) {
                             Text("✓", color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Size: ${(scale * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    TextButton(onClick = { scale = (scale - 0.1f).coerceIn(0.3f, 2f) }) {
-                        Icon(Icons.Default.Remove, contentDescription = "Smaller")
+                    TextButton(onClick = {
+                        onUpdate(image.copy(
+                            width = (image.width * 0.8f).coerceAtLeast(50f),
+                            height = (image.height * 0.8f).coerceAtLeast(50f)
+                        ))
+                    }) {
+                        Icon(Icons.Default.Remove, contentDescription = "Shrink")
+                        Text("Smaller")
                     }
-                    TextButton(onClick = { scale = (scale + 0.1f).coerceIn(0.3f, 2f) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Larger")
+                    TextButton(onClick = {
+                        onUpdate(image.copy(
+                            width = (image.width * 1.2f),
+                            height = (image.height * 1.2f)
+                        ))
+                    }) {
+                        Icon(Icons.Default.Add, contentDescription = "Enlarge")
+                        Text("Larger")
                     }
                 }
             }
         },
         confirmButton = {
             Row {
-                TextButton(onClick = onRemove) {
-                    Text("Remove", color = MaterialTheme.colorScheme.error)
-                }
                 TextButton(onClick = {
-                    onSave(selectedPosition, attachment.copy(
-                        metadata = attachment.metadata + ("scale" to scale.toString())
-                    ))
+                    onDelete()
+                    onDismiss()
                 }) {
-                    Text("Save", fontWeight = FontWeight.Bold)
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
                 }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                TextButton(onClick = onDismiss) {
+                    Text("Done")
+                }
             }
         }
     )
@@ -1118,7 +1107,6 @@ private fun DecoyEncryptedView(
         )
         Spacer(modifier = Modifier.height(4.dp))
 
-        // ── Raw encrypted blob ──
         OutlinedTextField(
             value = encryptedBlob,
             onValueChange = {},
@@ -1175,7 +1163,6 @@ private fun DecoyEncryptedView(
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ── Disguise section ──
         if (!showDisguise) {
             Button(
                 onClick = { showDisguise = true },
@@ -1250,144 +1237,66 @@ private fun DecoyEncryptedView(
     }
 }
 
-@Composable
-private fun EncryptAttachmentsDialog(
-    attachments: List<NoteAttachment>,
-    onDismiss: () -> Unit,
-    onEncrypt: (Boolean) -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Encrypt Note") },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Text(
-                    "You have ${attachments.size} image(s) in your note. Choose how to encrypt:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { onEncrypt(true) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Shield, null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Text("Encrypt All Together", fontWeight = FontWeight.Bold)
-                        Text(
-                            "Note content + images in one encrypted blob",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-private fun buildNoteJsonFromBlocks(blocks: List<ContentBlock>): String {
+private fun buildNoteJson(content: String, images: List<EditorImage>): String {
     val json = org.json.JSONObject()
-    val blocksArray = org.json.JSONArray()
+    json.put("content", content)
     
-    blocks.forEach { block ->
-        when (block) {
-            is ContentBlock.TextBlock -> {
-                val textObj = org.json.JSONObject()
-                textObj.put("type", "text")
-                textObj.put("content", block.content)
-                blocksArray.put(textObj)
-            }
-            is ContentBlock.ImageBlock -> {
-                val imgObj = org.json.JSONObject()
-                imgObj.put("type", "image")
-                imgObj.put("attachment", org.json.JSONObject().apply {
-                    put("id", block.attachment.id)
-                    put("originalName", block.attachment.originalName)
-                    put("mimeType", block.attachment.mimeType)
-                    put("size", block.attachment.size)
-                    put("storedPath", block.attachment.storedPath)
-                    put("type", block.attachment.type.name)
-                    put("isIntegrated", block.attachment.isIntegrated)
-                    put("encryptedPath", block.attachment.encryptedPath)
-                    put("position", block.position.name)
-                    put("widthFraction", block.widthFraction)
-                    block.attachment.metadata.forEach { (k, v) ->
-                        put("meta_$k", v)
-                    }
-                })
-                blocksArray.put(imgObj)
-            }
-        }
+    val imagesArray = org.json.JSONArray()
+    images.forEach { img ->
+        val imgObj = org.json.JSONObject()
+        imgObj.put("id", img.attachment.id)
+        imgObj.put("originalName", img.attachment.originalName)
+        imgObj.put("mimeType", img.attachment.mimeType)
+        imgObj.put("size", img.attachment.size)
+        imgObj.put("storedPath", img.attachment.storedPath)
+        imgObj.put("type", img.attachment.type.name)
+        imgObj.put("x", img.x)
+        imgObj.put("y", img.y)
+        imgObj.put("width", img.width)
+        imgObj.put("height", img.height)
+        imgObj.put("layer", img.layer.name)
+        imagesArray.put(imgObj)
     }
     
-    json.put("blocks", blocksArray)
+    json.put("images", imagesArray)
     return json.toString()
 }
 
 private fun parseNoteJson(plaintext: String): Pair<String, String> {
     return try {
         val json = org.json.JSONObject(plaintext)
-        if (json.has("blocks")) {
-            val blocksArray = json.getJSONArray("blocks")
-            val textContent = StringBuilder()
+        if (json.has("images")) {
+            val content = json.optString("content", "")
+            val imagesArray = json.getJSONArray("images")
             val attachmentsList = mutableListOf<NoteAttachment>()
             
-            for (i in 0 until blocksArray.length()) {
-                val blockObj = blocksArray.getJSONObject(i)
-                val type = blockObj.optString("type", "text")
-                
-                if (type == "text") {
-                    textContent.append(blockObj.optString("content", ""))
-                    textContent.append("\n")
-                } else if (type == "image") {
-                    val attObj = blockObj.getJSONObject("attachment")
-                    val metadata = mutableMapOf<String, String>()
-                    attObj.keys().forEach { key ->
-                        if (key.startsWith("meta_")) {
-                            metadata[key.removePrefix("meta_")] = attObj.getString(key)
-                        }
-                    }
-                    val position = try {
-                        ImagePosition.valueOf(attObj.optString("position", "INLINE"))
+            for (i in 0 until imagesArray.length()) {
+                val imgObj = imagesArray.getJSONObject(i)
+                val att = NoteAttachment(
+                    id = imgObj.optString("id", java.util.UUID.randomUUID().toString()),
+                    originalName = imgObj.optString("originalName", "image"),
+                    mimeType = imgObj.optString("mimeType", "image/jpeg"),
+                    size = imgObj.optLong("size", 0),
+                    storedPath = imgObj.optString("storedPath", ""),
+                    type = try {
+                        NoteAttachment.AttachmentType.valueOf(imgObj.optString("type", "IMAGE"))
                     } catch (_: Exception) {
-                        ImagePosition.INLINE
-                    }
-                    val widthFraction = attObj.optDouble("widthFraction", 0.8).toFloat()
-                    
-                    val att = NoteAttachment(
-                        id = attObj.optString("id", java.util.UUID.randomUUID().toString()),
-                        originalName = attObj.optString("originalName", "image"),
-                        mimeType = attObj.optString("mimeType", "image/jpeg"),
-                        size = attObj.optLong("size", 0),
-                        storedPath = attObj.optString("storedPath", ""),
-                        type = try {
-                            NoteAttachment.AttachmentType.valueOf(attObj.optString("type", "IMAGE"))
-                        } catch (_: Exception) {
-                            NoteAttachment.AttachmentType.IMAGE
-                        },
-                        isIntegrated = attObj.optBoolean("isIntegrated", false),
-                        encryptedPath = attObj.optString("encryptedPath", ""),
-                        metadata = metadata
+                        NoteAttachment.AttachmentType.IMAGE
+                    },
+                    isIntegrated = imgObj.optBoolean("isIntegrated", false),
+                    encryptedPath = imgObj.optString("encryptedPath", ""),
+                    metadata = mapOf(
+                        "x" to imgObj.optDouble("x", 0.0).toString(),
+                        "y" to imgObj.optDouble("y", 0.0).toString(),
+                        "width" to imgObj.optDouble("width", 200.0).toString(),
+                        "height" to imgObj.optDouble("height", 200.0).toString(),
+                        "layer" to imgObj.optString("layer", "IN_FRONT_OF_TEXT")
                     )
-                    attachmentsList.add(att)
-                }
+                )
+                attachmentsList.add(att)
             }
             
-            val content = textContent.toString().trimEnd('\n')
-            val attJson = attachmentsToJson(attachmentsList, embedFiles = true)
-            content to attJson
+            content to attachmentsToJson(attachmentsList, embedFiles = true)
         } else {
             val content = json.optString("content", plaintext)
             val attachments = json.optJSONArray("attachments")?.toString() ?: "[]"

@@ -559,6 +559,15 @@ private fun LoadNoteDialog(
                                         if (json.has("attachments")) {
                                             attachmentsJson = json.getJSONArray("attachments").toString()
                                         }
+                                        if (json.has("images")) {
+                                            val imagesArray = json.getJSONArray("images")
+                                            val imagesList = mutableListOf<String>()
+                                            for (i in 0 until imagesArray.length()) {
+                                                val imgObj = imagesArray.getJSONObject(i)
+                                                imagesList.add(imgObj.toString())
+                                            }
+                                            attachmentsJson = "[" + imagesList.joinToString(",") + "]"
+                                        }
                                     } catch (_: Exception) {
                                     }
 
