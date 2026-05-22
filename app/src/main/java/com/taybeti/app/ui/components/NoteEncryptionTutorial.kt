@@ -1,5 +1,8 @@
 package com.taybeti.app.ui.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -33,8 +36,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
@@ -57,6 +63,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +73,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -80,6 +88,9 @@ import androidx.compose.animation.slideOutVertically
 fun NoteEncryptionTutorialDialog(
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
     var step by remember { mutableIntStateOf(0) }
     val totalSteps = 6
     val progress by animateFloatAsState(
@@ -98,9 +109,12 @@ fun NoteEncryptionTutorialDialog(
     var isDecrypting by remember { mutableStateOf(false) }
     var passphrasesMatch by remember { mutableStateOf<Boolean?>(null) }
 
-    // Keyboard state
     var activeField by remember { mutableStateOf<String?>(null) }
-    val keyboardState = remember { KeyboardState() }
+
+    val currentMessage by rememberUpdatedState(userMessage)
+    val currentPassphrase by rememberUpdatedState(userPassphrase)
+    val currentConfirm by rememberUpdatedState(confirmPassphrase)
+    val currentDecryptPass by rememberUpdatedState(decryptPassphrase)
 
     LaunchedEffect(userPassphrase, confirmPassphrase) {
         if (userPassphrase.isNotEmpty() && confirmPassphrase.isNotEmpty()) {
@@ -151,7 +165,34 @@ fun NoteEncryptionTutorialDialog(
         }
     }
 
-    fun handleDone() {}
+    fun handleCopy() {
+        val textToCopy = when (activeField) {
+            "message" -> currentMessage
+            "passphrase" -> currentPassphrase
+            "confirmPassphrase" -> currentConfirm
+            "decryptPassphrase" -> currentDecryptPass
+            else -> return
+        }
+        if (textToCopy.isNotEmpty()) {
+            clipboard.setPrimaryClip(ClipData.newPlainText("tutorial", textToCopy))
+        }
+    }
+
+    fun handlePaste() {
+        if (!clipboard.hasPrimaryClip()) return
+        val clip = clipboard.primaryClip ?: return
+        if (clip.itemCount > 0) {
+            val pasteText = clip.getItemAt(0).text.toString()
+            when (activeField) {
+                "message" -> userMessage += pasteText
+                "passphrase" -> userPassphrase += pasteText
+                "confirmPassphrase" -> confirmPassphrase += pasteText
+                "decryptPassphrase" -> decryptPassphrase += pasteText
+            }
+        }
+    }
+
+    val needsKeyboard = step == 0 || step == 1 || step == 4
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -170,192 +211,202 @@ fun NoteEncryptionTutorialDialog(
             color = MaterialTheme.colorScheme.surface
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Main content area (takes remaining space)
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .padding(20.dp)
                 ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "How Note Encryption Works",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.Close, "Close", modifier = Modifier.size(18.dp))
-                    }
-                }
-
-                // Progress bar
-                Spacer(modifier = Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Step indicator
-                Text(
-                    "Step ${step + 1} of $totalSteps",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Animated step content
-                AnimatedContent(
-                    targetState = step,
-                    transitionSpec = {
-                        if (targetState > initialState) {
-                            (slideInHorizontally { it } + fadeIn()) togetherWith
-                                (slideOutHorizontally { -it } + fadeOut())
-                        } else {
-                            (slideInHorizontally { -it } + fadeIn()) togetherWith
-                                (slideOutHorizontally { it } + fadeOut())
-                        }
-                    },
-                    label = "step"
-                ) { currentStep ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .verticalScroll(rememberScrollState())
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        when (currentStep) {
-                            0 -> Step1_WriteNote(
-                                userMessage,
-                                isActive = activeField == "message",
-                                onActivate = { activeField = "message" }
-                            )
-                            1 -> Step2_CreatePassphrase(
-                                userPassphrase,
-                                confirmPassphrase,
-                                showPassphrase,
-                                passphrasesMatch,
-                                activeField,
-                                onActivatePassphrase = { activeField = "passphrase" },
-                                onActivateConfirm = { activeField = "confirmPassphrase" },
-                                onToggleShow = { showPassphrase = !showPassphrase }
-                            )
-                            2 -> Step3_Encrypt(
-                                userMessage,
-                                userPassphrase,
-                                isEncrypting
-                            ) { simulateEncrypt() }
-                            3 -> Step4_EncryptedResult(encryptedResult)
-                            4 -> Step5_Decrypt(
-                                encryptedResult,
-                                decryptPassphrase,
-                                decryptedResult,
-                                isDecrypting,
-                                isActive = activeField == "decryptPassphrase",
-                                onActivate = { activeField = "decryptPassphrase" },
-                                onDecrypt = { simulateDecrypt() }
-                            )
-                            5 -> Step6_Done()
+                        Text(
+                            "How Note Encryption Works",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                            Icon(Icons.Default.Close, "Close", modifier = Modifier.size(18.dp))
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
 
-                // Navigation
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (step > 0) {
-                        Button(
-                            onClick = { step--; activeField = null },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Back")
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.width(1.dp))
-                    }
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    if (step < totalSteps - 1) {
-                        val canProceed = when (step) {
-                            0 -> userMessage.isNotBlank()
-                            1 -> userPassphrase.length >= 4 && userPassphrase == confirmPassphrase
-                            2 -> encryptedResult.isNotEmpty()
-                            3 -> true
-                            4 -> true
-                            else -> true
-                        }
-                        Button(
-                            onClick = { step++; activeField = null },
-                            enabled = canProceed
-                        ) {
-                            Text("Next")
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(16.dp))
-                        }
-                    } else {
-                        Button(onClick = onDismiss) {
-                            Icon(Icons.Default.Check, null, Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Done!")
-                        }
-                    }
-                }
+                    Text(
+                        "Step ${step + 1} of $totalSteps",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
 
-                // Dots indicator
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    repeat(totalSteps) { i ->
-                        Box(
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    AnimatedContent(
+                        targetState = step,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                (slideInHorizontally { it } + fadeIn()) togetherWith
+                                    (slideOutHorizontally { -it } + fadeOut())
+                            } else {
+                                (slideInHorizontally { -it } + fadeIn()) togetherWith
+                                    (slideOutHorizontally { it } + fadeOut())
+                            }
+                        },
+                        label = "step"
+                    ) { currentStep ->
+                        Column(
                             modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .size(if (i == step) 10.dp else 8.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (i == step) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            when (currentStep) {
+                                0 -> Step1_WriteNote(
+                                    userMessage,
+                                    isActive = activeField == "message",
+                                    onActivate = { activeField = "message" },
+                                    onCopy = ::handleCopy,
+                                    onPaste = ::handlePaste
                                 )
+                                1 -> Step2_CreatePassphrase(
+                                    userPassphrase,
+                                    confirmPassphrase,
+                                    showPassphrase,
+                                    passphrasesMatch,
+                                    activeField,
+                                    onActivatePassphrase = { activeField = "passphrase" },
+                                    onActivateConfirm = { activeField = "confirmPassphrase" },
+                                    onToggleShow = { showPassphrase = !showPassphrase },
+                                    onCopy = ::handleCopy,
+                                    onPaste = ::handlePaste
+                                )
+                                2 -> Step3_Encrypt(
+                                    userMessage,
+                                    userPassphrase,
+                                    isEncrypting
+                                ) { simulateEncrypt() }
+                                3 -> Step4_EncryptedResult(encryptedResult)
+                                4 -> Step5_Decrypt(
+                                    encryptedResult,
+                                    decryptPassphrase,
+                                    decryptedResult,
+                                    isDecrypting,
+                                    isActive = activeField == "decryptPassphrase",
+                                    onActivate = { activeField = "decryptPassphrase" },
+                                    onDecrypt = { simulateDecrypt() },
+                                    onCopy = ::handleCopy,
+                                    onPaste = ::handlePaste
+                                )
+                                5 -> Step6_Done()
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        if (step > 0) {
+                            Button(
+                                onClick = { step--; activeField = null },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Back")
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.width(1.dp))
+                        }
+
+                        if (step < totalSteps - 1) {
+                            val canProceed = when (step) {
+                                0 -> userMessage.isNotBlank()
+                                1 -> userPassphrase.length >= 4 && userPassphrase == confirmPassphrase
+                                2 -> encryptedResult.isNotEmpty()
+                                3 -> true
+                                4 -> true
+                                else -> true
+                            }
+                            Button(
+                                onClick = { step++; activeField = null },
+                                enabled = canProceed
+                            ) {
+                                Text("Next")
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(16.dp))
+                            }
+                        } else {
+                            Button(onClick = onDismiss) {
+                                Icon(Icons.Default.Check, null, Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Done!")
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        repeat(totalSteps) { i ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .size(if (i == step) 10.dp else 8.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (i == step) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                    )
+                            )
+                        }
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = needsKeyboard && activeField != null,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            IconButton(onClick = ::handleCopy, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.ContentCopy, "Copy", modifier = Modifier.size(18.dp))
+                            }
+                            IconButton(onClick = ::handlePaste, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.ContentPaste, "Paste", modifier = Modifier.size(18.dp))
+                            }
+                        }
+                        CustomKeyboard(
+                            onKeyPress = { handleKeyPress(it) },
+                            onDelete = { handleDelete() },
+                            onDone = {},
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .navigationBarsPadding()
                         )
                     }
                 }
-            } // end scrollable content Column
-
-            // Custom keyboard at bottom
-            val needsKeyboard = step == 0 || step == 1 || step == 4
-            AnimatedVisibility(
-                visible = needsKeyboard && activeField != null,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it })
-            ) {
-                CustomKeyboard(
-                    onKeyPress = { handleKeyPress(it) },
-                    onDelete = { handleDelete() },
-                    onDone = { handleDone() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                )
             }
-        } // end outer Column
-    } // end Surface
-    } // end Dialog
+        }
+    }
 }
 
 @Composable
@@ -368,10 +419,28 @@ private fun TutorialTextField(
     showPassword: Boolean = false,
     onActivate: () -> Unit,
     onTogglePassword: (() -> Unit)? = null,
+    onCopy: () -> Unit = {},
+    onPaste: () -> Unit = {},
     isError: Boolean = false
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+            if (isActive) {
+                Row {
+                    IconButton(onClick = onCopy, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.ContentCopy, "Copy", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                    }
+                    IconButton(onClick = onPaste, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.ContentPaste, "Paste", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                    }
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(4.dp))
         Box(
             modifier = Modifier
@@ -422,7 +491,9 @@ private fun TutorialTextField(
 private fun Step1_WriteNote(
     message: String,
     isActive: Boolean,
-    onActivate: () -> Unit
+    onActivate: () -> Unit,
+    onCopy: () -> Unit,
+    onPaste: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("1", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -455,7 +526,9 @@ private fun Step1_WriteNote(
                     value = message,
                     isActive = isActive,
                     placeholder = "Tap to type your secret message...",
-                    onActivate = onActivate
+                    onActivate = onActivate,
+                    onCopy = onCopy,
+                    onPaste = onPaste
                 )
             }
         }
@@ -471,7 +544,9 @@ private fun Step2_CreatePassphrase(
     activeField: String?,
     onActivatePassphrase: () -> Unit,
     onActivateConfirm: () -> Unit,
-    onToggleShow: () -> Unit
+    onToggleShow: () -> Unit,
+    onCopy: () -> Unit,
+    onPaste: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("2", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -513,7 +588,9 @@ private fun Step2_CreatePassphrase(
                     isPassword = true,
                     showPassword = showPassphrase,
                     onActivate = onActivatePassphrase,
-                    onTogglePassword = onToggleShow
+                    onTogglePassword = onToggleShow,
+                    onCopy = onCopy,
+                    onPaste = onPaste
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -532,7 +609,9 @@ private fun Step2_CreatePassphrase(
                     isPassword = true,
                     showPassword = showPassphrase,
                     onActivate = onActivateConfirm,
-                    isError = passphrasesMatch == false
+                    isError = passphrasesMatch == false,
+                    onCopy = onCopy,
+                    onPaste = onPaste
                 )
 
                 if (passphrasesMatch != null) {
@@ -695,7 +774,9 @@ private fun Step5_Decrypt(
     isDecrypting: Boolean,
     isActive: Boolean,
     onActivate: () -> Unit,
-    onDecrypt: () -> Unit
+    onDecrypt: () -> Unit,
+    onCopy: () -> Unit,
+    onPaste: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("5", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -746,7 +827,9 @@ private fun Step5_Decrypt(
                     isActive = isActive,
                     placeholder = "Tap to enter passphrase",
                     isPassword = true,
-                    onActivate = onActivate
+                    onActivate = onActivate,
+                    onCopy = onCopy,
+                    onPaste = onPaste
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
