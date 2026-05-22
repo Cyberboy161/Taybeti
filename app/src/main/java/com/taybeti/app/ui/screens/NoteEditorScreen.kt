@@ -2,6 +2,7 @@ package com.taybeti.app.ui.screens
 
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.RectF
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -11,6 +12,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,18 +25,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.Description
@@ -45,6 +55,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -71,11 +82,18 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.taybeti.app.data.entities.NoteEntity
@@ -137,6 +155,7 @@ fun NoteEditorScreen(
     var pendingAttachmentType by remember { mutableStateOf<AttachmentType?>(null) }
     var showEncryptAttachmentsDialog by remember { mutableStateOf(false) }
     var encryptAttachmentsMode by remember { mutableStateOf<Boolean?>(null) }
+    var showImageEditor by remember { mutableStateOf<NoteAttachment?>(null) }
 
     val attachmentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -567,6 +586,28 @@ fun NoteEditorScreen(
             )
         }
 
+        if (showImageEditor != null) {
+            ImageEditorDialog(
+                attachment = showImageEditor!!,
+                onDismiss = { showImageEditor = null },
+                onSave = { updated ->
+                    val idx = attachments.indexOfFirst { it.id == updated.id }
+                    if (idx >= 0) attachments[idx] = updated
+                    showImageEditor = null
+                },
+                onDuplicate = { duplicated ->
+                    attachments.add(duplicated)
+                },
+                onRemove = { att ->
+                    scope.launch {
+                        AttachmentManager.deleteAttachment(context, noteId, att)
+                        attachments.remove(att)
+                    }
+                    showImageEditor = null
+                }
+            )
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -608,7 +649,7 @@ fun NoteEditorScreen(
                                 Button(
                                     onClick = {
                                         scope.launch {
-                                            val attachmentsJson = attachmentsToJson(attachments.toList())
+                        val attachmentsJson = attachmentsToJson(attachments.toList(), embedFiles = true)
                                             val contentJson = buildNoteJson(plaintext, attachmentsJson)
                                             val plainBytes = contentJson.toByteArray(Charsets.UTF_8)
                                             val result = repository.encryptNoteContent(
@@ -685,7 +726,7 @@ fun NoteEditorScreen(
                 Column(
                     modifier = Modifier
                         .padding(padding)
-                        .padding(16.dp)
+                        .fillMaxSize()
                 ) {
                     AppTextField(
                         value = title,
@@ -714,128 +755,62 @@ fun NoteEditorScreen(
                         label = strings.noteContent,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f),
+                            .height(200.dp),
                         singleLine = false,
-                        minLines = 1
+                        minLines = 8
                     )
 
                     if (attachments.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("Attachments", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState())
-                        ) {
-                            attachments.forEach { att ->
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        attachments.forEach { att ->
+                            item(key = att.id) {
                                 if (att.type == com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE && att.storedPath.isNotEmpty()) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
-                                            .padding(8.dp)
-                                    ) {
-                                        Column {
-                                            AsyncImage(
-                                                model = File(att.storedPath),
-                                                contentDescription = att.originalName,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(200.dp)
-                                                    .clip(RoundedCornerShape(8.dp))
-                                            )
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    att.originalName,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    fontWeight = FontWeight.Medium,
-                                                    maxLines = 1
-                                                )
-                                                IconButton(
-                                                    onClick = {
-                                                        scope.launch {
-                                                            AttachmentManager.deleteAttachment(context, noteId, att)
-                                                            attachments.remove(att)
-                                                        }
-                                                    },
-                                                    modifier = Modifier.size(24.dp)
-                                                ) {
-                                                    Icon(
-                                                        Icons.Default.Close,
-                                                        "Remove",
-                                                        modifier = Modifier.size(14.dp),
-                                                        tint = MaterialTheme.colorScheme.error
+                                    ImageAttachmentCard(
+                                        attachment = att,
+                                        onRemove = {
+                                            scope.launch {
+                                                AttachmentManager.deleteAttachment(context, noteId, att)
+                                                attachments.remove(att)
+                                            }
+                                        },
+                                        onEdit = { showImageEditor = att },
+                                        onDuplicate = {
+                                            scope.launch {
+                                                val sourceFile = File(att.storedPath)
+                                                if (sourceFile.exists()) {
+                                                    val destDir = AttachmentManager.getNoteDir(context, noteId)
+                                                    val destFile = File(destDir, "copy_${att.originalName}")
+                                                    sourceFile.copyTo(destFile, overwrite = true)
+                                                    val newAtt = att.copy(
+                                                        id = java.util.UUID.randomUUID().toString(),
+                                                        originalName = "copy_${att.originalName}",
+                                                        storedPath = destFile.absolutePath,
+                                                        size = destFile.length()
                                                     )
+                                                    attachments.add(newAtt)
                                                 }
                                             }
                                         }
-                                    }
+                                    )
                                 } else {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.weight(1f)
-                                        ) {
-                                            Icon(
-                                                imageVector = when (att.type) {
-                                                    com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE -> Icons.Default.Image
-                                                    com.taybeti.app.security.NoteAttachment.AttachmentType.AUDIO -> Icons.Default.MusicNote
-                                                    com.taybeti.app.security.NoteAttachment.AttachmentType.VIDEO -> Icons.Default.VideoFile
-                                                    else -> Icons.Default.Description
-                                                },
-                                                contentDescription = null,
-                                                modifier = Modifier.size(20.dp),
-                                                tint = MaterialTheme.colorScheme.primary
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Column {
-                                                Text(
-                                                    att.originalName,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    fontWeight = FontWeight.Medium,
-                                                    maxLines = 1
-                                                )
-                                                Text(
-                                                    "${att.size / 1024} KB",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                                )
+                                    FileAttachmentCard(
+                                        attachment = att,
+                                        onRemove = {
+                                            scope.launch {
+                                                AttachmentManager.deleteAttachment(context, noteId, att)
+                                                attachments.remove(att)
                                             }
                                         }
-                                        IconButton(
-                                            onClick = {
-                                                scope.launch {
-                                                    AttachmentManager.deleteAttachment(context, noteId, att)
-                                                    attachments.remove(att)
-                                                }
-                                            },
-                                            modifier = Modifier.size(28.dp)
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Close,
-                                                "Remove",
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.error
-                                            )
-                                        }
-                                    }
+                                    )
                                 }
-                                Spacer(modifier = Modifier.height(4.dp))
                             }
                         }
                     }
@@ -843,6 +818,93 @@ fun NoteEditorScreen(
             }
         }
     } // KeyboardHost
+}
+
+@Composable
+private fun ImageAttachmentCard(
+    attachment: NoteAttachment,
+    onRemove: () -> Unit,
+    onEdit: () -> Unit,
+    onDuplicate: () -> Unit
+) {
+    val strings = LocalStrings.current
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            AsyncImage(
+                model = attachment.storedPath,
+                contentDescription = attachment.originalName,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(4.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    attachment.originalName,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
+                )
+                Row {
+                    IconButton(onClick = onDuplicate, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Duplicate", modifier = Modifier.size(16.dp))
+                    }
+                    IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
+                    }
+                    IconButton(onClick = onRemove, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Remove", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FileAttachmentCard(
+    attachment: NoteAttachment,
+    onRemove: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = when (attachment.type) {
+                    NoteAttachment.AttachmentType.AUDIO -> Icons.Default.MusicNote
+                    NoteAttachment.AttachmentType.VIDEO -> Icons.Default.VideoFile
+                    else -> Icons.Default.Description
+                },
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(attachment.originalName, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+                Text("${attachment.size / 1024} KB", style = MaterialTheme.typography.bodySmall)
+            }
+            IconButton(onClick = onRemove) {
+                Icon(Icons.Default.Close, contentDescription = "Remove", tint = MaterialTheme.colorScheme.error)
+            }
+        }
+    }
 }
 
 // ── Decoy encrypted view (Copy / Edit / Disguise dropdown) ──
@@ -915,11 +977,27 @@ private fun DecoyEncryptedView(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
-                onClick = onEdit,
+                onClick = {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, encryptedBlob)
+                        putExtra(Intent.EXTRA_SUBJECT, "Encrypted Note")
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "Share Encrypted Note"))
+                },
                 modifier = Modifier.weight(1f)
             ) {
-                Text(strings.edit)
+                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Share")
             }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = onEdit,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(strings.edit)
         }
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -1113,4 +1191,219 @@ private fun parseNoteJson(plaintext: String): Pair<String, String> {
     } catch (_: Exception) {
         plaintext to "[]"
     }
+}
+
+@Composable
+private fun ImageEditorDialog(
+    attachment: NoteAttachment,
+    onDismiss: () -> Unit,
+    onSave: (NoteAttachment) -> Unit,
+    onDuplicate: (NoteAttachment) -> Unit,
+    onRemove: (NoteAttachment) -> Unit
+) {
+    val context = LocalContext.current
+    val strings = LocalStrings.current
+    var scale by remember { mutableStateOf(1f) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+    var cropMode by remember { mutableStateOf(false) }
+    var cropRect by remember { mutableStateOf(android.graphics.RectF(0f, 0f, 1f, 1f)) }
+    var showCropOverlay by remember { mutableStateOf(false) }
+    var cropStartX by remember { mutableStateOf(0f) }
+    var cropStartY by remember { mutableStateOf(0f) }
+    var cropEndX by remember { mutableStateOf(0f) }
+    var cropEndY by remember { mutableStateOf(0f) }
+    var isCropping by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Image", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .background(Color.Black, RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(8.dp))
+                        .pointerInput(Unit) {
+                            detectTransformGestures { _, pan, zoom, _ ->
+                                scale = (scale * zoom).coerceIn(0.5f, 5f)
+                                offsetX += pan.x
+                                offsetY += pan.y
+                            }
+                        }
+                        .pointerInput(Unit) {
+                            detectDragGestures(
+                                onDragStart = { offset ->
+                                    if (cropMode) {
+                                        isCropping = true
+                                        cropStartX = offset.x
+                                        cropStartY = offset.y
+                                        cropEndX = offset.x
+                                        cropEndY = offset.y
+                                    }
+                                },
+                                onDragEnd = {
+                                    if (cropMode && isCropping) {
+                                        isCropping = false
+                                        showCropOverlay = true
+                                    }
+                                },
+                                onDrag = { change, dragAmount ->
+                                    if (cropMode) {
+                                        cropEndX += dragAmount.x
+                                        cropEndY += dragAmount.y
+                                    } else {
+                                        offsetX += dragAmount.x
+                                        offsetY += dragAmount.y
+                                    }
+                                }
+                            )
+                        }
+                ) {
+                    AsyncImage(
+                        model = attachment.storedPath,
+                        contentDescription = attachment.originalName,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer(
+                                scaleX = scale,
+                                scaleY = scale,
+                                translationX = offsetX,
+                                translationY = offsetY
+                            ),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                    )
+
+                    if (cropMode && isCropping) {
+                        val left = minOf(cropStartX, cropEndX)
+                        val top = minOf(cropStartY, cropEndY)
+                        val right = maxOf(cropStartX, cropEndX)
+                        val bottom = maxOf(cropStartY, cropEndY)
+                        Box(
+                            modifier = Modifier
+                                .layout { measurable, constraints ->
+                                    val placeable = measurable.measure(constraints)
+                                    layout(placeable.width, placeable.height) {
+                                        placeable.place(left.toInt(), top.toInt())
+                                    }
+                                }
+                                .size(
+                                    width = (right - left).dp,
+                                    height = (bottom - top).dp
+                                )
+                                .border(2.dp, Color.White, RoundedCornerShape(4.dp))
+                                .background(Color(0x40FFFFFF))
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(onClick = {
+                        scale = 1f
+                        offsetX = 0f
+                        offsetY = 0f
+                    }) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Restore, contentDescription = "Reset Zoom")
+                            Text("Reset", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+
+                    IconButton(onClick = {
+                        cropMode = !cropMode
+                        if (!cropMode) {
+                            showCropOverlay = false
+                            isCropping = false
+                        }
+                    }) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Crop, contentDescription = "Crop")
+                            Text(if (cropMode) "Done" else "Crop", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+
+                    IconButton(onClick = {
+                        val newScale = (scale * 1.2f).coerceIn(0.5f, 5f)
+                        scale = newScale
+                    }) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Add, contentDescription = "Zoom In")
+                            Text("Zoom+", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+
+                    IconButton(onClick = {
+                        val newScale = (scale / 1.2f).coerceIn(0.5f, 5f)
+                        scale = newScale
+                    }) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Remove, contentDescription = "Zoom Out")
+                            Text("Zoom-", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Scale: ${(scale * 100).toInt()}%",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+        },
+        confirmButton = {
+            Row {
+                TextButton(onClick = {
+                    onDuplicate(
+                        attachment.copy(
+                            id = java.util.UUID.randomUUID().toString(),
+                            originalName = "copy_${attachment.originalName}"
+                        )
+                    )
+                }) {
+                    Text("Duplicate")
+                }
+                TextButton(onClick = { onRemove(attachment) }) {
+                    Text("Remove", color = MaterialTheme.colorScheme.error)
+                }
+                TextButton(onClick = {
+                    if (cropMode && showCropOverlay) {
+                        val parentSize = 300.dp.value
+                        val normalizedLeft = (minOf(cropStartX, cropEndX) / parentSize).coerceIn(0f, 1f)
+                        val normalizedTop = (minOf(cropStartY, cropEndY) / parentSize).coerceIn(0f, 1f)
+                        val normalizedRight = (maxOf(cropStartX, cropEndX) / parentSize).coerceIn(0f, 1f)
+                        val normalizedBottom = (maxOf(cropStartY, cropEndY) / parentSize).coerceIn(0f, 1f)
+                        cropRect = android.graphics.RectF(normalizedLeft, normalizedTop, normalizedRight, normalizedBottom)
+                    }
+                    onSave(
+                        attachment.copy(
+                            metadata = mapOf(
+                                "scale" to scale.toString(),
+                                "offsetX" to offsetX.toString(),
+                                "offsetY" to offsetY.toString(),
+                                "cropLeft" to cropRect.left.toString(),
+                                "cropTop" to cropRect.top.toString(),
+                                "cropRight" to cropRect.right.toString(),
+                                "cropBottom" to cropRect.bottom.toString()
+                            )
+                        )
+                    )
+                }) {
+                    Text("Save", fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

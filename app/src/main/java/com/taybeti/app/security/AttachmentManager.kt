@@ -2,6 +2,7 @@ package com.taybeti.app.security
 
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -15,7 +16,8 @@ data class NoteAttachment(
     val storedPath: String,
     val type: AttachmentType,
     val isIntegrated: Boolean = false,
-    val encryptedPath: String = ""
+    val encryptedPath: String = "",
+    val metadata: Map<String, String> = emptyMap()
 ) {
     enum class AttachmentType {
         IMAGE, AUDIO, VIDEO, DOCUMENT, OTHER
@@ -220,7 +222,7 @@ object AttachmentManager {
         }
     }
 
-    fun getAttachmentsList(json: String): List<NoteAttachment> {
+    fun getAttachmentsList(json: String, context: Context? = null, noteId: String? = null): List<NoteAttachment> {
         return try {
             if (json.isBlank() || json == "[]") return emptyList()
             val items = json.trimStart('[').trimEnd(']').split("},{")
@@ -231,7 +233,8 @@ object AttachmentManager {
                     if (parts.size == 2) parts[0].trim().trim('"') to parts[1].trim().trim('"')
                     else "" to ""
                 }.filter { it.key.isNotEmpty() }
-                NoteAttachment(
+                
+                val att = NoteAttachment(
                     id = map["id"] ?: UUID.randomUUID().toString(),
                     originalName = map["originalName"] ?: "attachment",
                     mimeType = map["mimeType"] ?: "application/octet-stream",
@@ -245,16 +248,36 @@ object AttachmentManager {
                     isIntegrated = map["isIntegrated"]?.toBoolean() ?: false,
                     encryptedPath = map["encryptedPath"] ?: ""
                 )
+                
+                // If fileData exists (base64-encoded file content), write it to disk
+                if (!map["fileData"].isNullOrEmpty() && context != null && noteId != null) {
+                    val fileData = map["fileData"]
+                    val decodedBytes = Base64.decode(fileData, Base64.DEFAULT)
+                    val destDir = getNoteDir(context, noteId)
+                    val destFile = File(destDir, att.originalName)
+                    destFile.writeBytes(decodedBytes)
+                    return@map att.copy(storedPath = destFile.absolutePath, size = decodedBytes.size.toLong())
+                }
+                
+                att
             }
         } catch (_: Exception) {
             emptyList()
         }
     }
 
-    fun attachmentsToJson(attachments: List<NoteAttachment>): String {
+    fun attachmentsToJson(attachments: List<NoteAttachment>, embedFiles: Boolean = false): String {
         if (attachments.isEmpty()) return "[]"
         return attachments.joinToString(",", prefix = "[", postfix = "]") { att ->
-            """{"id":"${att.id}","originalName":"${att.originalName.replace("\\", "\\\\")}","mimeType":"${att.mimeType}","size":${att.size},"storedPath":"${att.storedPath.replace("\\", "\\\\")}","type":"${att.type.name}","isIntegrated":${att.isIntegrated},"encryptedPath":"${att.encryptedPath.replace("\\", "\\\\")}"}"""
+            val fileData = if (embedFiles) {
+                val file = File(att.storedPath)
+                if (file.exists()) {
+                    val bytes = file.readBytes()
+                    val encoded = Base64.encodeToString(bytes, Base64.NO_WRAP)
+                    ""","fileData":"$encoded""""
+                } else ""
+            } else ""
+            """{"id":"${att.id}","originalName":"${att.originalName.replace("\\", "\\\\")}","mimeType":"${att.mimeType}","size":${att.size},"storedPath":"${att.storedPath.replace("\\", "\\\\")}","type":"${att.type.name}","isIntegrated":${att.isIntegrated},"encryptedPath":"${att.encryptedPath.replace("\\", "\\\\")}"$fileData}"""
         }
     }
 }

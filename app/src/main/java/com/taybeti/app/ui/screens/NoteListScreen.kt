@@ -579,7 +579,7 @@ private fun LoadNoteDialog(
                                     )
                                     db.noteDao().insert(note)
 
-                                    val attachments = getAttachmentsList(attachmentsJson)
+                                    val attachments = getAttachmentsList(attachmentsJson, context, noteId)
                                     if (attachments.isNotEmpty()) {
                                         for (att in attachments) {
                                             if (att.encryptedPath.isNotEmpty()) {
