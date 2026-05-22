@@ -251,7 +251,11 @@ fun NoteEditorScreen(
                                             val result = repository.decryptNoteContent(entity, editKey.toCharArray())
                                             if (result.isSuccess) {
                                                 val decrypted = result.getOrNull()!!
-                                                plaintext = String(decrypted, Charsets.UTF_8)
+                                                val decryptedStr = String(decrypted, Charsets.UTF_8)
+                                                val (content, attJson) = parseNoteJson(decryptedStr)
+                                                plaintext = content
+                                                attachments.clear()
+                                                attachments.addAll(getAttachmentsList(attJson))
                                                 title = entity.title
                                                 showEditKeyDialog = false
                                                 showEncryptedOutput = false
@@ -366,7 +370,11 @@ fun NoteEditorScreen(
                                             )
                                             if (result.isSuccess) {
                                                 val decrypted = result.getOrNull()!!
-                                                plaintext = String(decrypted, Charsets.UTF_8)
+                                                val decryptedStr = String(decrypted, Charsets.UTF_8)
+                                                val (content, attJson) = parseNoteJson(decryptedStr)
+                                                plaintext = content
+                                                attachments.clear()
+                                                attachments.addAll(getAttachmentsList(attJson))
                                                 title = entity.title
                                                 isLocked = false
                                                 showKeyDialog = false
@@ -546,8 +554,9 @@ fun NoteEditorScreen(
                             Button(
                                 onClick = {
                                     scope.launch {
-                                        val plainBytes = plaintext.toByteArray(Charsets.UTF_8)
                                         val attachmentsJson = attachmentsToJson(attachments.toList())
+                                        val contentJson = buildNoteJson(plaintext, attachmentsJson)
+                                        val plainBytes = contentJson.toByteArray(Charsets.UTF_8)
                                         val result = repository.encryptNoteContent(
                                             noteId, title, plainBytes, noteKey.toCharArray(), attachmentsJson
                                         )
@@ -881,5 +890,27 @@ private fun DecoyEncryptedView(
                 }
             )
         }
+    }
+}
+
+private fun buildNoteJson(content: String, attachmentsJson: String): String {
+    return try {
+        val json = org.json.JSONObject()
+        json.put("content", content)
+        json.put("attachments", org.json.JSONArray(attachmentsJson))
+        json.toString()
+    } catch (_: Exception) {
+        content
+    }
+}
+
+private fun parseNoteJson(plaintext: String): Pair<String, String> {
+    return try {
+        val json = org.json.JSONObject(plaintext)
+        val content = json.optString("content", plaintext)
+        val attachments = json.optJSONArray("attachments")?.toString() ?: "[]"
+        content to attachments
+    } catch (_: Exception) {
+        plaintext to "[]"
     }
 }
