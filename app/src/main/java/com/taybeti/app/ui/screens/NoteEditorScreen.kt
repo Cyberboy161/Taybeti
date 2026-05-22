@@ -1,14 +1,11 @@
 package com.taybeti.app.ui.screens
 
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.RectF
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,16 +26,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MusicNote
@@ -84,7 +81,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -121,6 +117,21 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Base64
 
+enum class ImagePosition {
+    INLINE,
+    BEHIND_TEXT,
+    IN_FRONT_OF_TEXT
+}
+
+sealed class ContentBlock {
+    data class TextBlock(val content: String) : ContentBlock()
+    data class ImageBlock(
+        val attachment: NoteAttachment,
+        val position: ImagePosition = ImagePosition.INLINE,
+        val widthFraction: Float = 0.8f
+    ) : ContentBlock()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditorScreen(
@@ -135,7 +146,6 @@ fun NoteEditorScreen(
 
     var noteEntity by remember { mutableStateOf<NoteEntity?>(null) }
     var title by remember { mutableStateOf("") }
-    var plaintext by remember { mutableStateOf("") }
     var isLocked by remember { mutableStateOf(true) }
     var showKeyDialog by remember { mutableStateOf(false) }
     var showCreateKeyDialog by remember { mutableStateOf(true) }
@@ -151,11 +161,10 @@ fun NoteEditorScreen(
     var editKeyError by remember { mutableStateOf<String?>(null) }
     val clipboard = LocalClipboardManager.current
 
-    val attachments = remember { mutableStateListOf<NoteAttachment>() }
+    val blocks = remember { mutableStateListOf<ContentBlock>() }
     var pendingAttachmentType by remember { mutableStateOf<AttachmentType?>(null) }
     var showEncryptAttachmentsDialog by remember { mutableStateOf(false) }
-    var encryptAttachmentsMode by remember { mutableStateOf<Boolean?>(null) }
-    var showImageEditor by remember { mutableStateOf<NoteAttachment?>(null) }
+    var showImageEditor by remember { mutableStateOf<Pair<Int, NoteAttachment>?>(null) }
 
     val attachmentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -166,7 +175,12 @@ fun NoteEditorScreen(
                     context, noteId, uri, context.contentResolver
                 )
                 result.onSuccess { attachment ->
-                    attachments.add(attachment)
+                    blocks.add(
+                        ContentBlock.ImageBlock(
+                            attachment = attachment,
+                            position = ImagePosition.INLINE
+                        )
+                    )
                 }.onFailure {
                     Toast.makeText(context, "Failed to attach file", Toast.LENGTH_SHORT).show()
                 }
@@ -175,7 +189,7 @@ fun NoteEditorScreen(
         pendingAttachmentType = null
     }
 
-    val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || plaintext.isNotEmpty())
+    val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || blocks.any { it is ContentBlock.TextBlock && (it as ContentBlock.TextBlock).content.isNotEmpty() })
 
     KeyboardHost {
         BackHandler {
@@ -199,8 +213,10 @@ fun NoteEditorScreen(
                 dismissButton = {
                     TextButton(onClick = {
                         showUnsavedDialog = false
-                        SecureMemory.clear(plaintext.toCharArray())
-                        plaintext = ""
+                        blocks.filterIsInstance<ContentBlock.ImageBlock>().forEach {
+                            SecureMemory.clear(it.attachment.storedPath.toCharArray())
+                        }
+                        blocks.clear()
                         onBack()
                     }) {
                         Text(strings.discard, color = MaterialTheme.colorScheme.error)
@@ -209,7 +225,6 @@ fun NoteEditorScreen(
             )
         }
 
-        // Edit key verification dialog
         if (showEditKeyDialog) {
             val dialogKeyboardState = remember { KeyboardState() }
             Dialog(
@@ -281,9 +296,17 @@ fun NoteEditorScreen(
                                                 val decrypted = result.getOrNull()!!
                                                 val decryptedStr = String(decrypted, Charsets.UTF_8)
                                                 val (content, attJson) = parseNoteJson(decryptedStr)
-                                                plaintext = content
-                                                attachments.clear()
-                                                attachments.addAll(getAttachmentsList(attJson))
+                                                blocks.clear()
+                                                blocks.add(ContentBlock.TextBlock(content))
+                                                val atts = getAttachmentsList(attJson, context, noteId)
+                                                atts.forEach { att ->
+                                                    blocks.add(
+                                                        ContentBlock.ImageBlock(
+                                                            attachment = att,
+                                                            position = ImagePosition.INLINE
+                                                        )
+                                                    )
+                                                }
                                                 title = entity.title
                                                 showEditKeyDialog = false
                                                 showEncryptedOutput = false
@@ -323,20 +346,19 @@ fun NoteEditorScreen(
                     isNewNote = false
                     showCreateKeyDialog = false
                     showKeyDialog = true
-                    attachments.clear()
-                    attachments.addAll(getAttachmentsList(existing.attachments))
                 }
             }
         }
 
         DisposableEffect(Unit) {
             onDispose {
-                SecureMemory.clear(plaintext.toCharArray())
+                blocks.filterIsInstance<ContentBlock.TextBlock>().forEach {
+                    SecureMemory.clear(it.content.toCharArray())
+                }
                 SecureMemory.clear(noteKey.toCharArray())
             }
         }
 
-        // Unlock key dialog for existing notes
         if (showKeyDialog) {
             val dialogKeyboardState = remember { KeyboardState() }
             Dialog(
@@ -400,9 +422,17 @@ fun NoteEditorScreen(
                                                 val decrypted = result.getOrNull()!!
                                                 val decryptedStr = String(decrypted, Charsets.UTF_8)
                                                 val (content, attJson) = parseNoteJson(decryptedStr)
-                                                plaintext = content
-                                                attachments.clear()
-                                                attachments.addAll(getAttachmentsList(attJson))
+                                                blocks.clear()
+                                                blocks.add(ContentBlock.TextBlock(content))
+                                                val atts = getAttachmentsList(attJson, context, noteId)
+                                                atts.forEach { att ->
+                                                    blocks.add(
+                                                        ContentBlock.ImageBlock(
+                                                            attachment = att,
+                                                            position = ImagePosition.INLINE
+                                                        )
+                                                    )
+                                                }
                                                 title = entity.title
                                                 isLocked = false
                                                 showKeyDialog = false
@@ -432,7 +462,6 @@ fun NoteEditorScreen(
             }
         }
 
-        // Create key dialog for new notes
         if (showCreateKeyDialog && isNewNote && !showKeyDialog) {
             var newKey by remember { mutableStateOf(generatedKey) }
             var confirmKey by remember { mutableStateOf("") }
@@ -540,7 +569,8 @@ fun NoteEditorScreen(
                                             showCreateKeyDialog = false
                                             isLocked = false
                                             title = ""
-                                            plaintext = ""
+                                            blocks.clear()
+                                            blocks.add(ContentBlock.TextBlock(""))
                                         }
                                     }
                                 },
@@ -559,25 +589,25 @@ fun NoteEditorScreen(
 
         if (showEncryptAttachmentsDialog) {
             EncryptAttachmentsDialog(
-                attachments = attachments.toList(),
+                attachments = blocks.filterIsInstance<ContentBlock.ImageBlock>().map { it.attachment },
                 onDismiss = { showEncryptAttachmentsDialog = false },
                 onEncrypt = { encryptAttachmentsTogether ->
                     showEncryptAttachmentsDialog = false
-                    encryptAttachmentsMode = encryptAttachmentsTogether
                     scope.launch {
-                        val attachmentsJson = attachmentsToJson(attachments.toList())
-                        val contentJson = buildNoteJson(plaintext, attachmentsJson)
-                        val plainBytes = contentJson.toByteArray(Charsets.UTF_8)
+                        val noteJson = buildNoteJsonFromBlocks(blocks)
+                        val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
                         val result = repository.encryptNoteContent(
-                            noteId, title, plainBytes, noteKey.toCharArray(), attachmentsJson
+                            noteId, title, plainBytes, noteKey.toCharArray(), ""
                         )
                         if (result.isSuccess) {
                             val note = result.getOrNull()!!
                             val b64 = Base64.getEncoder()
                             encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
                             showEncryptedOutput = true
-                            SecureMemory.clear(plaintext.toCharArray())
-                            plaintext = ""
+                            blocks.filterIsInstance<ContentBlock.TextBlock>().forEach {
+                                SecureMemory.clear(it.content.toCharArray())
+                            }
+                            blocks.clear()
                             isLocked = true
                             Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
                         }
@@ -587,22 +617,26 @@ fun NoteEditorScreen(
         }
 
         if (showImageEditor != null) {
-            ImageEditorDialog(
-                attachment = showImageEditor!!,
+            val (blockIndex, attachment) = showImageEditor!!
+            ImagePositionDialog(
+                attachment = attachment,
+                currentPosition = (blocks[blockIndex] as? ContentBlock.ImageBlock)?.position ?: ImagePosition.INLINE,
                 onDismiss = { showImageEditor = null },
-                onSave = { updated ->
-                    val idx = attachments.indexOfFirst { it.id == updated.id }
-                    if (idx >= 0) attachments[idx] = updated
+                onSave = { newPosition, newAttachment ->
+                    val existingBlock = blocks[blockIndex] as? ContentBlock.ImageBlock
+                    if (existingBlock != null) {
+                        blocks[blockIndex] = existingBlock.copy(
+                            attachment = newAttachment,
+                            position = newPosition
+                        )
+                    }
                     showImageEditor = null
                 },
-                onDuplicate = { duplicated ->
-                    attachments.add(duplicated)
-                },
-                onRemove = { att ->
+                onRemove = {
                     scope.launch {
-                        AttachmentManager.deleteAttachment(context, noteId, att)
-                        attachments.remove(att)
+                        AttachmentManager.deleteAttachment(context, noteId, attachment)
                     }
+                    blocks.removeAt(blockIndex)
                     showImageEditor = null
                 }
             )
@@ -630,55 +664,44 @@ fun NoteEditorScreen(
                     },
                     actions = {
                         if (!isLocked) {
-                            if (attachments.isNotEmpty()) {
-                                Button(
-                                    onClick = { showEncryptAttachmentsDialog = true },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    )
-                                ) {
-                                    Icon(
-                                        Icons.Default.Shield,
-                                        contentDescription = null,
-                                        modifier = Modifier.height(18.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(strings.encrypt, fontWeight = FontWeight.Bold)
-                                }
-                            } else {
-                                Button(
-                                    onClick = {
+                            val hasImages = blocks.any { it is ContentBlock.ImageBlock }
+                            Button(
+                                onClick = {
+                                    if (hasImages) {
+                                        showEncryptAttachmentsDialog = true
+                                    } else {
                                         scope.launch {
-                        val attachmentsJson = attachmentsToJson(attachments.toList(), embedFiles = true)
-                                            val contentJson = buildNoteJson(plaintext, attachmentsJson)
-                                            val plainBytes = contentJson.toByteArray(Charsets.UTF_8)
+                                            val noteJson = buildNoteJsonFromBlocks(blocks)
+                                            val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
                                             val result = repository.encryptNoteContent(
-                                                noteId, title, plainBytes, noteKey.toCharArray(), attachmentsJson
+                                                noteId, title, plainBytes, noteKey.toCharArray(), ""
                                             )
                                             if (result.isSuccess) {
                                                 val note = result.getOrNull()!!
                                                 val b64 = Base64.getEncoder()
                                                 encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
                                                 showEncryptedOutput = true
-                                                SecureMemory.clear(plaintext.toCharArray())
-                                                plaintext = ""
+                                                blocks.filterIsInstance<ContentBlock.TextBlock>().forEach {
+                                                    SecureMemory.clear(it.content.toCharArray())
+                                                }
+                                                blocks.clear()
                                                 isLocked = true
                                                 Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
                                             }
                                         }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    )
-                                ) {
-                                    Icon(
-                                        Icons.Default.Shield,
-                                        contentDescription = null,
-                                        modifier = Modifier.height(18.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(strings.encrypt, fontWeight = FontWeight.Bold)
-                                }
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.Shield,
+                                    contentDescription = null,
+                                    modifier = Modifier.height(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(strings.encrypt, fontWeight = FontWeight.Bold)
                             }
                         }
                     },
@@ -739,7 +762,11 @@ fun NoteEditorScreen(
 
                     NoteFormattingToolbar(
                         onInsertFormat = { format ->
-                            plaintext = plaintext + format
+                            val textBlockIdx = blocks.indexOfLast { it is ContentBlock.TextBlock }
+                            if (textBlockIdx >= 0) {
+                                val existing = blocks[textBlockIdx] as ContentBlock.TextBlock
+                                blocks[textBlockIdx] = ContentBlock.TextBlock(existing.content + format)
+                            }
                         },
                         onAddAttachment = { type ->
                             pendingAttachmentType = type
@@ -749,64 +776,113 @@ fun NoteEditorScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    AppTextField(
-                        value = plaintext,
-                        onValueChange = { plaintext = it },
-                        label = strings.noteContent,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        singleLine = false,
-                        minLines = 8
-                    )
-
-                    if (attachments.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Attachments", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        attachments.forEach { att ->
-                            item(key = att.id) {
-                                if (att.type == com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE && att.storedPath.isNotEmpty()) {
-                                    ImageAttachmentCard(
-                                        attachment = att,
-                                        onRemove = {
-                                            scope.launch {
-                                                AttachmentManager.deleteAttachment(context, noteId, att)
-                                                attachments.remove(att)
+                        items(blocks.toList(), key = { 
+                            when (it) {
+                                is ContentBlock.TextBlock -> "text_${it.content.hashCode()}"
+                                is ContentBlock.ImageBlock -> "img_${it.attachment.id}"
+                            }
+                        }) { block ->
+                            when (block) {
+                                is ContentBlock.TextBlock -> {
+                                    val kbState = remember { KeyboardState() }
+                                    Column {
+                                        CompositionLocalProvider(LocalKeyboardState provides kbState) {
+                                            BasicTextField(
+                                                value = block.content,
+                                                onValueChange = { newText ->
+                                                    val idx = blocks.indexOf(block)
+                                                    if (idx >= 0) {
+                                                        blocks[idx] = ContentBlock.TextBlock(newText)
+                                                    }
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 8.dp),
+                                                decorationBox = { innerTextField ->
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable { kbState.attach(
+                                                                onKey = { char ->
+                                                                    val idx = blocks.indexOf(block)
+                                                                    if (idx >= 0) {
+                                                                        blocks[idx] = ContentBlock.TextBlock(block.content + char)
+                                                                    }
+                                                                },
+                                                                onDel = {
+                                                                    val idx = blocks.indexOf(block)
+                                                                    if (idx >= 0 && block.content.isNotEmpty()) {
+                                                                        blocks[idx] = ContentBlock.TextBlock(block.content.dropLast(1))
+                                                                    }
+                                                                },
+                                                                onDone = { kbState.detach() }
+                                                            ) }
+                                                            .padding(8.dp)
+                                                    ) {
+                                                        if (block.content.isEmpty()) {
+                                                            Text(
+                                                                "Type here...",
+                                                                color = Color.Gray,
+                                                                style = MaterialTheme.typography.bodyLarge
+                                                            )
+                                                        }
+                                                        innerTextField()
+                                                    }
+                                                }
+                                            )
+                                        }
+                                        if (kbState.isVisible) {
+                                            CustomKeyboard(
+                                                onKeyPress = { char ->
+                                                    val idx = blocks.indexOf(block)
+                                                    if (idx >= 0) {
+                                                        blocks[idx] = ContentBlock.TextBlock(block.content + char)
+                                                    }
+                                                },
+                                                onDelete = {
+                                                    val idx = blocks.indexOf(block)
+                                                    if (idx >= 0 && block.content.isNotEmpty()) {
+                                                        blocks[idx] = ContentBlock.TextBlock(block.content.dropLast(1))
+                                                    }
+                                                },
+                                                onDone = { kbState.detach() }
+                                            )
+                                        }
+                                    }
+                                }
+                                is ContentBlock.ImageBlock -> {
+                                    ImageBlockCard(
+                                        block = block,
+                                        onEdit = {
+                                            val idx = blocks.indexOf(block)
+                                            if (idx >= 0) {
+                                                showImageEditor = idx to block.attachment
                                             }
                                         },
-                                        onEdit = { showImageEditor = att },
-                                        onDuplicate = {
-                                            scope.launch {
-                                                val sourceFile = File(att.storedPath)
-                                                if (sourceFile.exists()) {
-                                                    val destDir = AttachmentManager.getNoteDir(context, noteId)
-                                                    val destFile = File(destDir, "copy_${att.originalName}")
-                                                    sourceFile.copyTo(destFile, overwrite = true)
-                                                    val newAtt = att.copy(
-                                                        id = java.util.UUID.randomUUID().toString(),
-                                                        originalName = "copy_${att.originalName}",
-                                                        storedPath = destFile.absolutePath,
-                                                        size = destFile.length()
-                                                    )
-                                                    attachments.add(newAtt)
-                                                }
-                                            }
-                                        }
-                                    )
-                                } else {
-                                    FileAttachmentCard(
-                                        attachment = att,
                                         onRemove = {
                                             scope.launch {
-                                                AttachmentManager.deleteAttachment(context, noteId, att)
-                                                attachments.remove(att)
+                                                AttachmentManager.deleteAttachment(context, noteId, block.attachment)
+                                            }
+                                            blocks.remove(block)
+                                        },
+                                        onMoveUp = {
+                                            val idx = blocks.indexOf(block)
+                                            if (idx > 0) {
+                                                blocks.removeAt(idx)
+                                                blocks.add(idx - 1, block)
+                                            }
+                                        },
+                                        onMoveDown = {
+                                            val idx = blocks.indexOf(block)
+                                            if (idx < blocks.size - 1) {
+                                                blocks.removeAt(idx)
+                                                blocks.add(idx + 1, block)
                                             }
                                         }
                                     )
@@ -821,49 +897,95 @@ fun NoteEditorScreen(
 }
 
 @Composable
-private fun ImageAttachmentCard(
-    attachment: NoteAttachment,
-    onRemove: () -> Unit,
+private fun ImageBlockCard(
+    block: ContentBlock.ImageBlock,
     onEdit: () -> Unit,
-    onDuplicate: () -> Unit
+    onRemove: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit
 ) {
-    val strings = LocalStrings.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
-            AsyncImage(
-                model = attachment.storedPath,
-                contentDescription = attachment.originalName,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    attachment.originalName,
+                    block.attachment.originalName,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     modifier = Modifier.weight(1f)
                 )
-                Row {
-                    IconButton(onClick = onDuplicate, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Duplicate", modifier = Modifier.size(16.dp))
-                    }
-                    IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
-                    }
-                    IconButton(onClick = onRemove, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.Delete, contentDescription = "Remove", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
-                    }
+                Text(
+                    when (block.position) {
+                        ImagePosition.INLINE -> "Inline"
+                        ImagePosition.BEHIND_TEXT -> "Behind Text"
+                        ImagePosition.IN_FRONT_OF_TEXT -> "In Front"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            if (block.position == ImagePosition.INLINE) {
+                Spacer(modifier = Modifier.height(4.dp))
+                AsyncImage(
+                    model = block.attachment.storedPath,
+                    contentDescription = block.attachment.originalName,
+                    modifier = Modifier
+                        .fillMaxWidth(block.widthFraction)
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .background(Color.Black.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
+                ) {
+                    AsyncImage(
+                        model = block.attachment.storedPath,
+                        contentDescription = block.attachment.originalName,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(4.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Text(
+                        when (block.position) {
+                            ImagePosition.BEHIND_TEXT -> "Will appear behind text"
+                            ImagePosition.IN_FRONT_OF_TEXT -> "Will appear over text"
+                            else -> ""
+                        },
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = onMoveUp, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Move Up", modifier = Modifier.size(16.dp))
+                }
+                IconButton(onClick = onMoveDown, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Move Down", modifier = Modifier.size(16.dp).graphicsLayer(rotationZ = 180f))
+                }
+                IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
+                }
+                IconButton(onClick = onRemove, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Default.Delete, contentDescription = "Remove", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -871,40 +993,92 @@ private fun ImageAttachmentCard(
 }
 
 @Composable
-private fun FileAttachmentCard(
+private fun ImagePositionDialog(
     attachment: NoteAttachment,
+    currentPosition: ImagePosition,
+    onDismiss: () -> Unit,
+    onSave: (ImagePosition, NoteAttachment) -> Unit,
     onRemove: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = when (attachment.type) {
-                    NoteAttachment.AttachmentType.AUDIO -> Icons.Default.MusicNote
-                    NoteAttachment.AttachmentType.VIDEO -> Icons.Default.VideoFile
-                    else -> Icons.Default.Description
-                },
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(attachment.originalName, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
-                Text("${attachment.size / 1024} KB", style = MaterialTheme.typography.bodySmall)
+    var selectedPosition by remember { mutableStateOf(currentPosition) }
+    var scale by remember { mutableStateOf(1f) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Image Position", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                AsyncImage(
+                    model = attachment.storedPath,
+                    contentDescription = attachment.originalName,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text("Position:", fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                ImagePosition.entries.forEach { position ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedPosition = position }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = when (position) {
+                                ImagePosition.INLINE -> "Inline with text"
+                                ImagePosition.BEHIND_TEXT -> "Behind text (background)"
+                                ImagePosition.IN_FRONT_OF_TEXT -> "In front of text (overlay)"
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (selectedPosition == position) {
+                            Text("✓", color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Size: ${(scale * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    TextButton(onClick = { scale = (scale - 0.1f).coerceIn(0.3f, 2f) }) {
+                        Icon(Icons.Default.Remove, contentDescription = "Smaller")
+                    }
+                    TextButton(onClick = { scale = (scale + 0.1f).coerceIn(0.3f, 2f) }) {
+                        Icon(Icons.Default.Add, contentDescription = "Larger")
+                    }
+                }
             }
-            IconButton(onClick = onRemove) {
-                Icon(Icons.Default.Close, contentDescription = "Remove", tint = MaterialTheme.colorScheme.error)
+        },
+        confirmButton = {
+            Row {
+                TextButton(onClick = onRemove) {
+                    Text("Remove", color = MaterialTheme.colorScheme.error)
+                }
+                TextButton(onClick = {
+                    onSave(selectedPosition, attachment.copy(
+                        metadata = attachment.metadata + ("scale" to scale.toString())
+                    ))
+                }) {
+                    Text("Save", fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
             }
         }
-    }
+    )
 }
 
 // ── Decoy encrypted view (Copy / Edit / Disguise dropdown) ──
@@ -1084,7 +1258,7 @@ private fun EncryptAttachmentsDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Encrypt Attachments") },
+        title = { Text("Encrypt Note") },
         text = {
             Column(
                 modifier = Modifier
@@ -1092,7 +1266,7 @@ private fun EncryptAttachmentsDialog(
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    "You have ${attachments.size} attachment(s). Choose how to encrypt them:",
+                    "You have ${attachments.size} image(s) in your note. Choose how to encrypt:",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -1107,58 +1281,10 @@ private fun EncryptAttachmentsDialog(
                     Column(horizontalAlignment = Alignment.Start) {
                         Text("Encrypt All Together", fontWeight = FontWeight.Bold)
                         Text(
-                            "Note + all attachments in one encrypted blob",
+                            "Note content + images in one encrypted blob",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                         )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Button(
-                    onClick = { onEncrypt(false) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    )
-                ) {
-                    Icon(Icons.Default.AttachFile, null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Text("Encrypt Separately", fontWeight = FontWeight.Bold)
-                        Text(
-                            "Note and each attachment as separate encrypted files",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text("Attachments:", fontWeight = FontWeight.Medium, style = MaterialTheme.typography.labelMedium)
-                Spacer(modifier = Modifier.height(4.dp))
-                attachments.forEach { att ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp)
-                    ) {
-                        Icon(
-                            imageVector = when (att.type) {
-                                com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE -> Icons.Default.Image
-                                com.taybeti.app.security.NoteAttachment.AttachmentType.AUDIO -> Icons.Default.MusicNote
-                                com.taybeti.app.security.NoteAttachment.AttachmentType.VIDEO -> Icons.Default.VideoFile
-                                else -> Icons.Default.Description
-                            },
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(att.originalName, style = MaterialTheme.typography.bodySmall, maxLines = 1)
                     }
                 }
             }
@@ -1171,239 +1297,103 @@ private fun EncryptAttachmentsDialog(
     )
 }
 
-private fun buildNoteJson(content: String, attachmentsJson: String): String {
-    return try {
-        val json = org.json.JSONObject()
-        json.put("content", content)
-        json.put("attachments", org.json.JSONArray(attachmentsJson))
-        json.toString()
-    } catch (_: Exception) {
-        content
+private fun buildNoteJsonFromBlocks(blocks: List<ContentBlock>): String {
+    val json = org.json.JSONObject()
+    val blocksArray = org.json.JSONArray()
+    
+    blocks.forEach { block ->
+        when (block) {
+            is ContentBlock.TextBlock -> {
+                val textObj = org.json.JSONObject()
+                textObj.put("type", "text")
+                textObj.put("content", block.content)
+                blocksArray.put(textObj)
+            }
+            is ContentBlock.ImageBlock -> {
+                val imgObj = org.json.JSONObject()
+                imgObj.put("type", "image")
+                imgObj.put("attachment", org.json.JSONObject().apply {
+                    put("id", block.attachment.id)
+                    put("originalName", block.attachment.originalName)
+                    put("mimeType", block.attachment.mimeType)
+                    put("size", block.attachment.size)
+                    put("storedPath", block.attachment.storedPath)
+                    put("type", block.attachment.type.name)
+                    put("isIntegrated", block.attachment.isIntegrated)
+                    put("encryptedPath", block.attachment.encryptedPath)
+                    put("position", block.position.name)
+                    put("widthFraction", block.widthFraction)
+                    block.attachment.metadata.forEach { (k, v) ->
+                        put("meta_$k", v)
+                    }
+                })
+                blocksArray.put(imgObj)
+            }
+        }
     }
+    
+    json.put("blocks", blocksArray)
+    return json.toString()
 }
 
 private fun parseNoteJson(plaintext: String): Pair<String, String> {
     return try {
         val json = org.json.JSONObject(plaintext)
-        val content = json.optString("content", plaintext)
-        val attachments = json.optJSONArray("attachments")?.toString() ?: "[]"
-        content to attachments
+        if (json.has("blocks")) {
+            val blocksArray = json.getJSONArray("blocks")
+            val textContent = StringBuilder()
+            val attachmentsList = mutableListOf<NoteAttachment>()
+            
+            for (i in 0 until blocksArray.length()) {
+                val blockObj = blocksArray.getJSONObject(i)
+                val type = blockObj.optString("type", "text")
+                
+                if (type == "text") {
+                    textContent.append(blockObj.optString("content", ""))
+                    textContent.append("\n")
+                } else if (type == "image") {
+                    val attObj = blockObj.getJSONObject("attachment")
+                    val metadata = mutableMapOf<String, String>()
+                    attObj.keys().forEach { key ->
+                        if (key.startsWith("meta_")) {
+                            metadata[key.removePrefix("meta_")] = attObj.getString(key)
+                        }
+                    }
+                    val position = try {
+                        ImagePosition.valueOf(attObj.optString("position", "INLINE"))
+                    } catch (_: Exception) {
+                        ImagePosition.INLINE
+                    }
+                    val widthFraction = attObj.optDouble("widthFraction", 0.8).toFloat()
+                    
+                    val att = NoteAttachment(
+                        id = attObj.optString("id", java.util.UUID.randomUUID().toString()),
+                        originalName = attObj.optString("originalName", "image"),
+                        mimeType = attObj.optString("mimeType", "image/jpeg"),
+                        size = attObj.optLong("size", 0),
+                        storedPath = attObj.optString("storedPath", ""),
+                        type = try {
+                            NoteAttachment.AttachmentType.valueOf(attObj.optString("type", "IMAGE"))
+                        } catch (_: Exception) {
+                            NoteAttachment.AttachmentType.IMAGE
+                        },
+                        isIntegrated = attObj.optBoolean("isIntegrated", false),
+                        encryptedPath = attObj.optString("encryptedPath", ""),
+                        metadata = metadata
+                    )
+                    attachmentsList.add(att)
+                }
+            }
+            
+            val content = textContent.toString().trimEnd('\n')
+            val attJson = attachmentsToJson(attachmentsList, embedFiles = true)
+            content to attJson
+        } else {
+            val content = json.optString("content", plaintext)
+            val attachments = json.optJSONArray("attachments")?.toString() ?: "[]"
+            content to attachments
+        }
     } catch (_: Exception) {
         plaintext to "[]"
     }
-}
-
-@Composable
-private fun ImageEditorDialog(
-    attachment: NoteAttachment,
-    onDismiss: () -> Unit,
-    onSave: (NoteAttachment) -> Unit,
-    onDuplicate: (NoteAttachment) -> Unit,
-    onRemove: (NoteAttachment) -> Unit
-) {
-    val context = LocalContext.current
-    val strings = LocalStrings.current
-    var scale by remember { mutableStateOf(1f) }
-    var offsetX by remember { mutableStateOf(0f) }
-    var offsetY by remember { mutableStateOf(0f) }
-    var cropMode by remember { mutableStateOf(false) }
-    var cropRect by remember { mutableStateOf(android.graphics.RectF(0f, 0f, 1f, 1f)) }
-    var showCropOverlay by remember { mutableStateOf(false) }
-    var cropStartX by remember { mutableStateOf(0f) }
-    var cropStartY by remember { mutableStateOf(0f) }
-    var cropEndX by remember { mutableStateOf(0f) }
-    var cropEndY by remember { mutableStateOf(0f) }
-    var isCropping by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Edit Image", fontWeight = FontWeight.Bold) },
-        text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                        .background(Color.Black, RoundedCornerShape(8.dp))
-                        .clip(RoundedCornerShape(8.dp))
-                        .pointerInput(Unit) {
-                            detectTransformGestures { _, pan, zoom, _ ->
-                                scale = (scale * zoom).coerceIn(0.5f, 5f)
-                                offsetX += pan.x
-                                offsetY += pan.y
-                            }
-                        }
-                        .pointerInput(Unit) {
-                            detectDragGestures(
-                                onDragStart = { offset ->
-                                    if (cropMode) {
-                                        isCropping = true
-                                        cropStartX = offset.x
-                                        cropStartY = offset.y
-                                        cropEndX = offset.x
-                                        cropEndY = offset.y
-                                    }
-                                },
-                                onDragEnd = {
-                                    if (cropMode && isCropping) {
-                                        isCropping = false
-                                        showCropOverlay = true
-                                    }
-                                },
-                                onDrag = { change, dragAmount ->
-                                    if (cropMode) {
-                                        cropEndX += dragAmount.x
-                                        cropEndY += dragAmount.y
-                                    } else {
-                                        offsetX += dragAmount.x
-                                        offsetY += dragAmount.y
-                                    }
-                                }
-                            )
-                        }
-                ) {
-                    AsyncImage(
-                        model = attachment.storedPath,
-                        contentDescription = attachment.originalName,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer(
-                                scaleX = scale,
-                                scaleY = scale,
-                                translationX = offsetX,
-                                translationY = offsetY
-                            ),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
-                    )
-
-                    if (cropMode && isCropping) {
-                        val left = minOf(cropStartX, cropEndX)
-                        val top = minOf(cropStartY, cropEndY)
-                        val right = maxOf(cropStartX, cropEndX)
-                        val bottom = maxOf(cropStartY, cropEndY)
-                        Box(
-                            modifier = Modifier
-                                .layout { measurable, constraints ->
-                                    val placeable = measurable.measure(constraints)
-                                    layout(placeable.width, placeable.height) {
-                                        placeable.place(left.toInt(), top.toInt())
-                                    }
-                                }
-                                .size(
-                                    width = (right - left).dp,
-                                    height = (bottom - top).dp
-                                )
-                                .border(2.dp, Color.White, RoundedCornerShape(4.dp))
-                                .background(Color(0x40FFFFFF))
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    IconButton(onClick = {
-                        scale = 1f
-                        offsetX = 0f
-                        offsetY = 0f
-                    }) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Restore, contentDescription = "Reset Zoom")
-                            Text("Reset", style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-
-                    IconButton(onClick = {
-                        cropMode = !cropMode
-                        if (!cropMode) {
-                            showCropOverlay = false
-                            isCropping = false
-                        }
-                    }) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Crop, contentDescription = "Crop")
-                            Text(if (cropMode) "Done" else "Crop", style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-
-                    IconButton(onClick = {
-                        val newScale = (scale * 1.2f).coerceIn(0.5f, 5f)
-                        scale = newScale
-                    }) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Add, contentDescription = "Zoom In")
-                            Text("Zoom+", style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-
-                    IconButton(onClick = {
-                        val newScale = (scale / 1.2f).coerceIn(0.5f, 5f)
-                        scale = newScale
-                    }) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Remove, contentDescription = "Zoom Out")
-                            Text("Zoom-", style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    "Scale: ${(scale * 100).toInt()}%",
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            }
-        },
-        confirmButton = {
-            Row {
-                TextButton(onClick = {
-                    onDuplicate(
-                        attachment.copy(
-                            id = java.util.UUID.randomUUID().toString(),
-                            originalName = "copy_${attachment.originalName}"
-                        )
-                    )
-                }) {
-                    Text("Duplicate")
-                }
-                TextButton(onClick = { onRemove(attachment) }) {
-                    Text("Remove", color = MaterialTheme.colorScheme.error)
-                }
-                TextButton(onClick = {
-                    if (cropMode && showCropOverlay) {
-                        val parentSize = 300.dp.value
-                        val normalizedLeft = (minOf(cropStartX, cropEndX) / parentSize).coerceIn(0f, 1f)
-                        val normalizedTop = (minOf(cropStartY, cropEndY) / parentSize).coerceIn(0f, 1f)
-                        val normalizedRight = (maxOf(cropStartX, cropEndX) / parentSize).coerceIn(0f, 1f)
-                        val normalizedBottom = (maxOf(cropStartY, cropEndY) / parentSize).coerceIn(0f, 1f)
-                        cropRect = android.graphics.RectF(normalizedLeft, normalizedTop, normalizedRight, normalizedBottom)
-                    }
-                    onSave(
-                        attachment.copy(
-                            metadata = mapOf(
-                                "scale" to scale.toString(),
-                                "offsetX" to offsetX.toString(),
-                                "offsetY" to offsetY.toString(),
-                                "cropLeft" to cropRect.left.toString(),
-                                "cropTop" to cropRect.top.toString(),
-                                "cropRight" to cropRect.right.toString(),
-                                "cropBottom" to cropRect.bottom.toString()
-                            )
-                        )
-                    )
-                }) {
-                    Text("Save", fontWeight = FontWeight.Bold)
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
 }
