@@ -1,11 +1,13 @@
 package com.taybeti.app.ui.screens
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +37,8 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -67,11 +71,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.taybeti.app.data.entities.NoteEntity
 import com.taybeti.app.data.repository.NoteRepository
 import com.taybeti.app.security.AttachmentManager
@@ -94,6 +100,7 @@ import com.taybeti.app.util.DecoyPlatform
 import com.taybeti.app.util.LocalStrings
 import com.taybeti.app.util.generateRandomKey
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.Base64
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,6 +135,8 @@ fun NoteEditorScreen(
 
     val attachments = remember { mutableStateListOf<NoteAttachment>() }
     var pendingAttachmentType by remember { mutableStateOf<AttachmentType?>(null) }
+    var showEncryptAttachmentsDialog by remember { mutableStateOf(false) }
+    var encryptAttachmentsMode by remember { mutableStateOf<Boolean?>(null) }
 
     val attachmentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -529,6 +538,35 @@ fun NoteEditorScreen(
             }
         }
 
+        if (showEncryptAttachmentsDialog) {
+            EncryptAttachmentsDialog(
+                attachments = attachments.toList(),
+                onDismiss = { showEncryptAttachmentsDialog = false },
+                onEncrypt = { encryptAttachmentsTogether ->
+                    showEncryptAttachmentsDialog = false
+                    encryptAttachmentsMode = encryptAttachmentsTogether
+                    scope.launch {
+                        val attachmentsJson = attachmentsToJson(attachments.toList())
+                        val contentJson = buildNoteJson(plaintext, attachmentsJson)
+                        val plainBytes = contentJson.toByteArray(Charsets.UTF_8)
+                        val result = repository.encryptNoteContent(
+                            noteId, title, plainBytes, noteKey.toCharArray(), attachmentsJson
+                        )
+                        if (result.isSuccess) {
+                            val note = result.getOrNull()!!
+                            val b64 = Base64.getEncoder()
+                            encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
+                            showEncryptedOutput = true
+                            SecureMemory.clear(plaintext.toCharArray())
+                            plaintext = ""
+                            isLocked = true
+                            Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            )
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -551,38 +589,55 @@ fun NoteEditorScreen(
                     },
                     actions = {
                         if (!isLocked) {
-                            Button(
-                                onClick = {
-                                    scope.launch {
-                                        val attachmentsJson = attachmentsToJson(attachments.toList())
-                                        val contentJson = buildNoteJson(plaintext, attachmentsJson)
-                                        val plainBytes = contentJson.toByteArray(Charsets.UTF_8)
-                                        val result = repository.encryptNoteContent(
-                                            noteId, title, plainBytes, noteKey.toCharArray(), attachmentsJson
-                                        )
-                                        if (result.isSuccess) {
-                                            val note = result.getOrNull()!!
-                                            val b64 = Base64.getEncoder()
-                                            encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
-                                            showEncryptedOutput = true
-                                            SecureMemory.clear(plaintext.toCharArray())
-                                            plaintext = ""
-                                            isLocked = true
-                                            Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
+                            if (attachments.isNotEmpty()) {
+                                Button(
+                                    onClick = { showEncryptAttachmentsDialog = true },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Default.Shield,
+                                        contentDescription = null,
+                                        modifier = Modifier.height(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(strings.encrypt, fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                Button(
+                                    onClick = {
+                                        scope.launch {
+                                            val attachmentsJson = attachmentsToJson(attachments.toList())
+                                            val contentJson = buildNoteJson(plaintext, attachmentsJson)
+                                            val plainBytes = contentJson.toByteArray(Charsets.UTF_8)
+                                            val result = repository.encryptNoteContent(
+                                                noteId, title, plainBytes, noteKey.toCharArray(), attachmentsJson
+                                            )
+                                            if (result.isSuccess) {
+                                                val note = result.getOrNull()!!
+                                                val b64 = Base64.getEncoder()
+                                                encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
+                                                showEncryptedOutput = true
+                                                SecureMemory.clear(plaintext.toCharArray())
+                                                plaintext = ""
+                                                isLocked = true
+                                                Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
+                                            }
                                         }
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                Icon(
-                                    Icons.Default.Shield,
-                                    contentDescription = null,
-                                    modifier = Modifier.height(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(strings.encrypt, fontWeight = FontWeight.Bold)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Default.Shield,
+                                        contentDescription = null,
+                                        modifier = Modifier.height(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(strings.encrypt, fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
                     },
@@ -674,60 +729,110 @@ fun NoteEditorScreen(
                                 .verticalScroll(rememberScrollState())
                         ) {
                             attachments.forEach { att ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.weight(1f)
+                                if (att.type == com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE && att.storedPath.isNotEmpty()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                                            .padding(8.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = when (att.type) {
-                                                com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE -> Icons.Default.Image
-                                                com.taybeti.app.security.NoteAttachment.AttachmentType.AUDIO -> Icons.Default.MusicNote
-                                                com.taybeti.app.security.NoteAttachment.AttachmentType.VIDEO -> Icons.Default.VideoFile
-                                                else -> Icons.Default.Description
-                                            },
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
                                         Column {
-                                            Text(
-                                                att.originalName,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = FontWeight.Medium,
-                                                maxLines = 1
+                                            AsyncImage(
+                                                model = File(att.storedPath),
+                                                contentDescription = att.originalName,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(200.dp)
+                                                    .clip(RoundedCornerShape(8.dp))
                                             )
-                                            Text(
-                                                "${att.size / 1024} KB",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    att.originalName,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    fontWeight = FontWeight.Medium,
+                                                    maxLines = 1
+                                                )
+                                                IconButton(
+                                                    onClick = {
+                                                        scope.launch {
+                                                            AttachmentManager.deleteAttachment(context, noteId, att)
+                                                            attachments.remove(att)
+                                                        }
+                                                    },
+                                                    modifier = Modifier.size(24.dp)
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Close,
+                                                        "Remove",
+                                                        modifier = Modifier.size(14.dp),
+                                                        tint = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch {
-                                                AttachmentManager.deleteAttachment(context, noteId, att)
-                                                attachments.remove(att)
-                                            }
-                                        },
-                                        modifier = Modifier.size(28.dp)
+                                } else {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(
-                                            Icons.Default.Close,
-                                            "Remove",
-                                            modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Icon(
+                                                imageVector = when (att.type) {
+                                                    com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE -> Icons.Default.Image
+                                                    com.taybeti.app.security.NoteAttachment.AttachmentType.AUDIO -> Icons.Default.MusicNote
+                                                    com.taybeti.app.security.NoteAttachment.AttachmentType.VIDEO -> Icons.Default.VideoFile
+                                                    else -> Icons.Default.Description
+                                                },
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp),
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column {
+                                                Text(
+                                                    att.originalName,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    fontWeight = FontWeight.Medium,
+                                                    maxLines = 1
+                                                )
+                                                Text(
+                                                    "${att.size / 1024} KB",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                                )
+                                            }
+                                        }
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    AttachmentManager.deleteAttachment(context, noteId, att)
+                                                    attachments.remove(att)
+                                                }
+                                            },
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Close,
+                                                "Remove",
+                                                modifier = Modifier.size(16.dp),
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -891,6 +996,101 @@ private fun DecoyEncryptedView(
             )
         }
     }
+}
+
+@Composable
+private fun EncryptAttachmentsDialog(
+    attachments: List<NoteAttachment>,
+    onDismiss: () -> Unit,
+    onEncrypt: (Boolean) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Encrypt Attachments") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    "You have ${attachments.size} attachment(s). Choose how to encrypt them:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { onEncrypt(true) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Shield, null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text("Encrypt All Together", fontWeight = FontWeight.Bold)
+                        Text(
+                            "Note + all attachments in one encrypted blob",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = { onEncrypt(false) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Icon(Icons.Default.AttachFile, null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text("Encrypt Separately", fontWeight = FontWeight.Bold)
+                        Text(
+                            "Note and each attachment as separate encrypted files",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text("Attachments:", fontWeight = FontWeight.Medium, style = MaterialTheme.typography.labelMedium)
+                Spacer(modifier = Modifier.height(4.dp))
+                attachments.forEach { att ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = when (att.type) {
+                                com.taybeti.app.security.NoteAttachment.AttachmentType.IMAGE -> Icons.Default.Image
+                                com.taybeti.app.security.NoteAttachment.AttachmentType.AUDIO -> Icons.Default.MusicNote
+                                com.taybeti.app.security.NoteAttachment.AttachmentType.VIDEO -> Icons.Default.VideoFile
+                                else -> Icons.Default.Description
+                            },
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(att.originalName, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 private fun buildNoteJson(content: String, attachmentsJson: String): String {
