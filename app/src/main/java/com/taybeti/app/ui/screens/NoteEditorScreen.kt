@@ -39,8 +39,10 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Shield
@@ -125,13 +127,15 @@ data class EditorImage(
     var width: Float = 200f,
     var height: Float = 200f,
     var layer: ImageLayer = ImageLayer.INLINE,
-    var isSelected: Boolean = false
+    var isSelected: Boolean = false,
+    val pageIndex: Int = 0
 )
 
 enum class ImageLayer {
     INLINE,
     BEHIND_TEXT,
-    IN_FRONT_OF_TEXT
+    IN_FRONT_OF_TEXT,
+    INTEGRATED
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -169,37 +173,118 @@ fun NoteEditorScreen(
     var showEncryptDialog by remember { mutableStateOf(false) }
     var selectedImageId by remember { mutableStateOf<String?>(null) }
     var showImageOptions by remember { mutableStateOf(false) }
+    var activeField by remember { mutableStateOf<String?>(null) }
+    var pageTheme by remember { mutableStateOf("dark") }
+    val pages = remember { mutableStateListOf<String>("") }
+    var currentPageIndex by remember { mutableStateOf(0) }
+
+    val saveFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                try {
+                    val noteJson = buildNoteJson(pages, images)
+                    val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
+                    val result = repository.encryptNoteContent(
+                        noteId, title, plainBytes, noteKey.toCharArray(), ""
+                    )
+                    if (result.isSuccess) {
+                        val note = result.getOrNull()!!
+                        val json = org.json.JSONObject()
+                        json.put("title", title)
+                        json.put("salt", Base64.getEncoder().encodeToString(note.salt))
+                        json.put("iv", Base64.getEncoder().encodeToString(note.iv))
+                        json.put("tag", Base64.getEncoder().encodeToString(note.tag))
+                        json.put("ciphertext", Base64.getEncoder().encodeToString(note.ciphertext))
+                        val outputBytes = json.toString().toByteArray(Charsets.UTF_8)
+                        context.contentResolver.openOutputStream(uri)?.use { it.write(outputBytes) }
+                        SecureMemory.clear(plaintext.toCharArray())
+                        plaintext = ""
+                        images.clear()
+                        isLocked = true
+                        Toast.makeText(context, "\uD83D\uDD12 Note encrypted and saved", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Encryption failed", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Failed to save: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
     val attachmentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        if (uri != null && pendingAttachmentType != null) {
+        val currentType = pendingAttachmentType
+        pendingAttachmentType = null
+        if (uri != null && currentType != null) {
             scope.launch {
                 val result = AttachmentManager.copyAttachment(
                     context, noteId, uri, context.contentResolver
                 )
                 result.onSuccess { attachment ->
-                    images.add(
-                        EditorImage(
-                            attachment = attachment,
-                            x = 0f,
-                            y = 0f,
-                            width = 200f,
-                            height = 200f,
-                            layer = ImageLayer.IN_FRONT_OF_TEXT
+                    val alreadyExists = images.any { it.attachment.id == attachment.id }
+                    if (!alreadyExists) {
+                        images.add(
+                            EditorImage(
+                                attachment = attachment,
+                                x = 0f,
+                                y = 0f,
+                                width = 200f,
+                                height = 200f,
+                                layer = ImageLayer.IN_FRONT_OF_TEXT,
+                                pageIndex = currentPageIndex
+                            )
                         )
-                    )
+                    }
                 }.onFailure {
                     Toast.makeText(context, "Failed to attach file", Toast.LENGTH_SHORT).show()
                 }
             }
         }
-        pendingAttachmentType = null
     }
 
     val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || plaintext.isNotEmpty() || images.isNotEmpty())
 
+    fun attachKeyboardForTitle(kb: KeyboardState) {
+        kb.attach(
+            onKey = { char ->
+                val toInsert = if (char == 'P' || char == 'p') "PPPPPPPP" else char.toString()
+                title += toInsert
+            },
+            onDel = { if (title.isNotEmpty()) title = title.dropLast(1) },
+            onDone = { kb.detach(); activeField = null }
+        )
+    }
+
+    fun attachKeyboardForContent(kb: KeyboardState) {
+        kb.attach(
+            onKey = { char ->
+                val toInsert = if (char == 'P' || char == 'p') "PPPPPPPP" else char.toString()
+                if (currentPageIndex < pages.size) {
+                    pages[currentPageIndex] = pages[currentPageIndex] + toInsert
+                }
+            },
+            onDel = {
+                if (currentPageIndex < pages.size && pages[currentPageIndex].isNotEmpty()) {
+                    pages[currentPageIndex] = pages[currentPageIndex].dropLast(1)
+                }
+            },
+            onDone = { kb.detach(); activeField = null }
+        )
+    }
+
     KeyboardHost {
+        val kb = LocalKeyboardState.current
+        LaunchedEffect(activeField, kb) {
+            if (kb != null) {
+                if (activeField == "title") attachKeyboardForTitle(kb)
+                else if (activeField == "content") attachKeyboardForContent(kb)
+            }
+        }
+
         BackHandler {
             if (hasUnsavedChanges) {
                 showUnsavedDialog = true
@@ -302,19 +387,25 @@ fun NoteEditorScreen(
                                             if (result.isSuccess) {
                                                 val decrypted = result.getOrNull()!!
                                                 val decryptedStr = String(decrypted, Charsets.UTF_8)
-                                                val (content, attJson) = parseNoteJson(decryptedStr)
-                                                plaintext = content
+                                                val (loadedPages, attJson) = parseNoteJson(decryptedStr)
+                                                pages.clear()
+                                                pages.addAll(loadedPages)
                                                 images.clear()
                                                 val atts = getAttachmentsList(attJson, context, noteId)
                                                 atts.forEach { att ->
                                                     images.add(
                                                         EditorImage(
                                                             attachment = att,
-                                                            x = 0f,
-                                                            y = 0f,
-                                                            width = 200f,
-                                                            height = 200f,
-                                                            layer = ImageLayer.IN_FRONT_OF_TEXT
+                                                            x = att.metadata["x"]?.toFloatOrNull() ?: 0f,
+                                                            y = att.metadata["y"]?.toFloatOrNull() ?: 0f,
+                                                            width = att.metadata["width"]?.toFloatOrNull() ?: 200f,
+                                                            height = att.metadata["height"]?.toFloatOrNull() ?: 200f,
+                                                            layer = try {
+                                                                ImageLayer.valueOf(att.metadata["layer"] ?: "IN_FRONT_OF_TEXT")
+                                                            } catch (_: Exception) {
+                                                                ImageLayer.IN_FRONT_OF_TEXT
+                                                            },
+                                                            pageIndex = att.metadata["pageIndex"]?.toIntOrNull() ?: 0
                                                         )
                                                     )
                                                 }
@@ -430,19 +521,25 @@ fun NoteEditorScreen(
                                             if (result.isSuccess) {
                                                 val decrypted = result.getOrNull()!!
                                                 val decryptedStr = String(decrypted, Charsets.UTF_8)
-                                                val (content, attJson) = parseNoteJson(decryptedStr)
-                                                plaintext = content
+                                                val (loadedPages, attJson) = parseNoteJson(decryptedStr)
+                                                pages.clear()
+                                                pages.addAll(loadedPages)
                                                 images.clear()
                                                 val atts = getAttachmentsList(attJson, context, noteId)
                                                 atts.forEach { att ->
                                                     images.add(
                                                         EditorImage(
                                                             attachment = att,
-                                                            x = 0f,
-                                                            y = 0f,
-                                                            width = 200f,
-                                                            height = 200f,
-                                                            layer = ImageLayer.IN_FRONT_OF_TEXT
+                                                            x = att.metadata["x"]?.toFloatOrNull() ?: 0f,
+                                                            y = att.metadata["y"]?.toFloatOrNull() ?: 0f,
+                                                            width = att.metadata["width"]?.toFloatOrNull() ?: 200f,
+                                                            height = att.metadata["height"]?.toFloatOrNull() ?: 200f,
+                                                            layer = try {
+                                                                ImageLayer.valueOf(att.metadata["layer"] ?: "IN_FRONT_OF_TEXT")
+                                                            } catch (_: Exception) {
+                                                                ImageLayer.IN_FRONT_OF_TEXT
+                                                            },
+                                                            pageIndex = att.metadata["pageIndex"]?.toIntOrNull() ?: 0
                                                         )
                                                     )
                                                 }
@@ -582,7 +679,8 @@ fun NoteEditorScreen(
                                             showCreateKeyDialog = false
                                             isLocked = false
                                             title = ""
-                                            plaintext = ""
+                                            pages.clear()
+                                            pages.add("")
                                         }
                                     }
                                 },
@@ -611,7 +709,7 @@ fun NoteEditorScreen(
                             onClick = {
                                 showEncryptDialog = false
                                 scope.launch {
-                                    val noteJson = buildNoteJson(plaintext, images)
+                    val noteJson = buildNoteJson(pages, images)
                                     val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
                                     val result = repository.encryptNoteContent(
                                         noteId, title, plainBytes, noteKey.toCharArray(), ""
@@ -621,8 +719,10 @@ fun NoteEditorScreen(
                                         val b64 = Base64.getEncoder()
                                         encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
                                         showEncryptedOutput = true
-                                        SecureMemory.clear(plaintext.toCharArray())
-                                        plaintext = ""
+                        SecureMemory.clear(plaintext.toCharArray())
+                        plaintext = ""
+                        pages.clear()
+                        pages.add("")
                                         images.clear()
                                         isLocked = true
                                         Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
@@ -641,16 +741,8 @@ fun NoteEditorScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
+                                saveFileLauncher.launch("${title.ifEmpty { "note" }}.taybeti")
                                 showEncryptDialog = false
-                                scope.launch {
-                                    val noteJson = buildNoteJson(plaintext, images)
-                                    val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
-                                    val noteFile = File(context.filesDir, "encrypted_notes")
-                                    if (!noteFile.exists()) noteFile.mkdirs()
-                                    val outputFile = File(noteFile, "${title.ifEmpty { "note" }}.taybeti")
-                                    outputFile.writeBytes(plainBytes)
-                                    Toast.makeText(context, "Note saved to ${outputFile.absolutePath}", Toast.LENGTH_LONG).show()
-                                }
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
@@ -756,18 +848,25 @@ fun NoteEditorScreen(
                         .padding(padding)
                         .fillMaxSize()
                 ) {
-                    AppTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = "Title",
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    // Title field with shared keyboard
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { activeField = "title" }
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = title.ifEmpty { "Title" },
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (title.isEmpty()) Color.Gray else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
 
                     NoteFormattingToolbar(
                         onInsertFormat = { format ->
-                            plaintext += format
+                            if (currentPageIndex < pages.size) {
+                                pages[currentPageIndex] = pages[currentPageIndex] + format
+                            }
                         },
                         onAddAttachment = { type ->
                             pendingAttachmentType = type
@@ -777,10 +876,56 @@ fun NoteEditorScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    // Theme toggle - both icons side by side
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Theme:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = { pageTheme = "light" },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(
+                                    width = 1.dp,
+                                    color = if (pageTheme == "light") MaterialTheme.colorScheme.primary else Color.Transparent,
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LightMode,
+                                contentDescription = "Light mode",
+                                tint = if (pageTheme == "light") Color(0xFFFFB300) else Color.Gray
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        IconButton(
+                            onClick = { pageTheme = "dark" },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(
+                                    width = 1.dp,
+                                    color = if (pageTheme == "dark") MaterialTheme.colorScheme.primary else Color.Transparent,
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.NightsStay,
+                                contentDescription = "Dark mode",
+                                tint = if (pageTheme == "dark") Color(0xFF90CAF9) else Color.Gray
+                            )
+                        }
+                    }
+
                     WordEditorCanvas(
-                        text = plaintext,
-                        onTextChange = { plaintext = it },
+                        pages = pages,
                         images = images,
+                        currentPageIndex = currentPageIndex,
+                        onPageSelect = { currentPageIndex = it },
                         onImageSelect = { id ->
                             selectedImageId = id
                             showImageOptions = true
@@ -799,7 +944,11 @@ fun NoteEditorScreen(
                                 }
                                 images.remove(img)
                             }
-                        }
+                        },
+                        activeField = activeField,
+                        onFieldActivate = { activeField = it },
+                        onFieldDeactivate = { activeField = null },
+                        pageTheme = pageTheme
                     )
                 }
             }
@@ -809,51 +958,142 @@ fun NoteEditorScreen(
 
 @Composable
 private fun WordEditorCanvas(
-    text: String,
-    onTextChange: (String) -> Unit,
+    pages: MutableList<String>,
     images: List<EditorImage>,
+    currentPageIndex: Int,
+    onPageSelect: (Int) -> Unit,
     onImageSelect: (String) -> Unit,
     onImageUpdate: (EditorImage) -> Unit,
-    onImageDelete: (String) -> Unit
+    onImageDelete: (String) -> Unit,
+    activeField: String?,
+    onFieldActivate: (String) -> Unit,
+    onFieldDeactivate: () -> Unit,
+    pageTheme: String
 ) {
-    val kbState = remember { KeyboardState() }
+    val kbState = LocalKeyboardState.current
+    val scrollState = rememberScrollState()
+    val isDark = pageTheme == "dark"
+    val pageBg = if (isDark) Color(0xFF1E1E1E) else Color.White
+    val pageBorder = if (isDark) Color(0xFF444444) else Color.LightGray.copy(alpha = 0.3f)
+    val canvasBg = if (isDark) Color(0xFF121212) else Color(0xFFF0F0F0)
+    val textColor = if (isDark) Color.White else Color.Black
+    val placeholderColor = Color.Gray
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clickable {
-                kbState.attach(
-                    onKey = { char ->
-                        val toInsert = if (char == 'P') "PPPPPPPP" else char.toString()
-                        onTextChange(text + toInsert)
-                    },
-                    onDel = { if (text.isNotEmpty()) onTextChange(text.dropLast(1)) },
-                    onDone = { kbState.detach() }
-                )
-                images.forEach { img ->
-                    if (img.isSelected) {
-                        onImageUpdate(img.copy(isSelected = false))
-                    }
-                }
-            }
+            .background(canvasBg)
     ) {
-        // Text layer
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
+                .padding(vertical = 16.dp)
+        ) {
+            pages.forEachIndexed { index, pageText ->
+                PageBlock(
+                    text = pageText,
+                    onTextChange = { pages[index] = it },
+                    images = images,
+                    pageIndex = index,
+                    isSelected = index == currentPageIndex,
+                    onPageSelect = { onPageSelect(index); onFieldActivate("content") },
+                    onImageSelect = onImageSelect,
+                    onImageUpdate = onImageUpdate,
+                    onImageDelete = onImageDelete,
+                    pageNumber = index + 1,
+                    pageBg = pageBg,
+                    pageBorder = pageBorder,
+                    isDark = isDark,
+                    textColor = textColor,
+                    placeholderColor = placeholderColor
+                )
+            }
+
+            // Add page button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(horizontal = 32.dp, vertical = 24.dp)
+                    .background(pageBg, RoundedCornerShape(16.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                    .clickable { pages.add("") }
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Page", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text("Add new page", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                        Text("Tap to insert a blank page below", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
+
+        // Scrollbar
+        if (scrollState.maxValue > 0) {
+            val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 8.dp)
+                    .width(6.dp)
+                    .height(60.dp)
+                    .offset(y = (scrollProgress * (scrollState.maxValue - 60)).dp)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), RoundedCornerShape(3.dp))
+            )
+        }
+    }
+}
+
+@Composable
+private fun PageBlock(
+    text: String,
+    onTextChange: (String) -> Unit,
+    images: List<EditorImage>,
+    pageIndex: Int,
+    isSelected: Boolean,
+    onPageSelect: () -> Unit,
+    onImageSelect: (String) -> Unit,
+    onImageUpdate: (EditorImage) -> Unit,
+    onImageDelete: (String) -> Unit,
+    pageNumber: Int,
+    pageBg: Color,
+    pageBorder: Color,
+    isDark: Boolean,
+    textColor: Color,
+    placeholderColor: Color
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(842.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(pageBg, RoundedCornerShape(2.dp))
+            .border(
+                width = if (isSelected) 2.dp else 1.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else pageBorder,
+                shape = RoundedCornerShape(2.dp)
+            )
+            .clickable { onPageSelect() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(48.dp)
         ) {
             Text(
                 text = text.ifEmpty { "Start typing here..." },
-                color = if (text.isEmpty()) Color.Gray else MaterialTheme.colorScheme.onSurface,
+                color = if (text.isEmpty()) placeholderColor else textColor,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.fillMaxWidth()
             )
         }
 
-        // Behind text images
-        images.filter { it.layer == ImageLayer.BEHIND_TEXT }.forEach { img ->
+        images.filter { it.layer == ImageLayer.BEHIND_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
             DraggableImage(
                 image = img,
                 onSelect = onImageSelect,
@@ -862,8 +1102,93 @@ private fun WordEditorCanvas(
             )
         }
 
-        // In front images
-        images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT }.forEach { img ->
+        val integratedImages = images.filter { it.layer == ImageLayer.INTEGRATED && it.pageIndex == pageNumber - 1 }
+        if (integratedImages.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(48.dp)
+            ) {
+                Text(
+                    text = text.ifEmpty { "Start typing here..." },
+                    color = if (text.isEmpty()) placeholderColor else textColor,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize().padding(48.dp)) {
+                val primaryImage = integratedImages.first()
+                val imageTop = primaryImage.y
+                val imageBottom = primaryImage.y + primaryImage.height
+                val imageLeft = primaryImage.x
+                val imageRight = primaryImage.x + primaryImage.width
+                val lineHeight = 24f
+                val linesAbove = (imageTop / lineHeight).toInt().coerceAtLeast(0)
+                val linesThrough = ((imageBottom - imageTop) / lineHeight).toInt().coerceAtLeast(1)
+                val charsPerLine = 35
+                val charsAbove = (linesAbove * charsPerLine).coerceAtMost(text.length)
+                val textAbove = text.take(charsAbove)
+                val textRemaining = text.drop(charsAbove)
+                val charsThrough = (linesThrough * charsPerLine).coerceAtMost(textRemaining.length)
+                val textThrough = textRemaining.take(charsThrough)
+                val textAfter = textRemaining.drop(charsThrough)
+                Column(modifier = Modifier.fillMaxSize()) {
+                    if (textAbove.isNotEmpty()) {
+                        Text(
+                            text = textAbove,
+                            color = textColor,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    if (textThrough.isNotEmpty()) {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            val leftWidth = (imageLeft - 48f).coerceAtLeast(0f)
+                            Text(
+                                text = textThrough,
+                                color = textColor,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.width(leftWidth.dp)
+                            )
+                            Spacer(modifier = Modifier.width(primaryImage.width.dp))
+                        }
+                    }
+                    if (textAfter.isNotEmpty()) {
+                        Text(
+                            text = textAfter,
+                            color = textColor,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    if (text.isEmpty()) {
+                        Text(
+                            text = "Start typing here...",
+                            color = placeholderColor,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                DraggableImage(
+                    image = primaryImage,
+                    onSelect = onImageSelect,
+                    onUpdate = onImageUpdate,
+                    onDelete = onImageDelete
+                )
+                integratedImages.drop(1).forEach { img ->
+                    DraggableImage(
+                        image = img,
+                        onSelect = onImageSelect,
+                        onUpdate = onImageUpdate,
+                        onDelete = onImageDelete
+                    )
+                }
+            }
+        }
+
+        images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
             DraggableImage(
                 image = img,
                 onSelect = onImageSelect,
@@ -872,24 +1197,15 @@ private fun WordEditorCanvas(
             )
         }
 
-        // In front images
-        images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT }.forEach { img ->
-            DraggableImage(
-                image = img,
-                onSelect = onImageSelect,
-                onUpdate = onImageUpdate,
-                onDelete = onImageDelete
-            )
-        }
-
-        if (kbState.isVisible) {
-            CustomKeyboard(
-                onKeyPress = { char ->
-                    val toInsert = if (char == 'P') "PPPPPPPP" else char.toString()
-                    onTextChange(text + toInsert)
-                },
-                onDelete = { if (text.isNotEmpty()) onTextChange(text.dropLast(1)) },
-                onDone = { kbState.detach() }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Page $pageNumber",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.Gray
             )
         }
     }
@@ -1054,6 +1370,7 @@ private fun ImageOptionsDialog(
                                 ImageLayer.INLINE -> "Inline with text"
                                 ImageLayer.BEHIND_TEXT -> "Behind text (background)"
                                 ImageLayer.IN_FRONT_OF_TEXT -> "In front of text"
+                                ImageLayer.INTEGRATED -> "Integrated (text flows around)"
                             },
                             modifier = Modifier.weight(1f)
                         )
@@ -1272,9 +1589,11 @@ private fun DecoyEncryptedView(
     }
 }
 
-private fun buildNoteJson(content: String, images: List<EditorImage>): String {
+private fun buildNoteJson(pages: List<String>, images: List<EditorImage>): String {
     val json = org.json.JSONObject()
-    json.put("content", content)
+    val pagesArray = org.json.JSONArray()
+    pages.forEach { pagesArray.put(it) }
+    json.put("pages", pagesArray)
     
     val imagesArray = org.json.JSONArray()
     images.forEach { img ->
@@ -1290,6 +1609,7 @@ private fun buildNoteJson(content: String, images: List<EditorImage>): String {
         imgObj.put("width", img.width)
         imgObj.put("height", img.height)
         imgObj.put("layer", img.layer.name)
+        imgObj.put("pageIndex", img.pageIndex)
         imagesArray.put(imgObj)
     }
     
@@ -1297,11 +1617,19 @@ private fun buildNoteJson(content: String, images: List<EditorImage>): String {
     return json.toString()
 }
 
-private fun parseNoteJson(plaintext: String): Pair<String, String> {
+private fun parseNoteJson(plaintext: String): Pair<List<String>, String> {
     return try {
         val json = org.json.JSONObject(plaintext)
         if (json.has("images")) {
-            val content = json.optString("content", "")
+            val pagesList = mutableListOf<String>()
+            if (json.has("pages")) {
+                val pagesArray = json.getJSONArray("pages")
+                for (i in 0 until pagesArray.length()) {
+                    pagesList.add(pagesArray.getString(i))
+                }
+            } else {
+                pagesList.add(json.optString("content", ""))
+            }
             val imagesArray = json.getJSONArray("images")
             val attachmentsList = mutableListOf<NoteAttachment>()
             
@@ -1325,19 +1653,20 @@ private fun parseNoteJson(plaintext: String): Pair<String, String> {
                         "y" to imgObj.optDouble("y", 0.0).toString(),
                         "width" to imgObj.optDouble("width", 200.0).toString(),
                         "height" to imgObj.optDouble("height", 200.0).toString(),
-                        "layer" to imgObj.optString("layer", "IN_FRONT_OF_TEXT")
+                        "layer" to imgObj.optString("layer", "IN_FRONT_OF_TEXT"),
+                        "pageIndex" to imgObj.optInt("pageIndex", 0).toString()
                     )
                 )
                 attachmentsList.add(att)
             }
             
-            content to attachmentsToJson(attachmentsList, embedFiles = true)
+            pagesList to attachmentsToJson(attachmentsList, embedFiles = true)
         } else {
             val content = json.optString("content", plaintext)
             val attachments = json.optJSONArray("attachments")?.toString() ?: "[]"
-            content to attachments
+            listOf(content) to attachments
         }
     } catch (_: Exception) {
-        plaintext to "[]"
+        listOf(plaintext) to "[]"
     }
 }

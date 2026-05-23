@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardCapslock
+import androidx.compose.material.icons.filled.KeyboardReturn
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -213,6 +214,7 @@ fun CustomKeyboard(
                     onSym = { symbolPage = if (symbolPage < 3) symbolPage + 1 else -1 },
                     onSymLongPress = { symbolPage = PAGE_REVOLUTIONARY },
                     onDone = onDone,
+                    onNewline = { onKeyPress('\n') },
                     langLabel = currentLang.label,
                     onLangTap = { showLangPicker = !showLangPicker },
                     showLangPicker = showLangPicker,
@@ -306,6 +308,7 @@ private fun LetterLayout(
     onSym: () -> Unit,
     onSymLongPress: () -> Unit,
     onDone: () -> Unit,
+    onNewline: () -> Unit,
     langLabel: String,
     onLangTap: () -> Unit,
     showLangPicker: Boolean,
@@ -327,16 +330,16 @@ private fun LetterLayout(
         DeleteKey(weight = 1.5f, keyBg = keyBg, onDelete = onDelete)
     }
 
-    // Row 3 — bottom + shift
+    // Row 3 — bottom + shift (left only) + newline (right)
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
         ActionKey(weight = 1.5f, selected = uppercase, keyBg = keyBg, onClick = onShiftToggle) {
             Icon(Icons.Default.KeyboardCapslock, "Shift", modifier = Modifier.height(18.dp),
                 tint = if (uppercase) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
         }
         lang.letterRows[2].forEach { c -> LetterKey(c, uppercase, onKey, keyBg, 1f, shiftCaps, longPress) }
-        ActionKey(weight = 1.5f, selected = uppercase, keyBg = keyBg, onClick = onShiftToggle) {
-            Icon(Icons.Default.KeyboardCapslock, "Shift", modifier = Modifier.height(18.dp),
-                tint = if (uppercase) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
+        ActionKey(weight = 1.5f, selected = false, keyBg = keyBg, onClick = onNewline) {
+            Icon(Icons.Default.KeyboardReturn, "New line", modifier = Modifier.height(18.dp),
+                tint = MaterialTheme.colorScheme.onSurface)
         }
     }
 
@@ -554,23 +557,26 @@ private fun RowScope.LetterKey(
 ) {
     val display = if (uppercase) upperMap[c] ?: c.uppercaseChar() else c.lowercaseChar()
     val longPressChar = longPressMap[c]
+    val isPKey = display == 'P' || display == 'p'
     Box(
         modifier = rowKeyModifier(weight, bg)
             .then(
                 if (longPressChar != null) {
                     Modifier.combinedClickable(
                         onClick = { onKey(display) },
+                        onLongClick = { onKey(longPressChar) }
+                    )
+                } else if (isPKey) {
+                    Modifier.combinedClickable(
+                        onClick = {
+                            repeat(8) { onKey(display) }
+                        },
                         onLongClick = {
                             repeat(8) { onKey(display) }
                         }
                     )
                 } else {
-                    Modifier.combinedClickable(
-                        onClick = { onKey(display) },
-                        onLongClick = {
-                            repeat(8) { onKey(display) }
-                        }
-                    )
+                    Modifier.clickable { onKey(display) }
                 }
             ),
         contentAlignment = Alignment.Center
