@@ -2786,31 +2786,21 @@ private fun PageBlockRich(
                     }
                 } else if (isSelected && formattedText.paragraphs.isNotEmpty()) {
                     val lastPara = formattedText.paragraphs.last()
-                    if (lastPara.tableRows == null) {
-                        val lastText = lastPara.spans.joinToString("") { it.text }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = lastText,
-                                color = textColor,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            val cursorAlpha = remember { Animatable(1f) }
-                            LaunchedEffect(Unit) {
-                                while (true) {
-                                    cursorAlpha.animateTo(0f, animationSpec = tween(500))
-                                    cursorAlpha.animateTo(1f, animationSpec = tween(500))
-                                }
+                    if (lastPara.tableRows == null && lastPara.spans.any { it.text.isNotEmpty() }) {
+                        val cursorAlpha = remember { Animatable(1f) }
+                        LaunchedEffect(Unit) {
+                            while (true) {
+                                cursorAlpha.animateTo(0f, animationSpec = tween(500))
+                                cursorAlpha.animateTo(1f, animationSpec = tween(500))
                             }
-                            Box(
-                                modifier = Modifier
-                                    .width(2.dp)
-                                    .height(20.dp)
-                                    .background(textColor.copy(alpha = cursorAlpha.value))
-                            )
                         }
+                        Box(
+                            modifier = Modifier
+                                .width(2.dp)
+                                .height(20.dp)
+                                .align(Alignment.Start)
+                                .background(textColor.copy(alpha = cursorAlpha.value))
+                        )
                     }
                 }
             }
