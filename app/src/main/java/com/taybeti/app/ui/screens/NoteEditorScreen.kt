@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -115,6 +116,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
@@ -656,6 +659,12 @@ fun NoteEditorScreen(
     val PAGE_WIDTH_DP = 560
     val PAGE_HEIGHT_DP = 792
     var lastUndoSaveTime by remember { mutableStateOf(0L) }
+    var showTemplatePicker by remember { mutableStateOf(false) }
+    var showPageColorPicker by remember { mutableStateOf(false) }
+    var pageBackgroundColor by remember { mutableStateOf(Color.White) }
+    var showDrawingPanel by remember { mutableStateOf(false) }
+    var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
+    var tableCellText by remember { mutableStateOf("") }
 
     fun saveUndoState() {
         val now = System.currentTimeMillis()
@@ -1424,8 +1433,17 @@ fun NoteEditorScreen(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { replaceCurrent() }, modifier = Modifier.weight(1f)) { Text("Replace", fontSize = 12.sp) }
-                            Button(onClick = { replaceAll() }, modifier = Modifier.weight(1f)) { Text("All", fontSize = 12.sp) }
+                            Button(onClick = {
+                                replaceCurrent()
+                                Toast.makeText(context, "Replaced", Toast.LENGTH_SHORT).show()
+                                showFindReplace = false
+                            }, modifier = Modifier.weight(1f)) { Text("Replace", fontSize = 12.sp) }
+                            Button(onClick = {
+                                val count = searchResults.size
+                                replaceAll()
+                                Toast.makeText(context, "Replaced $count matches", Toast.LENGTH_SHORT).show()
+                                showFindReplace = false
+                            }, modifier = Modifier.weight(1f)) { Text("All", fontSize = 12.sp) }
                             TextButton(onClick = { showFindReplace = false }) { Text("Close", fontSize = 12.sp) }
                         }
                         if (findKbState.isVisible) {
@@ -1560,6 +1578,205 @@ fun NoteEditorScreen(
                     TextButton(onClick = { showTableDialog = false }) { Text("Cancel") }
                 }
             )
+        }
+
+        if (showTemplatePicker) {
+            AlertDialog(
+                onDismissRequest = { showTemplatePicker = false },
+                title = { Text("Page Templates") },
+                text = {
+                    Column {
+                        listOf(
+                            "Blank" to "Empty page",
+                            "Lined" to "Horizontal lines for writing",
+                            "Grid" to "Grid pattern",
+                            "Dotted" to "Dot grid pattern",
+                            "Cornell" to "Cornell note-taking layout"
+                        ).forEach { (name, desc) ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        val ft = pages.getOrNull(currentPageIndex)
+                                        if (ft != null) {
+                                            ft.headerText = when (name) {
+                                                "Cornell" -> "Topic: ___________"
+                                                else -> ""
+                                            }
+                                            ft.footerText = when (name) {
+                                                "Cornell" -> "Summary: ___________"
+                                                else -> ""
+                                            }
+                                        }
+                                        showTemplatePicker = false
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(name, fontWeight = FontWeight.Medium)
+                                    Text(desc, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showTemplatePicker = false }) { Text("Cancel") }
+                }
+            )
+        }
+
+        if (showPageColorPicker) {
+            val colors = listOf(
+                Color.White, Color(0xFFF5F5DC), Color(0xFFF0F8FF),
+                Color(0xFFF5FFFA), Color(0xFFFFF8DC), Color(0xFFF0FFF0),
+                Color(0xFFE6E6FA), Color(0xFFFFE4E1), Color(0xFFF0E68C),
+                Color(0xFF1E1E1E), Color(0xFF2C2C2C), Color(0xFF0D1117)
+            )
+            AlertDialog(
+                onDismissRequest = { showPageColorPicker = false },
+                title = { Text("Page Background") },
+                text = {
+                    Column {
+                        colors.chunked(4).forEach { row ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                row.forEach { color ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .background(color, RoundedCornerShape(8.dp))
+                                            .border(
+                                                2.dp,
+                                                if (pageBackgroundColor == color) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .clickable {
+                                                pageBackgroundColor = color
+                                                showPageColorPicker = false
+                                            }
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPageColorPicker = false }) { Text("Cancel") }
+                }
+            )
+        }
+
+        if (showDrawingPanel) {
+            DrawingPanelDialog(
+                onDismiss = { showDrawingPanel = false },
+                onSave = { bitmap ->
+                    scope.launch {
+                        val file = File(context.filesDir, "drawing_${System.currentTimeMillis()}.png")
+                        file.outputStream().use { out ->
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                        }
+                        val attachment = NoteAttachment(
+                            originalName = file.name,
+                            mimeType = "image/png",
+                            size = file.length(),
+                            storedPath = file.absolutePath,
+                            type = NoteAttachment.AttachmentType.IMAGE
+                        )
+                        images.add(
+                            EditorImage(
+                                attachment = attachment,
+                                x = 50f,
+                                y = 50f,
+                                width = 300f,
+                                height = 300f,
+                                layer = ImageLayer.IN_FRONT_OF_TEXT,
+                                pageIndex = currentPageIndex
+                            )
+                        )
+                    }
+                }
+            )
+        }
+
+        if (editingTableCell != null) {
+            val (paraIdx, rowIdx, cellIdx) = editingTableCell!!
+            val cellKbState = remember { KeyboardState() }
+            LaunchedEffect(Unit) {
+                val ft = pages.getOrNull(currentPageIndex)
+                val para = ft?.paragraphs?.getOrNull(paraIdx)
+                val cell = para?.tableRows?.getOrNull(rowIdx)?.cells?.getOrNull(cellIdx)
+                tableCellText = cell ?: ""
+                cellKbState.attach(
+                    onKey = { char -> tableCellText += char },
+                    onDel = { if (tableCellText.isNotEmpty()) tableCellText = tableCellText.dropLast(1) },
+                    onDone = {
+                        if (paraIdx < pages.size && pages[paraIdx].paragraphs.size > paraIdx) {
+                            val p = pages[currentPageIndex].paragraphs[paraIdx]
+                            val rows = p.tableRows
+                            if (rows != null && rowIdx < rows.size && cellIdx < rows[rowIdx].cells.size) {
+                                val mutableCells = rows[rowIdx].cells.toMutableList()
+                                mutableCells[cellIdx] = tableCellText
+                                rows[rowIdx] = TableRow(mutableCells)
+                            }
+                        }
+                        editingTableCell = null
+                        cellKbState.detach()
+                    }
+                )
+            }
+            Dialog(
+                onDismissRequest = { editingTableCell = null },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Edit Cell", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CompositionLocalProvider(LocalKeyboardState provides cellKbState) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                                    .padding(12.dp)
+                            ) {
+                                Text(tableCellText.ifEmpty { "Type here..." }, color = if (tableCellText.isEmpty()) Color.Gray else MaterialTheme.colorScheme.onSurface)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                val ft = pages.getOrNull(currentPageIndex)
+                                val para = ft?.paragraphs?.getOrNull(paraIdx)
+                                val rows = para?.tableRows
+                                if (rows != null && rowIdx < rows.size && cellIdx < rows[rowIdx].cells.size) {
+                                    val mutableCells = rows[rowIdx].cells.toMutableList()
+                                    mutableCells[cellIdx] = tableCellText
+                                    rows[rowIdx] = TableRow(mutableCells)
+                                }
+                                editingTableCell = null
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text("Save") }
+                        if (cellKbState.isVisible) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            CustomKeyboard(
+                                onKeyPress = { cellKbState.onKeyPress?.invoke(it) },
+                                onDelete = { cellKbState.onDelete?.invoke() },
+                                onDone = { cellKbState.onDone?.invoke() }
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         Scaffold(
@@ -1748,7 +1965,7 @@ fun NoteEditorScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Theme toggle - both icons side by side
+                    // Theme toggle + page options
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1760,7 +1977,7 @@ fun NoteEditorScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(24.dp)
                                 .border(
                                     width = 0.5.dp,
                                     color = if (pageTheme == "light") MaterialTheme.colorScheme.primary else Color.Transparent,
@@ -1773,13 +1990,13 @@ fun NoteEditorScreen(
                                 imageVector = Icons.Default.LightMode,
                                 contentDescription = "Light mode",
                                 tint = if (pageTheme == "light") Color(0xFFFFB300) else Color.Gray,
-                                modifier = Modifier.size(12.dp)
+                                modifier = Modifier.size(14.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         Box(
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(24.dp)
                                 .border(
                                     width = 0.5.dp,
                                     color = if (pageTheme == "dark") MaterialTheme.colorScheme.primary else Color.Transparent,
@@ -1792,8 +2009,39 @@ fun NoteEditorScreen(
                                 imageVector = Icons.Default.NightsStay,
                                 contentDescription = "Dark mode",
                                 tint = if (pageTheme == "dark") Color(0xFF90CAF9) else Color.Gray,
-                                modifier = Modifier.size(12.dp)
+                                modifier = Modifier.size(14.dp)
                             )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(pageBackgroundColor, RoundedCornerShape(3.dp))
+                                .border(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(3.dp))
+                                .clickable { showPageColorPicker = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.ColorLens, "Page Color", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .border(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(3.dp))
+                                .clickable { showTemplatePicker = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.GridOn, "Template", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .border(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(3.dp))
+                                .clickable { showDrawingPanel = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Edit, "Draw", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         }
                     }
 
@@ -1852,7 +2100,11 @@ fun NoteEditorScreen(
                         pageTheme = pageTheme,
                         marginSettings = marginSettings,
                         pageWidth = PAGE_WIDTH_DP,
-                        pageHeight = PAGE_HEIGHT_DP
+                        pageHeight = PAGE_HEIGHT_DP,
+                        pageBackgroundColor = pageBackgroundColor,
+                        onTableCellTap = { paraIdx, rowIdx, cellIdx ->
+                            editingTableCell = Triple(paraIdx, rowIdx, cellIdx)
+                        }
                     )
                 }
             }
@@ -2101,7 +2353,9 @@ private fun WordEditorCanvasRich(
     pageTheme: String,
     marginSettings: MarginSettings,
     pageWidth: Int,
-    pageHeight: Int
+    pageHeight: Int,
+    pageBackgroundColor: Color,
+    onTableCellTap: (Int, Int, Int) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val isDark = pageTheme == "dark"
@@ -2144,14 +2398,15 @@ private fun WordEditorCanvasRich(
                     onImageUpdate = onImageUpdate,
                     onImageDelete = onImageDelete,
                     pageNumber = index + 1,
-                    pageBg = pageBg,
+                    pageBg = pageBackgroundColor,
                     pageBorder = pageBorder,
                     isDark = isDark,
                     textColor = textColor,
                     placeholderColor = placeholderColor,
                     marginSettings = marginSettings,
                     pageWidth = pageWidth,
-                    pageHeight = pageHeight
+                    pageHeight = pageHeight,
+                    onTableCellTap = { rowIdx, cellIdx -> onTableCellTap(index, rowIdx, cellIdx) }
                 )
             }
 
@@ -2220,7 +2475,8 @@ private fun PageBlockRich(
     placeholderColor: Color,
     marginSettings: MarginSettings,
     pageWidth: Int,
-    pageHeight: Int
+    pageHeight: Int,
+    onTableCellTap: (Int, Int) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -2313,13 +2569,14 @@ private fun PageBlockRich(
                                 .fillMaxWidth()
                                 .border(1.dp, if (isDark) Color(0xFF555555) else Color.Gray, RoundedCornerShape(4.dp))
                         ) {
-                            pTableRows.forEach { row ->
+                            pTableRows.forEachIndexed { rowIdx, row ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    row.cells.forEach { cell ->
+                                    row.cells.forEachIndexed { cellIdx, cell ->
                                         Box(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .border(0.5.dp, if (isDark) Color(0xFF444444) else Color.Gray.copy(alpha = 0.5f))
+                                                .clickable { onTableCellTap(rowIdx, cellIdx) }
                                                 .padding(6.dp)
                                         ) {
                                             Text(
@@ -2336,30 +2593,57 @@ private fun PageBlockRich(
                     }
                 }
 
-                if (formattedText.toPlainText().isEmpty()) {
+                if (formattedText.toPlainText().isEmpty() && formattedText.paragraphs.all { it.tableRows == null }) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Start typing here...",
                             color = placeholderColor,
                             style = MaterialTheme.typography.bodyLarge
                         )
-                    }
-                }
-
-                if (isSelected) {
-                    val cursorAlpha = remember { Animatable(1f) }
-                    LaunchedEffect(Unit) {
-                        while (true) {
-                            cursorAlpha.animateTo(0f, animationSpec = tween(500))
-                            cursorAlpha.animateTo(1f, animationSpec = tween(500))
+                        if (isSelected) {
+                            val cursorAlpha = remember { Animatable(1f) }
+                            LaunchedEffect(Unit) {
+                                while (true) {
+                                    cursorAlpha.animateTo(0f, animationSpec = tween(500))
+                                    cursorAlpha.animateTo(1f, animationSpec = tween(500))
+                                }
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(20.dp)
+                                    .background(textColor.copy(alpha = cursorAlpha.value))
+                            )
                         }
                     }
-                    Box(
-                        modifier = Modifier
-                            .width(2.dp)
-                            .height(20.dp)
-                            .background(textColor.copy(alpha = cursorAlpha.value))
-                    )
+                } else if (isSelected && formattedText.paragraphs.isNotEmpty()) {
+                    val lastPara = formattedText.paragraphs.last()
+                    if (lastPara.tableRows == null) {
+                        val lastText = lastPara.spans.joinToString("") { it.text }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = lastText,
+                                color = textColor,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            val cursorAlpha = remember { Animatable(1f) }
+                            LaunchedEffect(Unit) {
+                                while (true) {
+                                    cursorAlpha.animateTo(0f, animationSpec = tween(500))
+                                    cursorAlpha.animateTo(1f, animationSpec = tween(500))
+                                }
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(20.dp)
+                                    .background(textColor.copy(alpha = cursorAlpha.value))
+                            )
+                        }
+                    }
                 }
             }
 
@@ -3092,5 +3376,193 @@ private fun parseNoteJson(plaintext: String): Pair<List<String>, String> {
         }
     } catch (_: Exception) {
         listOf(plaintext) to "[]"
+    }
+}
+
+@Composable
+private fun DrawingPanelDialog(
+    onDismiss: () -> Unit,
+    onSave: (Bitmap) -> Unit
+) {
+    var strokeColor by remember { mutableStateOf(Color.Black) }
+    var strokeWidth by remember { mutableStateOf(5f) }
+    var isEraser by remember { mutableStateOf(false) }
+    var showColorWheel by remember { mutableStateOf(false) }
+    val paths = remember { mutableStateListOf<Pair<androidx.compose.ui.graphics.Path, Pair<Color, Float>>>() }
+    var currentPath by remember { mutableStateOf<androidx.compose.ui.graphics.Path?>(null) }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Drawing", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IconButton(onClick = { isEraser = !isEraser }) {
+                            Icon(
+                                Icons.Default.FormatClear,
+                                "Eraser",
+                                tint = if (isEraser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(onClick = { showColorWheel = !showColorWheel }) {
+                            Icon(Icons.Default.ColorLens, "Color", tint = strokeColor)
+                        }
+                        IconButton(onClick = { strokeWidth = (strokeWidth + 2f).coerceAtMost(20f) }) {
+                            Icon(Icons.Default.Add, "Thicker")
+                        }
+                        IconButton(onClick = { strokeWidth = (strokeWidth - 2f).coerceAtLeast(1f) }) {
+                            Icon(Icons.Default.Remove, "Thinner")
+                        }
+                        IconButton(onClick = { if (paths.isNotEmpty()) paths.removeAt(paths.lastIndex) }) {
+                            Icon(Icons.Default.Undo, "Undo")
+                        }
+                        IconButton(onClick = { paths.clear() }) {
+                            Icon(Icons.Default.Delete, "Clear")
+                        }
+                    }
+                }
+
+                if (showColorWheel) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        listOf(
+                            Color.Black, Color.Red, Color.Blue, Color.Green,
+                            Color(0xFFFF9800), Color(0xFF9C27B0), Color(0xFF795548),
+                            Color(0xFF607D8B), Color(0xFFE91E63), Color(0xFF00BCD4)
+                        ).forEach { color ->
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .background(color, RoundedCornerShape(4.dp))
+                                    .border(
+                                        2.dp,
+                                        if (strokeColor == color) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .clickable {
+                                        strokeColor = color
+                                        isEraser = false
+                                        showColorWheel = false
+                                    }
+                            )
+                        }
+                    }
+                }
+
+                Text("Size: ${strokeWidth.toInt()}px", style = MaterialTheme.typography.bodySmall)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(Color.White, RoundedCornerShape(8.dp))
+                        .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                        .pointerInput(strokeColor, strokeWidth, isEraser) {
+                            detectDragGestures(
+                                onDragStart = { offset ->
+                                    currentPath = androidx.compose.ui.graphics.Path().apply {
+                                        moveTo(offset.x, offset.y)
+                                    }
+                                },
+                                onDragEnd = {
+                                    currentPath?.let { path ->
+                                        val color = if (isEraser) Color.White else strokeColor
+                                        paths.add(path to (color to strokeWidth))
+                                    }
+                                    currentPath = null
+                                },
+                                onDrag = { change, _ ->
+                                    change.consume()
+                                    currentPath?.lineTo(change.position.x, change.position.y)
+                                }
+                            )
+                        }
+                ) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        paths.forEach { (path, colorWidth) ->
+                            val (color, width) = colorWidth
+                            drawPath(
+                                path = path,
+                                color = color,
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                    width = width,
+                                    cap = StrokeCap.Round,
+                                    join = StrokeJoin.Round
+                                )
+                            )
+                        }
+                        currentPath?.let { path ->
+                            val color = if (isEraser) Color.White else strokeColor
+                            drawPath(
+                                path = path,
+                                color = color,
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                    width = strokeWidth,
+                                    cap = StrokeCap.Round,
+                                    join = StrokeJoin.Round
+                                )
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) { Text("Cancel") }
+                    Button(
+                        onClick = {
+                            val bitmap = Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888)
+                            val androidCanvas = android.graphics.Canvas(bitmap)
+                            androidCanvas.drawColor(android.graphics.Color.WHITE)
+                            val paint = android.graphics.Paint().apply {
+                                isAntiAlias = true
+                                style = android.graphics.Paint.Style.STROKE
+                                strokeCap = android.graphics.Paint.Cap.ROUND
+                                strokeJoin = android.graphics.Paint.Join.ROUND
+                            }
+                            val composeCanvas = androidx.compose.ui.graphics.Canvas(androidCanvas)
+                            val composePaint = androidx.compose.ui.graphics.Paint().apply {
+                                isAntiAlias = true
+                                style = androidx.compose.ui.graphics.PaintingStyle.Stroke
+                                strokeCap = StrokeCap.Round
+                                strokeJoin = StrokeJoin.Round
+                            }
+                            paths.forEach { (path, colorWidth) ->
+                                val (color, width) = colorWidth
+                                composePaint.color = color
+                                composePaint.strokeWidth = width
+                                composeCanvas.drawPath(path, composePaint)
+                            }
+                            onSave(bitmap)
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Save Drawing") }
+                }
+            }
+        }
     }
 }
