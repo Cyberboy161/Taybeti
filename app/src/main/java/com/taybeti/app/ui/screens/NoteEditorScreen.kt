@@ -174,6 +174,7 @@ import com.taybeti.app.util.DecoyPlatform
 import com.taybeti.app.util.LocalStrings
 import com.taybeti.app.util.generateRandomKey
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filter
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Base64
@@ -2688,10 +2689,12 @@ private fun PageBlockRich(
             }
 
             val innerScrollState = rememberScrollState()
-            LaunchedEffect(formattedText.paragraphs.size, formattedText.toPlainText().length) {
-                // Wait for layout to update maxValue before scrolling
-                kotlinx.coroutines.delay(50L)
-                innerScrollState.animateScrollTo(innerScrollState.maxValue)
+            LaunchedEffect(innerScrollState) {
+                snapshotFlow { innerScrollState.maxValue }
+                    .filter { it > 0 }
+                    .collect { max ->
+                        innerScrollState.scrollTo(max)
+                    }
             }
             Column(
                 modifier = Modifier
