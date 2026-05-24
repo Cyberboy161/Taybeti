@@ -32,18 +32,21 @@ class KeyboardState {
         private set
     private var lastKeyPressTime = 0L
     private var lastDeleteTime = 0L
+    private var attachedField: String? = null
 
-    fun attach(onKey: (Char) -> Unit, onDel: () -> Unit, onDone: () -> Unit) {
+    fun attach(onKey: (Char) -> Unit, onDel: () -> Unit, onDone: () -> Unit, field: String = "") {
+        if (attachedField == field) return
+        attachedField = field
         onKeyPress = { char ->
             val now = System.currentTimeMillis()
-            if (now - lastKeyPressTime > 50L) {
+            if (now - lastKeyPressTime > 120L) {
                 lastKeyPressTime = now
                 onKey(char)
             }
         }
         onDelete = {
             val now = System.currentTimeMillis()
-            if (now - lastDeleteTime > 50L) {
+            if (now - lastDeleteTime > 120L) {
                 lastDeleteTime = now
                 onDel()
             }
@@ -53,6 +56,7 @@ class KeyboardState {
     }
 
     fun detach() {
+        attachedField = null
         onKeyPress = null
         onDelete = null
         onDone = null

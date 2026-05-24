@@ -38,9 +38,11 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Adjust
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.ContentCopy
@@ -119,12 +121,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -674,7 +678,7 @@ fun NoteEditorScreen(
     var lastUndoSaveTime by remember { mutableStateOf(0L) }
     var showTemplatePicker by remember { mutableStateOf(false) }
     var showPageColorPicker by remember { mutableStateOf(false) }
-    var pageBackgroundColor by remember { mutableStateOf(Color(0xFF2A2A2A)) }
+    var pageBackgroundColor by remember { mutableStateOf(Color(0xFF1A1A1A)) }
     var showDrawingPanel by remember { mutableStateOf(false) }
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
@@ -848,6 +852,7 @@ fun NoteEditorScreen(
 
     fun attachKeyboardForTitle(kb: KeyboardState) {
         kb.attach(
+            field = "title",
             onKey = { char ->
                 val toInsert = if (char == 'P' || char == 'p') "PPPPPPPP" else char.toString()
                 title += toInsert
@@ -859,6 +864,7 @@ fun NoteEditorScreen(
 
     fun attachKeyboardForContent(kb: KeyboardState) {
         kb.attach(
+            field = "content",
             onKey = { char ->
                 saveUndoState()
                 if (currentPageIndex < pages.size) {
@@ -1368,6 +1374,7 @@ fun NoteEditorScreen(
             var findField by remember { mutableStateOf("find") }
             LaunchedEffect(findField, findKbState) {
                 findKbState.attach(
+                    field = findField,
                     onKey = { char ->
                         if (findField == "find") findText += char
                         else replaceText += char
@@ -2116,6 +2123,16 @@ fun NoteEditorScreen(
                             ) {
                                 Icon(Icons.Default.Edit, "Draw", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                             }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                    .clickable { showDrawingPanel = true },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.CheckBoxOutlineBlank, "Shapes", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
                             Spacer(modifier = Modifier.width(6.dp))
                             Box(modifier = Modifier.width(1.dp).height(24.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)))
                             Spacer(modifier = Modifier.width(6.dp))
@@ -2460,9 +2477,9 @@ private fun WordEditorCanvasRich(
 ) {
     val scrollState = rememberScrollState()
     val isDark = pageTheme == "dark"
-    val pageBg = if (isDark) Color(0xFF1E1E1E) else Color.White
+    val pageBg = if (isDark) Color(0xFF222222) else Color.White
     val pageBorder = if (isDark) Color(0xFF444444) else Color.LightGray.copy(alpha = 0.3f)
-    val canvasBg = if (isDark) Color(0xFF121212) else Color(0xFFF0F0F0)
+    val canvasBg = if (isDark) Color(0xFF2A2A2A) else Color(0xFFF0F0F0)
     val textColor = if (isDark) Color.White else Color.Black
     val placeholderColor = Color.Gray
 
@@ -3550,7 +3567,9 @@ private fun parseNoteJson(plaintext: String): Pair<List<String>, String> {
 }
 
 enum class BrushType {
-    PEN, MARKER, HIGHLIGHTER, CALLIGRAPHY
+    PEN, MARKER, HIGHLIGHTER, CALLIGRAPHY, RECTANGLE, CIRCLE, LINE, TRIANGLE;
+    val isShape get() = this == RECTANGLE || this == CIRCLE || this == LINE || this == TRIANGLE
+    val isFreehand get() = !isShape
 }
 
 data class DrawingPath(
@@ -3567,47 +3586,72 @@ private fun ColorPresets(
     onColorSelected: (Color) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var hue by remember { mutableStateOf(0f) }
+    var sat by remember { mutableStateOf(1f) }
+    var bright by remember { mutableStateOf(1f) }
+    var showWheel by remember { mutableStateOf(false) }
+
     val colors = listOf(
-        Color.Black to "Black",
-        Color(0xFF333333) to "Dark Gray",
-        Color(0xFF666666) to "Gray",
-        Color(0xFF999999) to "Light Gray",
-        Color.White to "White",
-        Color(0xFFCC0000) to "Red",
-        Color(0xFFFF6600) to "Orange",
-        Color(0xFFFFCC00) to "Yellow",
-        Color(0xFF00CC00) to "Green",
-        Color(0xFF0066FF) to "Blue",
-        Color(0xFF6600CC) to "Purple",
-        Color(0xFFFF3399) to "Pink",
-        Color(0xFF663300) to "Brown",
-        Color(0xFF00CCCC) to "Cyan",
-        Color(0xFF336600) to "Dark Green",
-        Color(0xFF000088) to "Navy"
+        Color.Black to "Black", Color(0xFF333333) to "DarkGray", Color(0xFF666666) to "Gray", Color(0xFF999999) to "LtGray",
+        Color.White to "White", Color(0xFFE8B88A) to "Skin", Color(0xFFCC0000) to "Red", Color(0xFFFF6600) to "Orange",
+        Color(0xFFFFCC00) to "Yellow", Color(0xFF00CC00) to "Green", Color(0xFF00CCCC) to "Cyan", Color(0xFF0066FF) to "Blue",
+        Color(0xFF6600CC) to "Purple", Color(0xFFFF3399) to "Pink", Color(0xFF663300) to "Brown", Color(0xFF336600) to "DkGreen"
     )
 
     Column(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            var idx = 0
-            while (idx < 8 && idx < colors.size) {
-                val (c, name) = colors[idx]
-                ColorSwatch(c, name, selectedColor, onColorSelected, Modifier.weight(1f))
-                idx++
-            }
+        // Preset grid – 2 rows of 8
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            for (i in 0 until 8) { val (c, n) = colors[i]; ColorSwatch(c, n, selectedColor, onColorSelected, Modifier.weight(1f)) }
         }
-        Spacer(modifier = Modifier.height(6.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            var idx = 8
-            while (idx < colors.size) {
-                val (c, name) = colors[idx]
-                ColorSwatch(c, name, selectedColor, onColorSelected, Modifier.weight(1f))
-                idx++
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            for (i in 8 until 16) { val (c, n) = colors[i]; ColorSwatch(c, n, selectedColor, onColorSelected, Modifier.weight(1f)) }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = { showWheel = !showWheel }) {
+                Icon(Icons.Default.ColorLens, null, modifier = Modifier.size(18.dp), tint = selectedColor)
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(if (showWheel) "Hide wheel" else "Color wheel")
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Text("B: ${(bright * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
+        }
+
+        if (showWheel) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Canvas(
+                    modifier = Modifier
+                        .size(160.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures { offset ->
+                                val cx = size.width / 2f; val cy = size.height / 2f
+                                val dx = offset.x - cx; val dy = offset.y - cy
+                                val dist = kotlin.math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                                val radius = size.width / 2f
+                                if (dist <= radius) {
+                                    sat = (dist / radius).coerceIn(0f, 1f)
+                                    hue = ((kotlin.math.atan2(dy.toDouble(), dx.toDouble()) * 180 / Math.PI).toFloat() + 360) % 360
+                                    onColorSelected(Color.hsv(hue, sat, bright))
+                                }
+                            }
+                        }
+                ) {
+                    val rad = size.minDimension / 2f
+                    drawCircle(brush = Brush.sweepGradient(listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)), radius = rad)
+                    drawCircle(brush = Brush.radialGradient(listOf(Color.White.copy(alpha = 0f), Color.White.copy(alpha = 0.8f)), center = Offset(rad, rad), radius = rad), radius = rad)
+                    val sx = rad + sat * rad * kotlin.math.cos(hue * Math.PI / 180).toFloat()
+                    val sy = rad + sat * rad * kotlin.math.sin(hue * Math.PI / 180).toFloat()
+                    drawCircle(Color.White, radius = 7f, center = Offset(sx, sy))
+                    drawCircle(Color.Black, radius = 5f, center = Offset(sx, sy))
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Brightness", style = MaterialTheme.typography.labelSmall)
+                    Slider(value = bright, onValueChange = { bright = it; onColorSelected(Color.hsv(hue, sat, bright)) }, valueRange = 0.1f..1f)
+                }
             }
         }
     }
@@ -3651,7 +3695,7 @@ private fun DrawingPanelDialog(
     onDismiss: () -> Unit,
     onSave: (Bitmap) -> Unit
 ) {
-    var strokeColor by remember { mutableStateOf(Color.Black) }
+    var strokeColor by remember { mutableStateOf(Color(0xFFE8B88A)) }
     var strokeWidth by remember { mutableStateOf(5f) }
     var currentBrush by remember { mutableStateOf(BrushType.PEN) }
     var isEraser by remember { mutableStateOf(false) }
@@ -3663,6 +3707,7 @@ private fun DrawingPanelDialog(
     var canvasActualWidth by remember { mutableStateOf(400) }
     var canvasActualHeight by remember { mutableStateOf(600) }
     var eraserPos by remember { mutableStateOf<Offset?>(null) }
+    var canvasZoom by remember { mutableStateOf(1f) }
     val paths = remember { mutableStateListOf<DrawingPath>() }
     var currentPath by remember { mutableStateOf<DrawingPath?>(null) }
 
@@ -3672,6 +3717,7 @@ private fun DrawingPanelDialog(
             BrushType.MARKER -> baseWidth * 2f
             BrushType.HIGHLIGHTER -> baseWidth * 4f
             BrushType.CALLIGRAPHY -> baseWidth * 1.5f
+            else -> baseWidth
         }
     }
 
@@ -3681,6 +3727,7 @@ private fun DrawingPanelDialog(
             BrushType.MARKER -> 0.9f
             BrushType.HIGHLIGHTER -> 0.3f
             BrushType.CALLIGRAPHY -> 1f
+            else -> 1f
         }
     }
 
@@ -3709,6 +3756,7 @@ private fun DrawingPanelDialog(
                                         BrushType.MARKER -> Icons.Default.FormatBold
                                         BrushType.HIGHLIGHTER -> Icons.Default.FormatColorFill
                                         BrushType.CALLIGRAPHY -> Icons.Default.FormatItalic
+                                        else -> Icons.Default.Edit
                                     },
                                     "Brush",
                                     tint = if (!isEraser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
@@ -3735,6 +3783,26 @@ private fun DrawingPanelDialog(
                                     leadingIcon = { Icon(Icons.Default.FormatItalic, null) },
                                     onClick = { currentBrush = BrushType.CALLIGRAPHY; isEraser = false; showBrushMenu = false }
                                 )
+                                DropdownMenuItem(
+                                    text = { Text("Rectangle") },
+                                    leadingIcon = { Icon(Icons.Default.CheckBoxOutlineBlank, null, modifier = Modifier.size(18.dp)) },
+                                    onClick = { currentBrush = BrushType.RECTANGLE; isEraser = false; showBrushMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Circle") },
+                                    leadingIcon = { Icon(Icons.Default.Adjust, null) },
+                                    onClick = { currentBrush = BrushType.CIRCLE; isEraser = false; showBrushMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Line") },
+                                    leadingIcon = { Icon(Icons.Default.Remove, null) },
+                                    onClick = { currentBrush = BrushType.LINE; isEraser = false; showBrushMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Triangle") },
+                                    leadingIcon = { Icon(Icons.Default.PlayArrow, null) },
+                                    onClick = { currentBrush = BrushType.TRIANGLE; isEraser = false; showBrushMenu = false }
+                                )
                             }
                         }
                         IconButton(onClick = { isEraser = !isEraser }) {
@@ -3750,8 +3818,7 @@ private fun DrawingPanelDialog(
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(strokeColor)
                                 .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
-                                .clickable { showColorWheel = !showColorWheel },
-                            contentAlignment = Alignment.Center
+                                .clickable { showColorWheel = !showColorWheel }
                         )
                         IconButton(onClick = { strokeWidth = (strokeWidth + 1f).coerceAtMost(20f) }) {
                             Icon(Icons.Default.Add, "Thicker")
@@ -3789,19 +3856,23 @@ private fun DrawingPanelDialog(
                     }
                     // Brush indicator
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
+                         Icon(
                             when (currentBrush) {
                                 BrushType.PEN -> Icons.Default.Edit
                                 BrushType.MARKER -> Icons.Default.FormatBold
                                 BrushType.HIGHLIGHTER -> Icons.Default.FormatColorFill
                                 BrushType.CALLIGRAPHY -> Icons.Default.FormatItalic
+                                BrushType.RECTANGLE -> Icons.Default.CheckBoxOutlineBlank
+                                BrushType.CIRCLE -> Icons.Default.Adjust
+                                BrushType.LINE -> Icons.Default.Remove
+                                BrushType.TRIANGLE -> Icons.Default.PlayArrow
                             },
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
                             tint = strokeColor
                         )
                         Spacer(modifier = Modifier.width(2.dp))
-                        Text(currentBrush.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall)
+                        Text(if (currentBrush.isShape) currentBrush.name.lowercase().replaceFirstChar { it.uppercase() } else currentBrush.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall)
                     }
                     if (isEraser) {
                         Icon(Icons.Default.FormatClear, "Eraser Active", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
@@ -3822,7 +3893,18 @@ private fun DrawingPanelDialog(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+                // Zoom controls for drawing
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { canvasZoom = (canvasZoom - 0.2f).coerceIn(0.5f, 3f) }) {
+                        Icon(Icons.Default.Remove, "Zoom Out", modifier = Modifier.size(20.dp))
+                    }
+                    Text("${(canvasZoom * 100).toInt()}%", style = MaterialTheme.typography.labelSmall, modifier = Modifier.width(44.dp), textAlign = TextAlign.Center)
+                    IconButton(onClick = { canvasZoom = (canvasZoom + 0.2f).coerceIn(0.5f, 3f) }) {
+                        Icon(Icons.Default.Add, "Zoom In", modifier = Modifier.size(20.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Box(
                     modifier = Modifier
@@ -3834,10 +3916,24 @@ private fun DrawingPanelDialog(
                         .pointerInput(strokeColor, strokeWidth, isEraser, currentBrush, eraserSize) {
                             detectDragGestures(
                                 onDragStart = { offset ->
-                                    val path = androidx.compose.ui.graphics.Path().apply {
-                                        moveTo(offset.x, offset.y)
-                                    }
+                                    val path = androidx.compose.ui.graphics.Path()
                                     val actualWidth = if (isEraser) eraserSize else getBrushWidth(currentBrush, strokeWidth)
+                                    if (currentBrush.isShape) {
+                                        when (currentBrush) {
+                                            BrushType.RECTANGLE -> path.addRect(androidx.compose.ui.geometry.Rect(offset, offset))
+                                            BrushType.CIRCLE -> path.addOval(androidx.compose.ui.geometry.Rect(offset, offset))
+                                            BrushType.LINE -> { path.moveTo(offset.x, offset.y); path.lineTo(offset.x, offset.y) }
+                                            BrushType.TRIANGLE -> {
+                                                path.moveTo(offset.x, offset.y - 10f)
+                                                path.lineTo(offset.x + 10f, offset.y + 10f)
+                                                path.lineTo(offset.x - 10f, offset.y + 10f)
+                                                path.close()
+                                            }
+                                            else -> {}
+                                        }
+                                    } else {
+                                        path.moveTo(offset.x, offset.y)
+                                    }
                                     currentPath = DrawingPath(
                                         path = path,
                                         color = if (isEraser) Color.White else strokeColor,
@@ -3854,13 +3950,40 @@ private fun DrawingPanelDialog(
                                 },
                                 onDrag = { change, _ ->
                                     change.consume()
-                                    currentPath?.path?.lineTo(change.position.x, change.position.y)
+                                    currentPath?.let { dp ->
+                                        val path = androidx.compose.ui.graphics.Path()
+                                        val start = currentPath!!.path.let { p -> /* get first point */ }
+                                        if (dp.brushType.isShape) {
+                                            val x1 = dp.path.getBounds().left
+                                            val y1 = dp.path.getBounds().top
+                                            val x2 = change.position.x
+                                            val y2 = change.position.y
+                                            val r = androidx.compose.ui.geometry.Rect(minOf(x1, x2), minOf(y1, y2), maxOf(x1, x2), maxOf(y1, y2))
+                                            when (dp.brushType) {
+                                                BrushType.RECTANGLE -> path.addRect(r)
+                                                BrushType.CIRCLE -> path.addOval(r)
+                                                BrushType.LINE -> { path.moveTo(x1, y1); path.lineTo(x2, y2) }
+                                                BrushType.TRIANGLE -> {
+                                                    val cx = (x1 + x2) / 2f; val cy = minOf(y1, y2)
+                                                    val bw = kotlin.math.abs(x2 - x1); val bh = kotlin.math.abs(y2 - y1)
+                                                    path.moveTo(cx, cy); path.lineTo(cx + bw / 2f, cy + bh); path.lineTo(cx - bw / 2f, cy + bh); path.close()
+                                                }
+                                                else -> {}
+                                            }
+                                            currentPath = dp.copy(path = path)
+                                        } else {
+                                            currentPath?.path?.lineTo(change.position.x, change.position.y)
+                                        }
+                                    }
                                     if (isEraser) eraserPos = change.position
                                 }
                             )
                         }
                 ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
+                    Canvas(modifier = Modifier.fillMaxSize().graphicsLayer {
+                        scaleX = canvasZoom; scaleY = canvasZoom
+                        transformOrigin = TransformOrigin(0f, 0f)
+                    }) {
                         paths.forEach { drawingPath ->
                             val alpha = if (drawingPath.isEraser) 1f else getBrushAlpha(drawingPath.brushType)
                             drawPath(
