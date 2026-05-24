@@ -2,12 +2,14 @@ package com.taybeti.app.ui.screens
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.pdf.PdfDocument
+
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -63,7 +65,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.Print
+
 import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Restore
@@ -649,13 +651,23 @@ fun NoteEditorScreen(
     var showTableDialog by remember { mutableStateOf(false) }
     var tableInsertData by remember { mutableStateOf(TableInsertData()) }
 
-    // Leap 11: PDF Export
-    var showPdfExportDialog by remember { mutableStateOf(false) }
+
 
     val PAGE_WIDTH_DP = 560
     val PAGE_HEIGHT_DP = 792
+    var lastUndoSaveTime by remember { mutableStateOf(0L) }
 
     fun saveUndoState() {
+        val now = System.currentTimeMillis()
+        if (now - lastUndoSaveTime > 2000L) {
+            if (currentPageIndex < pages.size) {
+                undoRedoManager.pushState(pages[currentPageIndex].copy(), currentPageIndex)
+            }
+            lastUndoSaveTime = now
+        }
+    }
+
+    fun saveUndoStateImmediate() {
         if (currentPageIndex < pages.size) {
             undoRedoManager.pushState(pages[currentPageIndex].copy(), currentPageIndex)
         }
@@ -737,6 +749,10 @@ fun NoteEditorScreen(
                 try {
                     val noteJson = buildNoteJsonRich(pages, images, marginSettings)
                     val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
+                    if (plainBytes.isEmpty()) {
+                        Toast.makeText(context, "Error: note content is empty", Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
                     val result = repository.encryptNoteContent(
                         noteId, title, plainBytes, noteKey.toCharArray(), ""
                     )
@@ -749,14 +765,22 @@ fun NoteEditorScreen(
                         json.put("tag", Base64.getEncoder().encodeToString(note.tag))
                         json.put("ciphertext", Base64.getEncoder().encodeToString(note.ciphertext))
                         val outputBytes = json.toString().toByteArray(Charsets.UTF_8)
-                        context.contentResolver.openOutputStream(uri)?.use { it.write(outputBytes) }
+                        context.contentResolver.openOutputStream(uri)?.use { stream ->
+                            stream.write(outputBytes)
+                            stream.flush()
+                        }
                         SecureMemory.clear(plaintext.toCharArray())
+                        SecureMemory.clear(noteKey.toCharArray())
                         plaintext = ""
+                        noteKey = ""
+                        pages.clear()
+                        pages.add(FormattedText())
                         images.clear()
                         isLocked = true
-                        Toast.makeText(context, "🔒 Note encrypted and saved", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Note encrypted and saved", Toast.LENGTH_SHORT).show()
+                        onBack()
                     } else {
-                        Toast.makeText(context, "Encryption failed", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Encryption failed: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
                     Toast.makeText(context, "Failed to save: ${e.message}", Toast.LENGTH_LONG).show()
@@ -1316,50 +1340,101 @@ fun NoteEditorScreen(
             )
         }
 
-        // Leap 8: Find and Replace dialog
         if (showFindReplace) {
-            Dialog(onDismissRequest = { showFindReplace = false }) {
+            val findKbState = remember { KeyboardState() }
+            var findField by remember { mutableStateOf("find") }
+            LaunchedEffect(findField, findKbState) {
+                findKbState.attach(
+                    onKey = { char ->
+                        if (findField == "find") findText += char
+                        else replaceText += char
+                    },
+                    onDel = {
+                        if (findField == "find") { if (findText.isNotEmpty()) findText = findText.dropLast(1) }
+                        else { if (replaceText.isNotEmpty()) replaceText = replaceText.dropLast(1) }
+                    },
+                    onDone = { findKbState.detach() }
+                )
+            }
+            Dialog(
+                onDismissRequest = { showFindReplace = false },
+                properties = DialogProperties(
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = true,
+                    usePlatformDefaultWidth = false
+                )
+            ) {
                 Surface(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Find and Replace", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = findText,
-                            onValueChange = { findText = it },
-                            label = { Text("Find") },
-                            modifier = Modifier.fillMaxWidth(),
-                            trailingIcon = {
+                        CompositionLocalProvider(LocalKeyboardState provides findKbState) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            if (findField == "find") MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                        )
+                                        .border(
+                                            1.dp,
+                                            if (findField == "find") MaterialTheme.colorScheme.primary else Color.Transparent,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable { findField = "find" }
+                                        .padding(12.dp)
+                                ) {
+                                    Text(if (findText.isEmpty()) "Find..." else findText, style = MaterialTheme.typography.bodyMedium)
+                                }
                                 IconButton(onClick = { performFindReplace() }) {
                                     Icon(Icons.Default.Search, "Find")
                                 }
                             }
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = replaceText,
-                            onValueChange = { replaceText = it },
-                            label = { Text("Replace with") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        if (searchResults.isNotEmpty()) {
-                            Text("Found ${searchResults.size} matches (${currentSearchResultIndex + 1}/${searchResults.size})")
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        if (findField == "replace") MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (findField == "replace") MaterialTheme.colorScheme.primary else Color.Transparent,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable { findField = "replace" }
+                                    .padding(12.dp)
+                            ) {
+                                Text(if (replaceText.isEmpty()) "Replace with..." else replaceText, style = MaterialTheme.typography.bodyMedium)
+                            }
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
+                        if (searchResults.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Found ${searchResults.size} matches", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { replaceCurrent() }, modifier = Modifier.weight(1f)) {
-                                Text("Replace")
-                            }
-                            Button(onClick = { replaceAll() }, modifier = Modifier.weight(1f)) {
-                                Text("Replace All")
-                            }
-                            TextButton(onClick = { showFindReplace = false }) {
-                                Text("Close")
-                            }
+                            Button(onClick = { replaceCurrent() }, modifier = Modifier.weight(1f)) { Text("Replace", fontSize = 12.sp) }
+                            Button(onClick = { replaceAll() }, modifier = Modifier.weight(1f)) { Text("All", fontSize = 12.sp) }
+                            TextButton(onClick = { showFindReplace = false }) { Text("Close", fontSize = 12.sp) }
+                        }
+                        if (findKbState.isVisible) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            CustomKeyboard(
+                                onKeyPress = { findKbState.onKeyPress?.invoke(it) },
+                                onDelete = { findKbState.onDelete?.invoke() },
+                                onDone = { findKbState.onDone?.invoke() }
+                            )
                         }
                     }
                 }
@@ -1449,31 +1524,28 @@ fun NoteEditorScreen(
             }
         }
 
-        // Leap 10: Table insert dialog
         if (showTableDialog) {
             AlertDialog(
                 onDismissRequest = { showTableDialog = false },
                 title = { Text("Insert Table") },
                 text = {
                     Column {
-                        OutlinedTextField(
-                            value = tableInsertData.rows.toString(),
-                            onValueChange = { tableInsertData = tableInsertData.copy(rows = it.toIntOrNull() ?: 3) },
-                            label = { Text("Rows") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = tableInsertData.columns.toString(),
-                            onValueChange = { tableInsertData = tableInsertData.copy(columns = it.toIntOrNull() ?: 3) },
-                            label = { Text("Columns") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Text("Rows: ${tableInsertData.rows}", fontWeight = FontWeight.Medium)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = { if (tableInsertData.rows > 1) tableInsertData = tableInsertData.copy(rows = tableInsertData.rows - 1) }) { Text("-") }
+                            Button(onClick = { if (tableInsertData.rows < 20) tableInsertData = tableInsertData.copy(rows = tableInsertData.rows + 1) }) { Text("+") }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text("Columns: ${tableInsertData.columns}", fontWeight = FontWeight.Medium)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = { if (tableInsertData.columns > 1) tableInsertData = tableInsertData.copy(columns = tableInsertData.columns - 1) }) { Text("-") }
+                            Button(onClick = { if (tableInsertData.columns < 10) tableInsertData = tableInsertData.copy(columns = tableInsertData.columns + 1) }) { Text("+") }
+                        }
                     }
                 },
                 confirmButton = {
                     Button(onClick = {
-                        saveUndoState()
+                        saveUndoStateImmediate()
                         val ft = pages.getOrNull(currentPageIndex)
                         if (ft != null) {
                             val rows = (0 until tableInsertData.rows).map {
@@ -1486,60 +1558,6 @@ fun NoteEditorScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showTableDialog = false }) { Text("Cancel") }
-                }
-            )
-        }
-
-        // Leap 11: PDF Export dialog
-        if (showPdfExportDialog) {
-            AlertDialog(
-                onDismissRequest = { showPdfExportDialog = false },
-                title = { Text("Export to PDF") },
-                text = { Text("This will generate a PDF from your note content. The PDF will be saved to your Downloads folder.") },
-                confirmButton = {
-                    Button(onClick = {
-                        scope.launch {
-                            try {
-                                val pdfDocument = PdfDocument()
-                                val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
-                                var pageNum = 1
-                                pages.forEach { ft ->
-                                    val page = pdfDocument.startPage(pageInfo)
-                                    val canvas = page.canvas
-                                    val paint = android.graphics.Paint().apply {
-                                        color = android.graphics.Color.BLACK
-                                        textSize = 36f
-                                    }
-                                    canvas.drawText(title, 50f, 50f, paint)
-                                    paint.textSize = 14f
-                                    var y = 100f
-                                    ft.paragraphs.forEach { para ->
-                                        val line = para.spans.joinToString("") { it.text }
-                                        canvas.drawText(line, 50f, y, paint)
-                                        y += 20f
-                                        if (y > 800f) {
-                                            pdfDocument.finishPage(page)
-                                            pageNum++
-                                            val newPage = pdfDocument.startPage(pageInfo)
-                                            // continue on new page
-                                        }
-                                    }
-                                    pdfDocument.finishPage(page)
-                                }
-                                val downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
-                                val file = File(downloadsDir, "${title.ifEmpty { "note" }}.pdf")
-                                pdfDocument.writeTo(file.outputStream())
-                                pdfDocument.close()
-                                Toast.makeText(context, "PDF saved to ${file.absolutePath}", Toast.LENGTH_LONG).show()
-                            } catch (e: Exception) {
-                                Toast.makeText(context, "PDF export failed: ${e.message}", Toast.LENGTH_LONG).show()
-                            }
-                        }
-                        showPdfExportDialog = false
-                    }) { Text("Export") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showPdfExportDialog = false }) { Text("Cancel") }
                 }
             )
         }
@@ -1566,24 +1584,11 @@ fun NoteEditorScreen(
                     },
                     actions = {
                         if (!isLocked) {
-                            // Leap 7: Undo/Redo buttons
                             IconButton(onClick = { performUndo() }, enabled = undoRedoManager.canUndo()) {
                                 Icon(Icons.Default.Undo, "Undo", tint = if (undoRedoManager.canUndo()) MaterialTheme.colorScheme.onSurface else Color.Gray)
                             }
                             IconButton(onClick = { performRedo() }, enabled = undoRedoManager.canRedo()) {
                                 Icon(Icons.Default.Redo, "Redo", tint = if (undoRedoManager.canRedo()) MaterialTheme.colorScheme.onSurface else Color.Gray)
-                            }
-                            // Leap 8: Find and Replace
-                            IconButton(onClick = { showFindReplace = !showFindReplace }) {
-                                Icon(Icons.Default.FindReplace, "Find and Replace")
-                            }
-                            // Leap 10: Table insert
-                            IconButton(onClick = { showTableDialog = true }) {
-                                Icon(Icons.Default.TableChart, "Insert Table")
-                            }
-                            // Leap 11: PDF Export
-                            IconButton(onClick = { showPdfExportDialog = true }) {
-                                Icon(Icons.Default.Print, "Export PDF")
                             }
                             Button(
                                 onClick = { showEncryptDialog = true },
@@ -1738,9 +1743,6 @@ fun NoteEditorScreen(
                         },
                         onFindReplace = {
                             showFindReplace = true
-                        },
-                        onExportPdf = {
-                            showPdfExportDialog = true
                         }
                     )
 
@@ -1756,40 +1758,67 @@ fun NoteEditorScreen(
                     ) {
                         Text("Theme:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
                         Spacer(modifier = Modifier.width(8.dp))
-                        IconButton(
-                            onClick = { pageTheme = "light" },
+                        Box(
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(20.dp)
                                 .border(
                                     width = 0.5.dp,
                                     color = if (pageTheme == "light") MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = RoundedCornerShape(4.dp)
+                                    shape = RoundedCornerShape(3.dp)
                                 )
+                                .clickable { pageTheme = "light" },
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LightMode,
                                 contentDescription = "Light mode",
                                 tint = if (pageTheme == "light") Color(0xFFFFB300) else Color.Gray,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(12.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(4.dp))
-                        IconButton(
-                            onClick = { pageTheme = "dark" },
+                        Box(
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(20.dp)
                                 .border(
                                     width = 0.5.dp,
                                     color = if (pageTheme == "dark") MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = RoundedCornerShape(4.dp)
+                                    shape = RoundedCornerShape(3.dp)
                                 )
+                                .clickable { pageTheme = "dark" },
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.NightsStay,
                                 contentDescription = "Dark mode",
                                 tint = if (pageTheme == "dark") Color(0xFF90CAF9) else Color.Gray,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(12.dp)
                             )
+                        }
+                    }
+
+                    if (showImageOptions) {
+                        val selectedImg = images.find { it.attachment.id == selectedImageId }
+                        if (selectedImg != null) {
+                            ImageOptionsDialog(
+                                image = selectedImg,
+                                onDismiss = { showImageOptions = false },
+                                onUpdate = { updated ->
+                                    val idx = images.indexOfFirst { it.attachment.id == updated.attachment.id }
+                                    if (idx >= 0) images[idx] = updated
+                                },
+                                onDelete = {
+                                    val img = images.find { it.attachment.id == selectedImageId }
+                                    if (img != null) {
+                                        scope.launch {
+                                            AttachmentManager.deleteAttachment(context, noteId, img.attachment)
+                                        }
+                                        images.remove(img)
+                                    }
+                                }
+                            )
+                        } else {
+                            showImageOptions = false
                         }
                     }
 
@@ -1854,8 +1883,7 @@ private fun RichTextToolbar(
     onAddAttachment: (AttachmentType) -> Unit,
     onInsertNewline: () -> Unit,
     onInsertTable: () -> Unit,
-    onFindReplace: () -> Unit,
-    onExportPdf: () -> Unit
+    onFindReplace: () -> Unit
 ) {
     var showFontMenu by remember { mutableStateOf(false) }
     var showSizeMenu by remember { mutableStateOf(false) }
@@ -2002,11 +2030,6 @@ private fun RichTextToolbar(
                 Icon(Icons.Default.FindReplace, "Find and Replace")
             }
 
-            // Export PDF
-            IconButton(onClick = onExportPdf) {
-                Icon(Icons.Default.Print, "Export PDF")
-            }
-
             // Attach
             Box {
                 IconButton(onClick = { showAttachMenu = true }) {
@@ -2080,7 +2103,6 @@ private fun WordEditorCanvasRich(
     pageWidth: Int,
     pageHeight: Int
 ) {
-    val kbState = LocalKeyboardState.current
     val scrollState = rememberScrollState()
     val isDark = pageTheme == "dark"
     val pageBg = if (isDark) Color(0xFF1E1E1E) else Color.White
@@ -2088,17 +2110,28 @@ private fun WordEditorCanvasRich(
     val canvasBg = if (isDark) Color(0xFF121212) else Color(0xFFF0F0F0)
     val textColor = if (isDark) Color.White else Color.Black
     val placeholderColor = Color.Gray
+    var zoomScale by remember { mutableStateOf(1f) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(canvasBg)
+            .pointerInput(Unit) {
+                detectTransformGestures { _, _, zoom, _ ->
+                    zoomScale = (zoomScale * zoom).coerceIn(0.5f, 3f)
+                }
+            }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(vertical = 16.dp)
+                .graphicsLayer {
+                    scaleX = zoomScale
+                    scaleY = zoomScale
+                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0f)
+                }
         ) {
             pages.forEachIndexed { index, ft ->
                 PageBlockRich(
@@ -2231,7 +2264,7 @@ private fun PageBlockRich(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
-                formattedText.paragraphs.forEach { paragraph ->
+                formattedText.paragraphs.forEachIndexed { paraIdx, paragraph ->
                     val textAlign = when (paragraph.alignment) {
                         TextAlignMode.LEFT -> TextAlign.Start
                         TextAlignMode.CENTER -> TextAlign.Center
@@ -2239,58 +2272,62 @@ private fun PageBlockRich(
                         TextAlignMode.JUSTIFY -> TextAlign.Justify
                     }
 
-                    // List prefix
                     val prefix = when (paragraph.listType) {
                         ListType.BULLETED -> "• "
-                        ListType.NUMBERED -> {
-                            val idx = formattedText.paragraphs.indexOf(paragraph) + 1
-                            "$idx. "
-                        }
+                        ListType.NUMBERED -> "${paraIdx + 1}. "
                         ListType.NONE -> ""
                     }
 
-                    Row {
-                        if (prefix.isNotEmpty()) {
+                    val paraAnnotated = buildAnnotatedString {
+                        paragraph.spans.forEach { span ->
+                            if (span.text.isNotEmpty()) {
+                                withStyle(span.toSpanStyle()) { append(span.text) }
+                            }
+                        }
+                    }
+
+                    if (paraAnnotated.isNotEmpty() || paragraph.tableRows == null) {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            if (prefix.isNotEmpty()) {
+                                Text(
+                                    text = prefix,
+                                    color = textColor,
+                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
                             Text(
-                                text = prefix,
+                                text = paraAnnotated,
                                 color = textColor,
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.fillMaxWidth(),
                                 textAlign = textAlign
                             )
                         }
-                        Text(
-                            text = formattedText.toAnnotatedString(),
-                            color = textColor,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = textAlign
-                        )
                     }
 
-                    // Leap 10: Table rendering
                     val pTableRows = paragraph.tableRows
                     if (pTableRows != null && pTableRows.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                .border(1.dp, if (isDark) Color(0xFF555555) else Color.Gray, RoundedCornerShape(4.dp))
                         ) {
-                            pTableRows.forEachIndexed { rowIdx, row ->
+                            pTableRows.forEach { row ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    row.cells.forEachIndexed { cellIdx, cell ->
-                                        Text(
-                                            text = cell,
+                                    row.cells.forEach { cell ->
+                                        Box(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .border(
-                                                    0.5.dp,
-                                                    Color.Gray.copy(alpha = 0.5f)
-                                                )
-                                                .padding(4.dp),
-                                            color = textColor,
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
+                                                .border(0.5.dp, if (isDark) Color(0xFF444444) else Color.Gray.copy(alpha = 0.5f))
+                                                .padding(6.dp)
+                                        ) {
+                                            Text(
+                                                text = cell.ifEmpty { " " },
+                                                color = textColor,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -2300,11 +2337,28 @@ private fun PageBlockRich(
                 }
 
                 if (formattedText.toPlainText().isEmpty()) {
-                    Text(
-                        text = "Start typing here...",
-                        color = placeholderColor,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth()
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Start typing here...",
+                            color = placeholderColor,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+
+                if (isSelected) {
+                    val cursorAlpha = remember { Animatable(1f) }
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            cursorAlpha.animateTo(0f, animationSpec = tween(500))
+                            cursorAlpha.animateTo(1f, animationSpec = tween(500))
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .width(2.dp)
+                            .height(20.dp)
+                            .background(textColor.copy(alpha = cursorAlpha.value))
                     )
                 }
             }
