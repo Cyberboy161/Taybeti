@@ -2190,10 +2190,11 @@ fun NoteEditorScreen(
                                 image = selectedImg,
                                 onDismiss = { showImageOptions = false },
                                 onUpdate = { updated ->
-                                    val idx = images.indexOfFirst { it.attachment.id == updated.attachment.id }
-                                    if (idx >= 0) {
-                                        images.removeAt(idx)
-                                        images.add(idx, updated)
+                                    val img = images.find { it.attachment.id == updated.attachment.id }
+                                    if (img != null) {
+                                        img.layer = updated.layer
+                                        img.width = updated.width
+                                        img.height = updated.height
                                         imageVersion++
                                     }
                                 },
@@ -2226,10 +2227,11 @@ fun NoteEditorScreen(
                             showImageOptions = true
                         },
                         onImageUpdate = { updatedImage ->
-                            val idx = images.indexOfFirst { it.attachment.id == updatedImage.attachment.id }
-                            if (idx >= 0) {
-                                images.removeAt(idx)
-                                images.add(idx, updatedImage)
+                            val img = images.find { it.attachment.id == updatedImage.attachment.id }
+                            if (img != null) {
+                                img.layer = updatedImage.layer
+                                img.width = updatedImage.width
+                                img.height = updatedImage.height
                                 imageVersion++
                             }
                         },
