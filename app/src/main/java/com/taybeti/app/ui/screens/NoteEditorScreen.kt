@@ -17,6 +17,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
@@ -83,6 +84,8 @@ import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.window.Dialog
@@ -2975,45 +2978,31 @@ private fun DraggableImage(
             )
             .pointerInput(image.attachment.id) {
                 detectTapGestures(
-                    onPress = {
-                        val startTime = System.currentTimeMillis()
-                        val pressPosition = it
-                        tryAwaitRelease()
-                        val pressDuration = System.currentTimeMillis() - startTime
-                        
-                        if (pressDuration >= 2000) {
-                            isDragging = true
-                            onUpdate(image.copy(isSelected = true))
-                        } else {
-                            onSelect(image.attachment.id)
-                        }
+                    onTap = {
+                        onSelect(image.attachment.id)
                     }
                 )
             }
-            .pointerInput(image.attachment.id, isDragging) {
-                if (isDragging) {
-                    detectDragGestures(
-                        onDragStart = {
-                            onUpdate(image.copy(isSelected = true))
-                        },
-                        onDragEnd = {
-                            isDragging = false
-                            onUpdate(image.copy(x = offsetX, y = offsetY, isSelected = false))
-                        },
-                        onDrag = { change, dragAmount ->
-                            change.consume()
-                            offsetX += dragAmount.x
-                            offsetY += dragAmount.y
-                            onUpdate(
-                                image.copy(
-                                    x = offsetX,
-                                    y = offsetY,
-                                    isSelected = true
-                                )
-                            )
-                        }
-                    )
-                }
+            .pointerInput(image.attachment.id) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = {
+                        isDragging = true
+                        onUpdate(image.copy(isSelected = true))
+                    },
+                    onDragEnd = {
+                        isDragging = false
+                        onUpdate(image.copy(x = offsetX, y = offsetY, isSelected = false))
+                    },
+                    onDragCancel = {
+                        isDragging = false
+                        onUpdate(image.copy(isSelected = false))
+                    },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        offsetX += dragAmount.x
+                        offsetY += dragAmount.y
+                    }
+                )
             }
     ) {
         AsyncImage(
@@ -3695,7 +3684,7 @@ private fun DrawingPanelDialog(
     onDismiss: () -> Unit,
     onSave: (Bitmap) -> Unit
 ) {
-    var strokeColor by remember { mutableStateOf(Color(0xFFE8B88A)) }
+    var strokeColor by remember { mutableStateOf(Color.Black) }
     var strokeWidth by remember { mutableStateOf(5f) }
     var currentBrush by remember { mutableStateOf(BrushType.PEN) }
     var isEraser by remember { mutableStateOf(false) }
@@ -3817,9 +3806,11 @@ private fun DrawingPanelDialog(
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(strokeColor)
-                                .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                .border(2.dp, if (strokeColor == Color.Black || strokeColor.red + strokeColor.green + strokeColor.blue < 1f) Color.White.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
                                 .clickable { showColorWheel = !showColorWheel }
-                        )
+                        ) {
+                            Icon(Icons.Default.ColorLens, "Color", modifier = Modifier.size(22.dp), tint = if ((strokeColor.red + strokeColor.green + strokeColor.blue) / 3f > 0.5f) Color.Black else Color.White)
+                        }
                         IconButton(onClick = { strokeWidth = (strokeWidth + 1f).coerceAtMost(20f) }) {
                             Icon(Icons.Default.Add, "Thicker")
                         }
@@ -3831,6 +3822,9 @@ private fun DrawingPanelDialog(
                         }
                         IconButton(onClick = { paths.clear() }) {
                             Icon(Icons.Default.Delete, "Clear")
+                        }
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Default.Close, "Close")
                         }
                     }
                 }
@@ -3848,34 +3842,14 @@ private fun DrawingPanelDialog(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Size indicator
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.FormatSize, "Size", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         Spacer(modifier = Modifier.width(2.dp))
                         Text("${strokeWidth.toInt()}px", style = MaterialTheme.typography.bodySmall)
                     }
-                    // Brush indicator
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                         Icon(
-                            when (currentBrush) {
-                                BrushType.PEN -> Icons.Default.Edit
-                                BrushType.MARKER -> Icons.Default.FormatBold
-                                BrushType.HIGHLIGHTER -> Icons.Default.FormatColorFill
-                                BrushType.CALLIGRAPHY -> Icons.Default.FormatItalic
-                                BrushType.RECTANGLE -> Icons.Default.CheckBoxOutlineBlank
-                                BrushType.CIRCLE -> Icons.Default.Adjust
-                                BrushType.LINE -> Icons.Default.Remove
-                                BrushType.TRIANGLE -> Icons.Default.PlayArrow
-                            },
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = strokeColor
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text(if (currentBrush.isShape) currentBrush.name.lowercase().replaceFirstChar { it.uppercase() } else currentBrush.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall)
-                    }
+                    Spacer(modifier = Modifier.weight(1f))
                     if (isEraser) {
-                        Icon(Icons.Default.FormatClear, "Eraser Active", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
+                        Icon(Icons.Default.FormatClear, "Eraser", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                     }
                 }
 
@@ -3902,6 +3876,17 @@ private fun DrawingPanelDialog(
                     Text("${(canvasZoom * 100).toInt()}%", style = MaterialTheme.typography.labelSmall, modifier = Modifier.width(44.dp), textAlign = TextAlign.Center)
                     IconButton(onClick = { canvasZoom = (canvasZoom + 0.2f).coerceIn(0.5f, 3f) }) {
                         Icon(Icons.Default.Add, "Zoom In", modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = {
+                        val tmp = canvasWidth
+                        canvasWidth = canvasHeight
+                        canvasHeight = tmp
+                        val atmp = canvasActualWidth
+                        canvasActualWidth = canvasActualHeight
+                        canvasActualHeight = atmp
+                    }) {
+                        Icon(Icons.Default.ScreenRotation, "Orientation", modifier = Modifier.size(20.dp))
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
