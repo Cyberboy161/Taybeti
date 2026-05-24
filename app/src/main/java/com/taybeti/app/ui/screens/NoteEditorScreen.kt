@@ -3106,6 +3106,9 @@ private fun ImageOptionsDialog(
     onDelete: () -> Unit,
     onOpenDrawing: () -> Unit = {}
 ) {
+    var pendingLayer by remember { mutableStateOf(image.layer) }
+    var pendingWidth by remember { mutableStateOf(image.width) }
+    var pendingHeight by remember { mutableStateOf(image.height) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Image Options", fontWeight = FontWeight.Bold) },
@@ -3129,10 +3132,7 @@ private fun ImageOptionsDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                onUpdate(image.copy(layer = layer))
-                                onDismiss()
-                            }
+                            .clickable { pendingLayer = layer }
                             .padding(vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -3145,7 +3145,7 @@ private fun ImageOptionsDialog(
                             },
                             contentDescription = null,
                             modifier = Modifier.size(20.dp),
-                            tint = if (image.layer == layer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            tint = if (pendingLayer == layer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
@@ -3169,7 +3169,7 @@ private fun ImageOptionsDialog(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
-                        if (image.layer == layer) {
+                        if (pendingLayer == layer) {
                             Text("✓", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -3181,19 +3181,15 @@ private fun ImageOptionsDialog(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     TextButton(onClick = {
-                        onUpdate(image.copy(
-                            width = (image.width * 0.8f).coerceAtLeast(50f),
-                            height = (image.height * 0.8f).coerceAtLeast(50f)
-                        ))
+                        pendingWidth = (pendingWidth * 0.8f).coerceAtLeast(50f)
+                        pendingHeight = (pendingHeight * 0.8f).coerceAtLeast(50f)
                     }) {
                         Icon(Icons.Default.Remove, contentDescription = "Shrink")
                         Text("Smaller")
                     }
                     TextButton(onClick = {
-                        onUpdate(image.copy(
-                            width = (image.width * 1.2f),
-                            height = (image.height * 1.2f)
-                        ))
+                        pendingWidth = (pendingWidth * 1.2f)
+                        pendingHeight = (pendingHeight * 1.2f)
                     }) {
                         Icon(Icons.Default.Add, contentDescription = "Enlarge")
                         Text("Larger")
@@ -3221,8 +3217,11 @@ private fun ImageOptionsDialog(
                 }) {
                     Text("Delete", color = MaterialTheme.colorScheme.error)
                 }
-                TextButton(onClick = onDismiss) {
-                    Text("Done")
+                TextButton(onClick = {
+                    onUpdate(image.copy(layer = pendingLayer, width = pendingWidth, height = pendingHeight))
+                    onDismiss()
+                }) {
+                    Text("Save")
                 }
             }
         }
