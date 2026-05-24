@@ -254,6 +254,8 @@ data class FormattedText(
     var showPageNumbers: Boolean = true,
     var template: PageTemplate = PageTemplate.BLANK
 ) {
+    var lastEditTime: Long = 0L
+
     fun toPlainText(): String {
         return paragraphs.joinToString("\n") { paragraph ->
             paragraph.spans.joinToString("") { it.text }
@@ -312,13 +314,9 @@ data class FormattedText(
     }
 
     fun applyToCurrentSpan(transform: (TextSpan) -> TextSpan) {
-        if (paragraphs.isEmpty()) {
-            paragraphs.add(Paragraph())
-        }
+        if (paragraphs.isEmpty()) paragraphs.add(Paragraph())
         val para = paragraphs.last()
-        if (para.spans.isEmpty()) {
-            para.spans.add(TextSpan())
-        }
+        if (para.spans.isEmpty()) para.spans.add(TextSpan())
         val idx = para.spans.lastIndex
         para.spans[idx] = transform(para.spans[idx])
     }
@@ -328,6 +326,9 @@ data class FormattedText(
             insertNewline()
             return
         }
+        val now = System.currentTimeMillis()
+        if (now - lastEditTime < 60L) return
+        lastEditTime = now
         if (paragraphs.isEmpty()) paragraphs.add(Paragraph())
         val para = paragraphs.last()
         if (para.spans.isEmpty()) para.spans.add(TextSpan())
