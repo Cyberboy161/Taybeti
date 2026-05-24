@@ -36,7 +36,7 @@ class KeyboardState {
     fun attach(onKey: (Char) -> Unit, onDel: () -> Unit, onDone: () -> Unit, field: String = "") {
         onKeyPress = { char ->
             val now = System.currentTimeMillis()
-            if (now - lastKeyPressTime > 200L) {
+            if (now - lastKeyPressTime > 30L) {
                 lastKeyPressTime = now
                 onKey(char)
             }
