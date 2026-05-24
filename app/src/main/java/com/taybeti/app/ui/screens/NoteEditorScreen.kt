@@ -3,6 +3,7 @@ package com.taybeti.app.ui.screens
 import android.content.Intent
 import android.graphics.Bitmap
 
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -133,6 +134,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -689,6 +691,8 @@ fun NoteEditorScreen(
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
     var zoomScale by remember { mutableStateOf(1f) }
+
+    var selectedDrawingImagePath by remember { mutableStateOf<String?>(null) }
 
     fun saveUndoState() {
         val now = System.currentTimeMillis()
@@ -1769,7 +1773,7 @@ fun NoteEditorScreen(
 
         if (showDrawingPanel) {
             DrawingPanelDialog(
-                onDismiss = { showDrawingPanel = false },
+                onDismiss = { showDrawingPanel = false; selectedDrawingImagePath = null },
                 onSave = { bitmap, isPng ->
                     scope.launch {
                         val ext = if (isPng) "png" else "jpg"
@@ -1798,7 +1802,8 @@ fun NoteEditorScreen(
                             )
                         )
                     }
-                }
+                },
+                initialImagePath = selectedDrawingImagePath
             )
         }
 
@@ -2197,6 +2202,7 @@ fun NoteEditorScreen(
                                     }
                                 },
                                 onOpenDrawing = {
+                                    selectedDrawingImagePath = selectedImg.attachment.storedPath
                                     showDrawingPanel = true
                                 }
                             )
@@ -2679,6 +2685,15 @@ private fun PageBlockRich(
                 }
             }
         }
+        // Images behind text — render before text so they appear behind
+        images.filter { it.layer == ImageLayer.BEHIND_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
+            DraggableImage(
+                image = img,
+                onSelect = onImageSelect,
+                onUpdate = onImageUpdate,
+                onDelete = onImageDelete
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -2845,15 +2860,6 @@ private fun PageBlockRich(
                     }
                 }
             }
-        }
-
-        images.filter { it.layer == ImageLayer.BEHIND_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
-            DraggableImage(
-                image = img,
-                onSelect = onImageSelect,
-                onUpdate = onImageUpdate,
-                onDelete = onImageDelete
-            )
         }
 
         val integratedImages = images.filter { it.layer == ImageLayer.INTEGRATED && it.pageIndex == pageNumber - 1 }
@@ -3696,7 +3702,8 @@ private fun ColorSwatch(
 @Composable
 private fun DrawingPanelDialog(
     onDismiss: () -> Unit,
-    onSave: (Bitmap, Boolean) -> Unit
+    onSave: (Bitmap, Boolean) -> Unit,
+    initialImagePath: String? = null
 ) {
     var strokeColor by remember { mutableStateOf(Color.Black) }
     var strokeWidth by remember { mutableStateOf(5f) }
@@ -3712,6 +3719,7 @@ private fun DrawingPanelDialog(
     var eraserPos by remember { mutableStateOf<Offset?>(null) }
     var canvasZoom by remember { mutableStateOf(1f) }
     var saveAsPng by remember { mutableStateOf(true) }
+    var backgroundBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val paths = remember { mutableStateListOf<DrawingPath>() }
     var currentPath by remember { mutableStateOf<DrawingPath?>(null) }
 
@@ -3732,6 +3740,13 @@ private fun DrawingPanelDialog(
             BrushType.HIGHLIGHTER -> 0.3f
             BrushType.CALLIGRAPHY -> 1f
             else -> 1f
+        }
+    }
+
+    LaunchedEffect(initialImagePath) {
+        initialImagePath?.let { path ->
+            val bmp = BitmapFactory.decodeFile(path)
+            if (bmp != null) backgroundBitmap = bmp
         }
     }
 
@@ -3981,6 +3996,10 @@ private fun DrawingPanelDialog(
                         }
                 ) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
+                        // Draw existing background image if loaded
+                        backgroundBitmap?.let { bmp ->
+                            drawImage(bmp.asImageBitmap(), topLeft = Offset.Zero)
+                        }
                         paths.forEach { drawingPath ->
                             val alpha = if (drawingPath.isEraser) 1f else getBrushAlpha(drawingPath.brushType)
                             drawPath(
