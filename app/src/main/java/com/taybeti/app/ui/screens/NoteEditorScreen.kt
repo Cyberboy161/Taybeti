@@ -95,6 +95,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -1969,7 +1970,7 @@ fun NoteEditorScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -1977,11 +1978,11 @@ fun NoteEditorScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(32.dp)
                                 .border(
-                                    width = 0.5.dp,
+                                    width = 1.dp,
                                     color = if (pageTheme == "light") MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = RoundedCornerShape(3.dp)
+                                    shape = RoundedCornerShape(4.dp)
                                 )
                                 .clickable { pageTheme = "light" },
                             contentAlignment = Alignment.Center
@@ -1990,17 +1991,17 @@ fun NoteEditorScreen(
                                 imageVector = Icons.Default.LightMode,
                                 contentDescription = "Light mode",
                                 tint = if (pageTheme == "light") Color(0xFFFFB300) else Color.Gray,
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(32.dp)
                                 .border(
-                                    width = 0.5.dp,
+                                    width = 1.dp,
                                     color = if (pageTheme == "dark") MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = RoundedCornerShape(3.dp)
+                                    shape = RoundedCornerShape(4.dp)
                                 )
                                 .clickable { pageTheme = "dark" },
                             contentAlignment = Alignment.Center
@@ -2009,39 +2010,39 @@ fun NoteEditorScreen(
                                 imageVector = Icons.Default.NightsStay,
                                 contentDescription = "Dark mode",
                                 tint = if (pageTheme == "dark") Color(0xFF90CAF9) else Color.Gray,
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
-                                .background(pageBackgroundColor, RoundedCornerShape(3.dp))
-                                .border(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(3.dp))
+                                .size(32.dp)
+                                .background(pageBackgroundColor, RoundedCornerShape(4.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
                                 .clickable { showPageColorPicker = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.ColorLens, "Page Color", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            Icon(Icons.Default.ColorLens, "Page Color", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         }
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
-                                .border(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(3.dp))
+                                .size(32.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
                                 .clickable { showTemplatePicker = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.GridOn, "Template", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            Icon(Icons.Default.GridOn, "Template", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         }
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
-                                .border(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(3.dp))
+                                .size(32.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
                                 .clickable { showDrawingPanel = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Edit, "Draw", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            Icon(Icons.Default.Edit, "Draw", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         }
                     }
 
@@ -2618,31 +2619,20 @@ private fun PageBlockRich(
                     }
                 } else if (isSelected && formattedText.paragraphs.isNotEmpty()) {
                     val lastPara = formattedText.paragraphs.last()
-                    if (lastPara.tableRows == null) {
-                        val lastText = lastPara.spans.joinToString("") { it.text }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = lastText,
-                                color = textColor,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            val cursorAlpha = remember { Animatable(1f) }
-                            LaunchedEffect(Unit) {
-                                while (true) {
-                                    cursorAlpha.animateTo(0f, animationSpec = tween(500))
-                                    cursorAlpha.animateTo(1f, animationSpec = tween(500))
-                                }
+                    if (lastPara.tableRows == null && lastPara.spans.all { it.text.isEmpty() }) {
+                        val cursorAlpha = remember { Animatable(1f) }
+                        LaunchedEffect(Unit) {
+                            while (true) {
+                                cursorAlpha.animateTo(0f, animationSpec = tween(500))
+                                cursorAlpha.animateTo(1f, animationSpec = tween(500))
                             }
-                            Box(
-                                modifier = Modifier
-                                    .width(2.dp)
-                                    .height(20.dp)
-                                    .background(textColor.copy(alpha = cursorAlpha.value))
-                            )
                         }
+                        Box(
+                            modifier = Modifier
+                                .width(2.dp)
+                                .height(20.dp)
+                                .background(textColor.copy(alpha = cursorAlpha.value))
+                        )
                     }
                 }
             }
@@ -2794,7 +2784,7 @@ private fun PageBlock(
     }
 }
 
-// ─── DraggableImage (unchanged) ───
+// ─── DraggableImage ───
 
 @Composable
 private fun DraggableImage(
@@ -2805,41 +2795,59 @@ private fun DraggableImage(
 ) {
     var offsetX by remember { mutableStateOf(image.x) }
     var offsetY by remember { mutableStateOf(image.y) }
+    var isDragging by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
             .offset { IntOffset(offsetX.toInt(), offsetY.toInt()) }
             .size(width = image.width.dp, height = image.height.dp)
-            .clickable { onSelect(image.attachment.id) }
             .border(
                 width = if (image.isSelected) 2.dp else 0.dp,
                 color = if (image.isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
                 shape = RoundedCornerShape(4.dp)
             )
             .pointerInput(image.attachment.id) {
-                detectDragGestures(
-                    onDragStart = {
-                        onSelect(image.attachment.id)
-                        if (!image.isSelected) {
+                detectTapGestures(
+                    onPress = {
+                        val startTime = System.currentTimeMillis()
+                        val pressPosition = it
+                        tryAwaitRelease()
+                        val pressDuration = System.currentTimeMillis() - startTime
+                        
+                        if (pressDuration >= 2000) {
+                            isDragging = true
                             onUpdate(image.copy(isSelected = true))
+                        } else {
+                            onSelect(image.attachment.id)
                         }
-                    },
-                    onDragEnd = {
-                        onUpdate(image.copy(x = offsetX, y = offsetY, isSelected = false))
-                    },
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        offsetX += dragAmount.x
-                        offsetY += dragAmount.y
-                        onUpdate(
-                            image.copy(
-                                x = offsetX,
-                                y = offsetY,
-                                isSelected = true
-                            )
-                        )
                     }
                 )
+            }
+            .pointerInput(image.attachment.id, isDragging) {
+                if (isDragging) {
+                    detectDragGestures(
+                        onDragStart = {
+                            onUpdate(image.copy(isSelected = true))
+                        },
+                        onDragEnd = {
+                            isDragging = false
+                            onUpdate(image.copy(x = offsetX, y = offsetY, isSelected = false))
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            offsetX += dragAmount.x
+                            offsetY += dragAmount.y
+                            onUpdate(
+                                image.copy(
+                                    x = offsetX,
+                                    y = offsetY,
+                                    isSelected = true
+                                )
+                            )
+                        }
+                    )
+                }
             }
     ) {
         AsyncImage(
@@ -3379,6 +3387,101 @@ private fun parseNoteJson(plaintext: String): Pair<List<String>, String> {
     }
 }
 
+enum class BrushType {
+    PEN, MARKER, HIGHLIGHTER, CALLIGRAPHY
+}
+
+data class DrawingPath(
+    val path: androidx.compose.ui.graphics.Path,
+    val color: Color,
+    val width: Float,
+    val brushType: BrushType,
+    val isEraser: Boolean = false
+)
+
+@Composable
+private fun HSVColorWheel(
+    selectedColor: Color,
+    onColorSelected: (Color) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var hue by remember { mutableStateOf(0f) }
+    var saturation by remember { mutableStateOf(1f) }
+    var value by remember { mutableStateOf(1f) }
+
+    LaunchedEffect(selectedColor) {
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(
+            android.graphics.Color.rgb(
+                (selectedColor.red * 255).toInt(),
+                (selectedColor.green * 255).toInt(),
+                (selectedColor.blue * 255).toInt()
+            ),
+            hsv
+        )
+        hue = hsv[0]
+        saturation = hsv[1]
+        value = hsv[2]
+    }
+
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Canvas(
+            modifier = Modifier
+                .size(200.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures { offset ->
+                        val centerX = size.width / 2f
+                        val centerY = size.height / 2f
+                        val dx = offset.x - centerX
+                        val dy = offset.y - centerY
+                        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+                        val radius = size.width / 2f
+
+                        if (distance <= radius) {
+                            saturation = (distance / radius).coerceIn(0f, 1f)
+                            hue = ((kotlin.math.atan2(dy.toDouble(), dx.toDouble()) * 180 / Math.PI).toFloat() + 360) % 360
+                            val newColor = Color.hsv(hue, saturation, value)
+                            onColorSelected(newColor)
+                        }
+                    }
+                }
+        ) {
+            val centerX = size.width / 2f
+            val centerY = size.height / 2f
+            val radius = size.width / 2f
+
+            for (angle in 0..359) {
+                for (r in 0 until radius.toInt()) {
+                    val sat = r.toFloat() / radius
+                    val color = Color.hsv(angle.toFloat(), sat, value)
+                    val x = centerX + r * kotlin.math.cos(angle * Math.PI / 180).toFloat()
+                    val y = centerY + r * kotlin.math.sin(angle * Math.PI / 180).toFloat()
+                    drawCircle(color, 1f, androidx.compose.ui.geometry.Offset(x, y))
+                }
+            }
+
+            val selectedX = centerX + saturation * radius * kotlin.math.cos(hue * Math.PI / 180).toFloat()
+            val selectedY = centerY + saturation * radius * kotlin.math.sin(hue * Math.PI / 180).toFloat()
+            drawCircle(Color.White, 8f, androidx.compose.ui.geometry.Offset(selectedX, selectedY))
+            drawCircle(Color.Black, 6f, androidx.compose.ui.geometry.Offset(selectedX, selectedY))
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text("Brightness: ${(value * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
+        Slider(
+            value = value,
+            onValueChange = {
+                value = it
+                val newColor = Color.hsv(hue, saturation, value)
+                onColorSelected(newColor)
+            },
+            valueRange = 0.1f..1f,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
 @Composable
 private fun DrawingPanelDialog(
     onDismiss: () -> Unit,
@@ -3386,10 +3489,33 @@ private fun DrawingPanelDialog(
 ) {
     var strokeColor by remember { mutableStateOf(Color.Black) }
     var strokeWidth by remember { mutableStateOf(5f) }
+    var currentBrush by remember { mutableStateOf(BrushType.PEN) }
     var isEraser by remember { mutableStateOf(false) }
+    var eraserSize by remember { mutableStateOf(20f) }
     var showColorWheel by remember { mutableStateOf(false) }
-    val paths = remember { mutableStateListOf<Pair<androidx.compose.ui.graphics.Path, Pair<Color, Float>>>() }
-    var currentPath by remember { mutableStateOf<androidx.compose.ui.graphics.Path?>(null) }
+    var showBrushMenu by remember { mutableStateOf(false) }
+    var canvasWidth by remember { mutableStateOf(1200) }
+    var canvasHeight by remember { mutableStateOf(900) }
+    val paths = remember { mutableStateListOf<DrawingPath>() }
+    var currentPath by remember { mutableStateOf<DrawingPath?>(null) }
+
+    fun getBrushWidth(brush: BrushType, baseWidth: Float): Float {
+        return when (brush) {
+            BrushType.PEN -> baseWidth
+            BrushType.MARKER -> baseWidth * 2f
+            BrushType.HIGHLIGHTER -> baseWidth * 4f
+            BrushType.CALLIGRAPHY -> baseWidth * 1.5f
+        }
+    }
+
+    fun getBrushAlpha(brush: BrushType): Float {
+        return when (brush) {
+            BrushType.PEN -> 1f
+            BrushType.MARKER -> 0.9f
+            BrushType.HIGHLIGHTER -> 0.3f
+            BrushType.CALLIGRAPHY -> 1f
+        }
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -3407,7 +3533,43 @@ private fun DrawingPanelDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("Drawing", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Box {
+                            IconButton(onClick = { showBrushMenu = !showBrushMenu }) {
+                                Icon(
+                                    when (currentBrush) {
+                                        BrushType.PEN -> Icons.Default.Edit
+                                        BrushType.MARKER -> Icons.Default.FormatBold
+                                        BrushType.HIGHLIGHTER -> Icons.Default.FormatColorFill
+                                        BrushType.CALLIGRAPHY -> Icons.Default.FormatItalic
+                                    },
+                                    "Brush",
+                                    tint = if (!isEraser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            DropdownMenu(expanded = showBrushMenu, onDismissRequest = { showBrushMenu = false }) {
+                                DropdownMenuItem(
+                                    text = { Text("Pen") },
+                                    leadingIcon = { Icon(Icons.Default.Edit, null) },
+                                    onClick = { currentBrush = BrushType.PEN; isEraser = false; showBrushMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Marker") },
+                                    leadingIcon = { Icon(Icons.Default.FormatBold, null) },
+                                    onClick = { currentBrush = BrushType.MARKER; isEraser = false; showBrushMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Highlighter") },
+                                    leadingIcon = { Icon(Icons.Default.FormatColorFill, null) },
+                                    onClick = { currentBrush = BrushType.HIGHLIGHTER; isEraser = false; showBrushMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Calligraphy") },
+                                    leadingIcon = { Icon(Icons.Default.FormatItalic, null) },
+                                    onClick = { currentBrush = BrushType.CALLIGRAPHY; isEraser = false; showBrushMenu = false }
+                                )
+                            }
+                        }
                         IconButton(onClick = { isEraser = !isEraser }) {
                             Icon(
                                 Icons.Default.FormatClear,
@@ -3418,10 +3580,10 @@ private fun DrawingPanelDialog(
                         IconButton(onClick = { showColorWheel = !showColorWheel }) {
                             Icon(Icons.Default.ColorLens, "Color", tint = strokeColor)
                         }
-                        IconButton(onClick = { strokeWidth = (strokeWidth + 2f).coerceAtMost(20f) }) {
+                        IconButton(onClick = { strokeWidth = (strokeWidth + 1f).coerceAtMost(20f) }) {
                             Icon(Icons.Default.Add, "Thicker")
                         }
-                        IconButton(onClick = { strokeWidth = (strokeWidth - 2f).coerceAtLeast(1f) }) {
+                        IconButton(onClick = { strokeWidth = (strokeWidth - 1f).coerceAtLeast(1f) }) {
                             Icon(Icons.Default.Remove, "Thinner")
                         }
                         IconButton(onClick = { if (paths.isNotEmpty()) paths.removeAt(paths.lastIndex) }) {
@@ -3434,35 +3596,34 @@ private fun DrawingPanelDialog(
                 }
 
                 if (showColorWheel) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        listOf(
-                            Color.Black, Color.Red, Color.Blue, Color.Green,
-                            Color(0xFFFF9800), Color(0xFF9C27B0), Color(0xFF795548),
-                            Color(0xFF607D8B), Color(0xFFE91E63), Color(0xFF00BCD4)
-                        ).forEach { color ->
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(color, RoundedCornerShape(4.dp))
-                                    .border(
-                                        2.dp,
-                                        if (strokeColor == color) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                        RoundedCornerShape(4.dp)
-                                    )
-                                    .clickable {
-                                        strokeColor = color
-                                        isEraser = false
-                                        showColorWheel = false
-                                    }
-                            )
-                        }
+                    HSVColorWheel(
+                        selectedColor = strokeColor,
+                        onColorSelected = { strokeColor = it },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Size: ${strokeWidth.toInt()}px", style = MaterialTheme.typography.bodySmall)
+                    Text("Brush: ${currentBrush.name}", style = MaterialTheme.typography.bodySmall)
+                    if (isEraser) {
+                        Text("ERASER", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                     }
                 }
 
-                Text("Size: ${strokeWidth.toInt()}px", style = MaterialTheme.typography.bodySmall)
+                if (isEraser) {
+                    Text("Eraser Size: ${eraserSize.toInt()}px", style = MaterialTheme.typography.bodySmall)
+                    Slider(
+                        value = eraserSize,
+                        onValueChange = { eraserSize = it },
+                        valueRange = 5f..50f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -3472,47 +3633,52 @@ private fun DrawingPanelDialog(
                         .fillMaxWidth()
                         .background(Color.White, RoundedCornerShape(8.dp))
                         .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                        .pointerInput(strokeColor, strokeWidth, isEraser) {
+                        .pointerInput(strokeColor, strokeWidth, isEraser, currentBrush, eraserSize) {
                             detectDragGestures(
                                 onDragStart = { offset ->
-                                    currentPath = androidx.compose.ui.graphics.Path().apply {
+                                    val path = androidx.compose.ui.graphics.Path().apply {
                                         moveTo(offset.x, offset.y)
                                     }
+                                    val actualWidth = if (isEraser) eraserSize else getBrushWidth(currentBrush, strokeWidth)
+                                    currentPath = DrawingPath(
+                                        path = path,
+                                        color = if (isEraser) Color.White else strokeColor,
+                                        width = actualWidth,
+                                        brushType = currentBrush,
+                                        isEraser = isEraser
+                                    )
                                 },
                                 onDragEnd = {
-                                    currentPath?.let { path ->
-                                        val color = if (isEraser) Color.White else strokeColor
-                                        paths.add(path to (color to strokeWidth))
-                                    }
+                                    currentPath?.let { paths.add(it) }
                                     currentPath = null
                                 },
                                 onDrag = { change, _ ->
                                     change.consume()
-                                    currentPath?.lineTo(change.position.x, change.position.y)
+                                    currentPath?.path?.lineTo(change.position.x, change.position.y)
                                 }
                             )
                         }
                 ) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
-                        paths.forEach { (path, colorWidth) ->
-                            val (color, width) = colorWidth
+                        paths.forEach { drawingPath ->
+                            val alpha = if (drawingPath.isEraser) 1f else getBrushAlpha(drawingPath.brushType)
                             drawPath(
-                                path = path,
-                                color = color,
+                                path = drawingPath.path,
+                                color = drawingPath.color.copy(alpha = alpha),
                                 style = androidx.compose.ui.graphics.drawscope.Stroke(
-                                    width = width,
+                                    width = drawingPath.width,
                                     cap = StrokeCap.Round,
                                     join = StrokeJoin.Round
                                 )
                             )
                         }
-                        currentPath?.let { path ->
-                            val color = if (isEraser) Color.White else strokeColor
+                        currentPath?.let { drawingPath ->
+                            val alpha = if (drawingPath.isEraser) 1f else getBrushAlpha(drawingPath.brushType)
                             drawPath(
-                                path = path,
-                                color = color,
+                                path = drawingPath.path,
+                                color = drawingPath.color.copy(alpha = alpha),
                                 style = androidx.compose.ui.graphics.drawscope.Stroke(
-                                    width = strokeWidth,
+                                    width = drawingPath.width,
                                     cap = StrokeCap.Round,
                                     join = StrokeJoin.Round
                                 )
@@ -3534,15 +3700,13 @@ private fun DrawingPanelDialog(
                     ) { Text("Cancel") }
                     Button(
                         onClick = {
-                            val bitmap = Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888)
+                            val bitmap = Bitmap.createBitmap(canvasWidth, canvasHeight, Bitmap.Config.ARGB_8888)
                             val androidCanvas = android.graphics.Canvas(bitmap)
                             androidCanvas.drawColor(android.graphics.Color.WHITE)
-                            val paint = android.graphics.Paint().apply {
-                                isAntiAlias = true
-                                style = android.graphics.Paint.Style.STROKE
-                                strokeCap = android.graphics.Paint.Cap.ROUND
-                                strokeJoin = android.graphics.Paint.Join.ROUND
-                            }
+                            
+                            val scaleX = canvasWidth.toFloat() / 1200f
+                            val scaleY = canvasHeight.toFloat() / 900f
+                            
                             val composeCanvas = androidx.compose.ui.graphics.Canvas(androidCanvas)
                             val composePaint = androidx.compose.ui.graphics.Paint().apply {
                                 isAntiAlias = true
@@ -3550,12 +3714,14 @@ private fun DrawingPanelDialog(
                                 strokeCap = StrokeCap.Round
                                 strokeJoin = StrokeJoin.Round
                             }
-                            paths.forEach { (path, colorWidth) ->
-                                val (color, width) = colorWidth
-                                composePaint.color = color
-                                composePaint.strokeWidth = width
-                                composeCanvas.drawPath(path, composePaint)
+                            
+                            paths.forEach { drawingPath ->
+                                val alpha = if (drawingPath.isEraser) 1f else getBrushAlpha(drawingPath.brushType)
+                                composePaint.color = drawingPath.color.copy(alpha = alpha)
+                                composePaint.strokeWidth = drawingPath.width * scaleX
+                                composeCanvas.drawPath(drawingPath.path, composePaint)
                             }
+                            
                             onSave(bitmap)
                             onDismiss()
                         },

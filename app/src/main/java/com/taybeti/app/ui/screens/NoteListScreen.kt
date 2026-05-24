@@ -118,59 +118,36 @@ fun NoteListScreen(
                 try {
                     val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
                     if (bytes != null) {
-                        val plaintext = String(bytes, Charsets.UTF_8)
+                        val fileContent = String(bytes, Charsets.UTF_8)
+                        val json = org.json.JSONObject(fileContent)
+                        
+                        val salt = Base64.getDecoder().decode(json.getString("salt"))
+                        val iv = Base64.getDecoder().decode(json.getString("iv"))
+                        val tag = Base64.getDecoder().decode(json.getString("tag"))
+                        val ciphertext = Base64.getDecoder().decode(json.getString("ciphertext"))
+                        val title = json.optString("title", "Loaded Note")
+                        
                         val noteId = generateNoteId()
                         val now = System.currentTimeMillis()
                         
-                        val (content, attJson) = try {
-                            val json = org.json.JSONObject(plaintext)
-                            if (json.has("images")) {
-                                val c = json.optString("content", "")
-                                val imagesArray = json.getJSONArray("images")
-                                val imagesList = mutableListOf<String>()
-                                for (i in 0 until imagesArray.length()) {
-                                    imagesList.add(imagesArray.getJSONObject(i).toString())
-                                }
-                                c to "[" + imagesList.joinToString(",") + "]"
-                            } else {
-                                json.optString("content", plaintext) to (json.optJSONArray("attachments")?.toString() ?: "[]")
-                            }
-                        } catch (_: Exception) {
-                            plaintext to "[]"
-                        }
-                        
                         val note = NoteEntity(
                             id = noteId,
-                            title = "Loaded Note",
-                            salt = byteArrayOf(),
-                            iv = byteArrayOf(),
-                            ciphertext = bytes,
-                            tag = byteArrayOf(),
+                            title = title,
+                            salt = salt,
+                            iv = iv,
+                            ciphertext = ciphertext,
+                            tag = tag,
                             isEncrypted = true,
                             isFavorite = false,
                             isDeleted = false,
                             isDecoyNote = false,
                             createdDate = now,
                             modifiedDate = now,
-                            attachments = attJson
+                            attachments = "[]"
                         )
                         db.noteDao().insert(note)
                         
-                        val attachments = getAttachmentsList(attJson, context, noteId)
-                        if (attachments.isNotEmpty()) {
-                            for (att in attachments) {
-                                if (att.encryptedPath.isNotEmpty()) {
-                                    val encFile = java.io.File(att.encryptedPath)
-                                    if (encFile.exists()) {
-                                        val destDir = AttachmentManager.getNoteDir(context, noteId)
-                                        val destFile = java.io.File(destDir, encFile.name)
-                                        encFile.copyTo(destFile, overwrite = true)
-                                    }
-                                }
-                            }
-                        }
-                        
-                        Toast.makeText(context, "Note loaded successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Encrypted note loaded", Toast.LENGTH_SHORT).show()
                         notes = when {
                             showFavorites -> db.noteDao().getFavorites(isDecoy)
                             else -> db.noteDao().getAllActive(isDecoy)
