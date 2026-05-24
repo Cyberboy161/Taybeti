@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.platform.LocalContext
@@ -559,10 +560,28 @@ private fun RowScope.LetterKey(
     val display = if (uppercase) upperMap[c] ?: c.uppercaseChar() else c.lowercaseChar()
     val longPressChar = longPressMap[c]
     val isPKey = display == 'P' || display == 'p'
+    val scope = rememberCoroutineScope()
     Box(
         modifier = rowKeyModifier(weight, bg)
             .then(
-                if (longPressChar != null) {
+                if (isPKey) {
+                    Modifier.pointerInput(Unit) {
+                        while (true) {
+                            awaitPointerEventScope { awaitFirstDown() }
+                            onKey(display)
+                            val repeatJob = scope.launch {
+                                var delayMs = 400L
+                                while (isActive) {
+                                    delay(delayMs)
+                                    onKey(display)
+                                    delayMs = 80L
+                                }
+                            }
+                            awaitPointerEventScope { waitForUpOrCancellation() }
+                            repeatJob.cancel()
+                        }
+                    }
+                } else if (longPressChar != null) {
                     Modifier.pointerInput(c, display) {
                         detectTapGestures(
                             onTap = { onKey(display) },
