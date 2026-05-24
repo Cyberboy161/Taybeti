@@ -2748,7 +2748,7 @@ private fun PageBlockRich(
                                 modifier = if (isLast && isSelected) Modifier else Modifier.fillMaxWidth(),
                                 textAlign = textAlign
                             )
-                            if (isLast && isSelected && paraAnnotated.isNotEmpty()) {
+                            if (isLast && isSelected) {
                                 val cursorAlpha = remember { Animatable(1f) }
                                 LaunchedEffect(Unit) {
                                     while (true) {
