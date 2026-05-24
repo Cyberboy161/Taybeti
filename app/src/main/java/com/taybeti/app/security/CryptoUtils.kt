@@ -19,9 +19,7 @@ object CryptoUtils {
     private const val ARGON2_ITERATIONS = 6
     private const val ARGON2_MEMORY_KIB = 65536  // 64 MB
     private const val ARGON2_PARALLELISM = 4
-    private const val PADDED_SIZE = 1024
     private const val LENGTH_PREFIX_BYTES = 2
-
     private const val STREAM_BUFFER_SIZE = 8192
     private const val NAME_LEN_BYTES = 2
     private const val SALT_IV_LENGTH = 32 + GCM_IV_LENGTH // 44
@@ -98,14 +96,12 @@ object CryptoUtils {
 
     private fun pad(plaintext: ByteArray): ByteArray {
         val origLen = plaintext.size
-        require(origLen <= PADDED_SIZE - LENGTH_PREFIX_BYTES) {
-            "Plaintext too large for padding (max ${PADDED_SIZE - LENGTH_PREFIX_BYTES} bytes)"
-        }
-        val padded = ByteArray(PADDED_SIZE)
+        val paddedSize = ((origLen / 1024) + 1) * 1024
+        val padded = ByteArray(paddedSize)
         padded[0] = ((origLen shr 8) and 0xFF).toByte()
         padded[1] = (origLen and 0xFF).toByte()
         System.arraycopy(plaintext, 0, padded, LENGTH_PREFIX_BYTES, origLen)
-        val randBytes = ByteArray(PADDED_SIZE - LENGTH_PREFIX_BYTES - origLen)
+        val randBytes = ByteArray(paddedSize - LENGTH_PREFIX_BYTES - origLen)
         secureRandom.nextBytes(randBytes)
         System.arraycopy(randBytes, 0, padded, LENGTH_PREFIX_BYTES + origLen, randBytes.size)
         return padded
@@ -116,10 +112,7 @@ object CryptoUtils {
         val lenHi = padded[0].toInt() and 0xFF
         val lenLo = padded[1].toInt() and 0xFF
         val claimedLen = (lenHi shl 8) or lenLo
-        if (claimedLen > 0 &&
-            claimedLen <= padded.size - LENGTH_PREFIX_BYTES &&
-            padded.size == PADDED_SIZE
-        ) {
+        if (claimedLen > 0 && claimedLen <= padded.size - LENGTH_PREFIX_BYTES) {
             return padded.copyOfRange(LENGTH_PREFIX_BYTES, LENGTH_PREFIX_BYTES + claimedLen)
         }
         return padded

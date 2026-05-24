@@ -2479,6 +2479,13 @@ private fun WordEditorCanvasRich(
     zoomScale: Float
 ) {
     val scrollState = rememberScrollState()
+    var prevPageCount by remember { mutableStateOf(pages.size) }
+    LaunchedEffect(pages.size) {
+        if (pages.size > prevPageCount) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+        prevPageCount = pages.size
+    }
     val isDark = pageTheme == "dark"
     val pageBg = if (isDark) Color(0xFF1A1A1A) else Color.White
     val pageBorder = if (isDark) Color(0xFF444444) else Color.LightGray.copy(alpha = 0.3f)
@@ -2537,7 +2544,10 @@ private fun WordEditorCanvasRich(
                         .height(80.dp)
                         .background(pageBg, RoundedCornerShape(12.dp))
                         .border(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .clickable { pages.add(FormattedText()) }
+                        .clickable {
+                            pages.add(FormattedText())
+                            onPageSelect(pages.size - 1)
+                        }
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
