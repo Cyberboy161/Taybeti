@@ -2711,7 +2711,8 @@ private fun PageBlockRich(
                     }
 
                     if (paraAnnotated.isNotEmpty() || paragraph.tableRows == null) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
+                        val isLast = paraIdx == formattedText.paragraphs.lastIndex
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             if (prefix.isNotEmpty()) {
                                 Text(
                                     text = prefix,
@@ -2723,9 +2724,24 @@ private fun PageBlockRich(
                                 text = paraAnnotated,
                                 color = textColor,
                                 style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = if (isLast && isSelected) Modifier else Modifier.fillMaxWidth(),
                                 textAlign = textAlign
                             )
+                            if (isLast && isSelected && paraAnnotated.isNotEmpty()) {
+                                val cursorAlpha = remember { Animatable(1f) }
+                                LaunchedEffect(Unit) {
+                                    while (true) {
+                                        cursorAlpha.animateTo(0f, animationSpec = tween(500))
+                                        cursorAlpha.animateTo(1f, animationSpec = tween(500))
+                                    }
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .width(2.dp)
+                                        .height(20.dp)
+                                        .background(textColor.copy(alpha = cursorAlpha.value))
+                                )
+                            }
                         }
                     }
 
@@ -2783,24 +2799,6 @@ private fun PageBlockRich(
                                     .background(textColor.copy(alpha = cursorAlpha.value))
                             )
                         }
-                    }
-                } else if (isSelected && formattedText.paragraphs.isNotEmpty()) {
-                    val lastPara = formattedText.paragraphs.last()
-                    if (lastPara.tableRows == null && lastPara.spans.any { it.text.isNotEmpty() }) {
-                        val cursorAlpha = remember { Animatable(1f) }
-                        LaunchedEffect(Unit) {
-                            while (true) {
-                                cursorAlpha.animateTo(0f, animationSpec = tween(500))
-                                cursorAlpha.animateTo(1f, animationSpec = tween(500))
-                            }
-                        }
-                        Box(
-                            modifier = Modifier
-                                .width(2.dp)
-                                .height(20.dp)
-                                .align(Alignment.Start)
-                                .background(textColor.copy(alpha = cursorAlpha.value))
-                        )
                     }
                 }
             }
