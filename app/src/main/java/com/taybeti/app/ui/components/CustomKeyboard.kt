@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.platform.LocalContext
@@ -562,21 +563,18 @@ private fun RowScope.LetterKey(
         modifier = rowKeyModifier(weight, bg)
             .then(
                 if (longPressChar != null) {
-                    Modifier.combinedClickable(
-                        onClick = { onKey(display) },
-                        onLongClick = { onKey(longPressChar) }
-                    )
-                } else if (isPKey) {
-                    Modifier.combinedClickable(
-                        onClick = {
-                            repeat(8) { onKey(display) }
-                        },
-                        onLongClick = {
-                            repeat(8) { onKey(display) }
-                        }
-                    )
+                    Modifier.pointerInput(c, display) {
+                        detectTapGestures(
+                            onTap = { onKey(display) },
+                            onLongPress = { onKey(longPressChar) }
+                        )
+                    }
                 } else {
-                    Modifier.clickable { onKey(display) }
+                    Modifier.pointerInput(c, display) {
+                        detectTapGestures(
+                            onTap = { onKey(display) }
+                        )
+                    }
                 }
             ),
         contentAlignment = Alignment.Center

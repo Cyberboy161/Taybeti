@@ -85,6 +85,7 @@ import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
@@ -686,7 +687,6 @@ fun NoteEditorScreen(
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
     var zoomScale by remember { mutableStateOf(1f) }
-    var lastContentKeyTime by remember { mutableStateOf(0L) }
 
     fun saveUndoState() {
         val now = System.currentTimeMillis()
@@ -870,9 +870,6 @@ fun NoteEditorScreen(
         kb.attach(
             field = "content",
             onKey = { char ->
-                val now = System.currentTimeMillis()
-                if (now - lastContentKeyTime < 300L) return@attach
-                lastContentKeyTime = now
                 saveUndoState()
                 if (currentPageIndex < pages.size) {
                     pages[currentPageIndex].appendText(char.toString())
@@ -1771,15 +1768,18 @@ fun NoteEditorScreen(
         if (showDrawingPanel) {
             DrawingPanelDialog(
                 onDismiss = { showDrawingPanel = false },
-                onSave = { bitmap ->
+                onSave = { bitmap, isPng ->
                     scope.launch {
-                        val file = File(context.filesDir, "drawing_${System.currentTimeMillis()}.png")
+                        val ext = if (isPng) "png" else "jpg"
+                        val mime = if (isPng) "image/png" else "image/jpeg"
+                        val compressFormat = if (isPng) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG
+                        val file = File(context.filesDir, "drawing_${System.currentTimeMillis()}.$ext")
                         file.outputStream().use { out ->
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                            bitmap.compress(compressFormat, 95, out)
                         }
                         val attachment = NoteAttachment(
                             originalName = file.name,
-                            mimeType = "image/png",
+                            mimeType = mime,
                             size = file.length(),
                             storedPath = file.absolutePath,
                             type = NoteAttachment.AttachmentType.IMAGE
@@ -3686,7 +3686,7 @@ private fun ColorSwatch(
 @Composable
 private fun DrawingPanelDialog(
     onDismiss: () -> Unit,
-    onSave: (Bitmap) -> Unit
+    onSave: (Bitmap, Boolean) -> Unit
 ) {
     var strokeColor by remember { mutableStateOf(Color.Black) }
     var strokeWidth by remember { mutableStateOf(5f) }
@@ -3701,6 +3701,7 @@ private fun DrawingPanelDialog(
     var canvasActualHeight by remember { mutableStateOf(600) }
     var eraserPos by remember { mutableStateOf<Offset?>(null) }
     var canvasZoom by remember { mutableStateOf(1f) }
+    var saveAsPng by remember { mutableStateOf(true) }
     val paths = remember { mutableStateListOf<DrawingPath>() }
     var currentPath by remember { mutableStateOf<DrawingPath?>(null) }
 
@@ -3810,10 +3811,10 @@ private fun DrawingPanelDialog(
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(strokeColor)
-                                .border(2.dp, if (strokeColor == Color.Black || strokeColor.red + strokeColor.green + strokeColor.blue < 1f) Color.White.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                .border(2.dp, if (strokeColor == Color.Black || strokeColor.red + strokeColor.green + strokeColor.blue < 1.5f) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
                                 .clickable { showColorWheel = !showColorWheel }
                         ) {
-                            Icon(Icons.Default.ColorLens, "Color", modifier = Modifier.size(22.dp), tint = if ((strokeColor.red + strokeColor.green + strokeColor.blue) / 3f > 0.5f) Color.Black else Color.White)
+                            Icon(Icons.Default.ColorLens, "Color", modifier = Modifier.size(22.dp), tint = Color(0xFFE8B88A))
                         }
                         IconButton(onClick = { strokeWidth = (strokeWidth + 1f).coerceAtMost(20f) }) {
                             Icon(Icons.Default.Add, "Thicker")
@@ -3828,7 +3829,7 @@ private fun DrawingPanelDialog(
                             Icon(Icons.Default.Delete, "Clear")
                         }
                         IconButton(onClick = onDismiss) {
-                            Icon(Icons.Default.Close, "Close")
+                            Icon(Icons.Default.KeyboardArrowUp, "Close")
                         }
                     }
                 }
@@ -4007,8 +4008,16 @@ private fun DrawingPanelDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Format: ", style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = { saveAsPng = true }) {
+                        Text("PNG", fontWeight = if (saveAsPng) FontWeight.Bold else FontWeight.Normal)
+                    }
+                    TextButton(onClick = { saveAsPng = false }) {
+                        Text("JPEG", fontWeight = if (!saveAsPng) FontWeight.Bold else FontWeight.Normal)
+                    }
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -4023,7 +4032,7 @@ private fun DrawingPanelDialog(
                             val scale = 2.5f
                             val bmpW = (canvasActualWidth * scale).toInt().coerceAtLeast(400)
                             val bmpH = (canvasActualHeight * scale).toInt().coerceAtLeast(400)
-                            val bitmap = Bitmap.createBitmap(bmpW, bmpH, Bitmap.Config.ARGB_8888)
+                            val bitmap = Bitmap.createBitmap(bmpW, bmpH, if (saveAsPng) Bitmap.Config.ARGB_8888 else Bitmap.Config.RGB_565)
                             val androidCanvas = android.graphics.Canvas(bitmap)
                             androidCanvas.drawColor(android.graphics.Color.WHITE)
                             
@@ -4044,7 +4053,7 @@ private fun DrawingPanelDialog(
                                 composeCanvas.drawPath(drawingPath.path, composePaint)
                             }
                             
-                            onSave(bitmap)
+                            onSave(bitmap, saveAsPng)
                             onDismiss()
                         },
                         modifier = Modifier.weight(1f)
