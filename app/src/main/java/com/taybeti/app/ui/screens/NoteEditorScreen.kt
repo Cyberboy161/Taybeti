@@ -2687,11 +2687,15 @@ private fun PageBlockRich(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
+            val innerScrollState = rememberScrollState()
+            LaunchedEffect(formattedText.paragraphs.size, formattedText.toPlainText().length) {
+                innerScrollState.animateScrollTo(innerScrollState.maxValue)
+            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(innerScrollState)
             ) {
                 formattedText.paragraphs.forEachIndexed { paraIdx, paragraph ->
                     val textAlign = when (paragraph.alignment) {
