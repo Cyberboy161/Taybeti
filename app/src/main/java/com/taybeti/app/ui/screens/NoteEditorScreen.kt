@@ -1,6 +1,8 @@
 package com.taybeti.app.ui.screens
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -12,7 +14,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,17 +36,42 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FindReplace
+import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.filled.FormatAlignJustify
+import androidx.compose.material.icons.filled.FormatAlignLeft
+import androidx.compose.material.icons.filled.FormatAlignRight
+import androidx.compose.material.icons.filled.FormatBold
+import androidx.compose.material.icons.filled.FormatClear
+import androidx.compose.material.icons.filled.FormatColorFill
+import androidx.compose.material.icons.filled.FormatColorText
+import androidx.compose.material.icons.filled.FormatIndentDecrease
+import androidx.compose.material.icons.filled.FormatIndentIncrease
+import androidx.compose.material.icons.filled.FormatItalic
+import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.FormatStrikethrough
+import androidx.compose.material.icons.filled.FormatUnderlined
+import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.TableChart
+import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.PlayArrow
@@ -55,6 +81,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,20 +107,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.taybeti.app.data.entities.NoteEntity
 import com.taybeti.app.data.repository.NoteRepository
@@ -117,8 +156,394 @@ import com.taybeti.app.util.DecoyPlatform
 import com.taybeti.app.util.LocalStrings
 import com.taybeti.app.util.generateRandomKey
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Base64
+
+// ─── Leap 1-5: Rich text data model ───
+
+data class TextSpan(
+    val text: String = "",
+    val isBold: Boolean = false,
+    val isItalic: Boolean = false,
+    val isUnderline: Boolean = false,
+    val isStrikethrough: Boolean = false,
+    val fontFamily: String = "Default",
+    val fontSize: Int = 16,
+    val textColor: String? = null,
+    val highlightColor: String? = null
+) {
+    fun toSpanStyle(): SpanStyle {
+        var style = SpanStyle(
+            fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal,
+            fontStyle = if (isItalic) FontStyle.Italic else FontStyle.Normal,
+            textDecoration = buildTextDecoration(),
+            fontSize = fontSize.sp,
+            fontFamily = when (fontFamily) {
+                "Serif" -> FontFamily.Serif
+                "Monospace" -> FontFamily.Monospace
+                "SansCondensed" -> FontFamily.SansSerif
+                else -> FontFamily.Default
+            }
+        )
+        textColor?.let { style = style.copy(color = Color(android.graphics.Color.parseColor(it))) }
+        highlightColor?.let { /* background handled separately */ }
+        return style
+    }
+
+    private fun buildTextDecoration(): TextDecoration? {
+        val decorations = mutableListOf<TextDecoration>()
+        if (isUnderline) decorations.add(TextDecoration.Underline)
+        if (isStrikethrough) decorations.add(TextDecoration.LineThrough)
+        return when (decorations.size) {
+            0 -> null
+            1 -> decorations[0]
+            else -> TextDecoration.combine(decorations)
+        }
+    }
+
+    fun copyWithToggle(field: String): TextSpan {
+        return when (field) {
+            "bold" -> copy(isBold = !isBold)
+            "italic" -> copy(isItalic = !isItalic)
+            "underline" -> copy(isUnderline = !isUnderline)
+            "strikethrough" -> copy(isStrikethrough = !isStrikethrough)
+            else -> this
+        }
+    }
+}
+
+enum class TextAlignMode { LEFT, CENTER, RIGHT, JUSTIFY }
+enum class ListType { NONE, BULLETED, NUMBERED }
+enum class MarginPreset { NARROW, NORMAL, WIDE }
+
+data class Paragraph(
+    val spans: MutableList<TextSpan> = mutableListOf(TextSpan()),
+    var alignment: TextAlignMode = TextAlignMode.LEFT,
+    var listType: ListType = ListType.NONE,
+    var tableRows: MutableList<TableRow>? = null
+)
+
+data class TableRow(
+    val cells: List<String>
+)
+
+data class FormattedText(
+    val paragraphs: MutableList<Paragraph> = mutableListOf(Paragraph()),
+    var headerText: String = "",
+    var footerText: String = "",
+    var showPageNumbers: Boolean = true
+) {
+    fun toPlainText(): String {
+        return paragraphs.joinToString("\n") { paragraph ->
+            paragraph.spans.joinToString("") { it.text }
+        }
+    }
+
+    fun toAnnotatedString(): AnnotatedString {
+        return buildAnnotatedString {
+            paragraphs.forEachIndexed { paraIndex, paragraph ->
+                val prefix = when (paragraph.listType) {
+                    ListType.BULLETED -> "• "
+                    ListType.NUMBERED -> "${paraIndex + 1}. "
+                    ListType.NONE -> ""
+                }
+                if (prefix.isNotEmpty()) {
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(prefix)
+                    }
+                }
+                paragraph.spans.forEach { span ->
+                    if (span.text.isNotEmpty()) {
+                        val spanStyle = span.toSpanStyle()
+                        withStyle(spanStyle) {
+                            append(span.text)
+                        }
+                        span.highlightColor?.let { hc ->
+                            addStyle(
+                                SpanStyle(background = Color(android.graphics.Color.parseColor(hc))),
+                                length - span.text.length,
+                                length
+                            )
+                        }
+                    }
+                }
+                val tableRows = paragraph.tableRows
+                if (tableRows != null && tableRows.isNotEmpty()) {
+                    append("\n")
+                    tableRows.forEach { row ->
+                        row.cells.forEachIndexed { cellIndex, cell ->
+                            withStyle(SpanStyle(background = Color(0xFFE0E0E0))) {
+                                append(" $cell ")
+                            }
+                            if (cellIndex < row.cells.lastIndex) append(" | ")
+                        }
+                        append("\n")
+                    }
+                }
+                if (paraIndex < paragraphs.lastIndex) append("\n")
+            }
+        }
+    }
+
+    fun getCurrentSpan(): TextSpan {
+        val lastPara = paragraphs.lastOrNull() ?: return TextSpan()
+        return lastPara.spans.lastOrNull() ?: TextSpan()
+    }
+
+    fun applyToCurrentSpan(transform: (TextSpan) -> TextSpan) {
+        if (paragraphs.isEmpty()) {
+            paragraphs.add(Paragraph())
+        }
+        val para = paragraphs.last()
+        if (para.spans.isEmpty()) {
+            para.spans.add(TextSpan())
+        }
+        val idx = para.spans.lastIndex
+        para.spans[idx] = transform(para.spans[idx])
+    }
+
+    fun appendText(char: String) {
+        if (paragraphs.isEmpty()) paragraphs.add(Paragraph())
+        val para = paragraphs.last()
+        if (para.spans.isEmpty()) para.spans.add(TextSpan())
+        val lastSpan = para.spans.last()
+        para.spans[para.spans.lastIndex] = lastSpan.copy(text = lastSpan.text + char)
+    }
+
+    fun deleteLastChar() {
+        if (paragraphs.isEmpty()) return
+        val para = paragraphs.last()
+        if (para.spans.isEmpty()) return
+        val idx = para.spans.lastIndex
+        val span = para.spans[idx]
+        if (span.text.isNotEmpty()) {
+            para.spans[idx] = span.copy(text = span.text.dropLast(1))
+        } else if (para.spans.size > 1) {
+            para.spans.removeAt(idx)
+        } else if (paragraphs.size > 1) {
+            paragraphs.removeAt(paragraphs.lastIndex)
+        }
+    }
+
+    fun insertNewline() {
+        if (paragraphs.isEmpty()) paragraphs.add(Paragraph())
+        val currentPara = paragraphs.last()
+        val newPara = Paragraph(
+            alignment = currentPara.alignment,
+            listType = if (currentPara.listType == ListType.NUMBERED) ListType.NUMBERED else ListType.NONE
+        )
+        paragraphs.add(newPara)
+    }
+
+    fun toJson(): String {
+        val sb = StringBuilder()
+        sb.append("{\"paragraphs\":[")
+        paragraphs.forEachIndexed { i, para ->
+            if (i > 0) sb.append(",")
+            sb.append("{\"spans\":[")
+            para.spans.forEachIndexed { j, span ->
+                if (j > 0) sb.append(",")
+                sb.append("{\"text\":\"${escapeJson(span.text)}\",")
+                sb.append("\"bold\":${span.isBold},")
+                sb.append("\"italic\":${span.isItalic},")
+                sb.append("\"underline\":${span.isUnderline},")
+                sb.append("\"strikethrough\":${span.isStrikethrough},")
+                sb.append("\"fontFamily\":\"${span.fontFamily}\",")
+                sb.append("\"fontSize\":${span.fontSize},")
+                sb.append("\"textColor\":${span.textColor?.let { "\"$it\"" } ?: "null"},")
+                sb.append("\"highlightColor\":${span.highlightColor?.let { "\"$it\"" } ?: "null"}")
+                sb.append("}")
+            }
+            sb.append("],")
+            sb.append("\"alignment\":\"${para.alignment.name}\",")
+            sb.append("\"listType\":\"${para.listType.name}\"")
+            val tableRows = para.tableRows
+            if (tableRows != null) {
+                sb.append(",\"tableRows\":[")
+                tableRows.forEachIndexed { ri, row ->
+                    if (ri > 0) sb.append(",")
+                    sb.append("{\"cells\":[")
+                    row.cells.forEachIndexed { ci, cell ->
+                        if (ci > 0) sb.append(",")
+                        sb.append("\"${escapeJson(cell)}\"")
+                    }
+                    sb.append("]}")
+                }
+                sb.append("]")
+            }
+            sb.append("}")
+        }
+        sb.append("],")
+        sb.append("\"header\":\"${escapeJson(headerText)}\",")
+        sb.append("\"footer\":\"${escapeJson(footerText)}\",")
+        sb.append("\"showPageNumbers\":$showPageNumbers")
+        sb.append("}")
+        return sb.toString()
+    }
+
+    private fun escapeJson(s: String): String {
+        return s.replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+    }
+
+    companion object {
+        fun fromJson(json: String): FormattedText {
+            return try {
+                val obj = org.json.JSONObject(json)
+                val ft = FormattedText()
+                ft.headerText = obj.optString("header", "")
+                ft.footerText = obj.optString("footer", "")
+                ft.showPageNumbers = obj.optBoolean("showPageNumbers", true)
+                val parasArray = obj.optJSONArray("paragraphs")
+                if (parasArray != null) {
+                    ft.paragraphs.clear()
+                    for (i in 0 until parasArray.length()) {
+                        val paraObj = parasArray.getJSONObject(i)
+                        val para = Paragraph()
+                        para.alignment = try {
+                            TextAlignMode.valueOf(paraObj.optString("alignment", "LEFT"))
+                        } catch (_: Exception) { TextAlignMode.LEFT }
+                        para.listType = try {
+                            ListType.valueOf(paraObj.optString("listType", "NONE"))
+                        } catch (_: Exception) { ListType.NONE }
+                        val spansArray = paraObj.optJSONArray("spans")
+                        if (spansArray != null) {
+                            for (j in 0 until spansArray.length()) {
+                                val spanObj = spansArray.getJSONObject(j)
+                                val span = TextSpan(
+                                    text = spanObj.optString("text", ""),
+                                    isBold = spanObj.optBoolean("bold", false),
+                                    isItalic = spanObj.optBoolean("italic", false),
+                                    isUnderline = spanObj.optBoolean("underline", false),
+                                    isStrikethrough = spanObj.optBoolean("strikethrough", false),
+                                    fontFamily = spanObj.optString("fontFamily", "Default"),
+                                    fontSize = spanObj.optInt("fontSize", 16),
+                                    textColor = if (spanObj.isNull("textColor")) null else spanObj.optString("textColor", null),
+                                    highlightColor = if (spanObj.isNull("highlightColor")) null else spanObj.optString("highlightColor", null)
+                                )
+                                para.spans.add(span)
+                            }
+                        } else {
+                            para.spans.add(TextSpan())
+                        }
+                        if (paraObj.has("tableRows")) {
+                            val tableArray = paraObj.getJSONArray("tableRows")
+                            val rows = mutableListOf<TableRow>()
+                            for (r in 0 until tableArray.length()) {
+                                val rowObj = tableArray.getJSONObject(r)
+                                val cellsArray = rowObj.getJSONArray("cells")
+                                val cells = mutableListOf<String>()
+                                for (c in 0 until cellsArray.length()) {
+                                    cells.add(cellsArray.getString(c))
+                                }
+                                rows.add(TableRow(cells))
+                            }
+                            para.tableRows = rows
+                        }
+                        ft.paragraphs.add(para)
+                    }
+                }
+                if (ft.paragraphs.isEmpty()) ft.paragraphs.add(Paragraph())
+                ft
+            } catch (_: Exception) {
+                FormattedText()
+            }
+        }
+
+        fun fromPlainText(text: String): FormattedText {
+            val ft = FormattedText()
+            ft.paragraphs.clear()
+            val lines = text.split("\n")
+            lines.forEach { line ->
+                ft.paragraphs.add(Paragraph(spans = mutableListOf(TextSpan(text = line))))
+            }
+            if (ft.paragraphs.isEmpty()) ft.paragraphs.add(Paragraph())
+            return ft
+        }
+    }
+}
+
+// ─── Leap 7: Undo/Redo ───
+
+data class EditorState(
+    val formattedText: FormattedText,
+    val currentPageIndex: Int = 0
+)
+
+class UndoRedoManager {
+    private val undoStack = mutableListOf<EditorState>()
+    private val redoStack = mutableListOf<EditorState>()
+    var currentState: EditorState? = null
+        private set
+
+    fun pushState(ft: FormattedText, pageIndex: Int) {
+        currentState?.let {
+            undoStack.add(it)
+            if (undoStack.size > 100) undoStack.removeAt(0)
+        }
+        currentState = EditorState(ft.copy(), pageIndex)
+        redoStack.clear()
+    }
+
+    fun undo(ft: FormattedText, pageIndex: Int): Pair<FormattedText, Int>? {
+        currentState?.let {
+            redoStack.add(it)
+        }
+        return if (undoStack.isNotEmpty()) {
+            val prev = undoStack.removeAt(undoStack.lastIndex)
+            val old = currentState
+            currentState = prev
+            redoStack.add(old ?: EditorState(ft, pageIndex))
+            prev.formattedText to prev.currentPageIndex
+        } else null
+    }
+
+    fun redo(ft: FormattedText, pageIndex: Int): Pair<FormattedText, Int>? {
+        return if (redoStack.isNotEmpty()) {
+            val next = redoStack.removeAt(redoStack.lastIndex)
+            currentState?.let { undoStack.add(it) }
+            currentState = next
+            next.formattedText to next.currentPageIndex
+        } else null
+    }
+
+    fun canUndo() = undoStack.isNotEmpty()
+    fun canRedo() = redoStack.isNotEmpty()
+}
+
+// ─── Leap 8: Find and Replace ───
+
+data class SearchResult(
+    val paragraphIndex: Int,
+    val spanIndex: Int,
+    val startIndex: Int,
+    val length: Int
+)
+
+// ─── Leap 6: Margin settings ───
+
+data class MarginSettings(
+    val preset: MarginPreset = MarginPreset.NORMAL
+) {
+    val horizontal: Int
+        get() = when (preset) {
+            MarginPreset.NARROW -> 24
+            MarginPreset.NORMAL -> 48
+            MarginPreset.WIDE -> 72
+        }
+    val vertical: Int
+        get() = when (preset) {
+            MarginPreset.NARROW -> 24
+            MarginPreset.NORMAL -> 48
+            MarginPreset.WIDE -> 72
+        }
+}
+
+// ─── Existing data classes ───
 
 data class EditorImage(
     val attachment: NoteAttachment,
@@ -137,6 +562,15 @@ enum class ImageLayer {
     IN_FRONT_OF_TEXT,
     INTEGRATED
 }
+
+// ─── Leap 10: Table data ───
+
+data class TableInsertData(
+    val rows: Int = 3,
+    val columns: Int = 3
+)
+
+// ─── Main Screen ───
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -175,8 +609,125 @@ fun NoteEditorScreen(
     var showImageOptions by remember { mutableStateOf(false) }
     var activeField by remember { mutableStateOf<String?>(null) }
     var pageTheme by remember { mutableStateOf("dark") }
-    val pages = remember { mutableStateListOf<String>("") }
+
+    // Leap 1: Rich text pages
+    val pages = remember { mutableStateListOf<FormattedText>(FormattedText()) }
     var currentPageIndex by remember { mutableStateOf(0) }
+
+    // Leap 2: Font settings
+    var currentFontFamily by remember { mutableStateOf("Default") }
+    var currentFontSize by remember { mutableStateOf(16) }
+
+    // Leap 3: Alignment
+    var currentAlignment by remember { mutableStateOf(TextAlignMode.LEFT) }
+
+    // Leap 4: Color settings
+    var showColorPicker by remember { mutableStateOf(false) }
+    var colorPickerMode by remember { mutableStateOf("text") } // "text" or "highlight"
+    var currentTextColor by remember { mutableStateOf<String?>(null) }
+    var currentHighlightColor by remember { mutableStateOf<String?>(null) }
+
+    // Leap 5: List settings
+    var currentListType by remember { mutableStateOf(ListType.NONE) }
+
+    // Leap 6: Margins
+    var marginSettings by remember { mutableStateOf(MarginSettings()) }
+
+    // Leap 7: Undo/Redo
+    val undoRedoManager = remember { UndoRedoManager() }
+
+    // Leap 8: Find and Replace
+    var showFindReplace by remember { mutableStateOf(false) }
+    var findText by remember { mutableStateOf("") }
+    var replaceText by remember { mutableStateOf("") }
+    var searchResults by remember { mutableStateOf<List<SearchResult>>(emptyList()) }
+    var currentSearchResultIndex by remember { mutableStateOf(-1) }
+
+    // Leap 9: Header/Footer (stored per FormattedText)
+
+    // Leap 10: Table
+    var showTableDialog by remember { mutableStateOf(false) }
+    var tableInsertData by remember { mutableStateOf(TableInsertData()) }
+
+    // Leap 11: PDF Export
+    var showPdfExportDialog by remember { mutableStateOf(false) }
+
+    val PAGE_WIDTH_DP = 560
+    val PAGE_HEIGHT_DP = 792
+
+    fun saveUndoState() {
+        if (currentPageIndex < pages.size) {
+            undoRedoManager.pushState(pages[currentPageIndex].copy(), currentPageIndex)
+        }
+    }
+
+    fun performUndo() {
+        val result = undoRedoManager.undo(pages.getOrNull(currentPageIndex) ?: FormattedText(), currentPageIndex)
+        result?.let { (ft, idx) ->
+            if (idx < pages.size) {
+                pages[idx] = ft
+            }
+            currentPageIndex = idx
+        }
+    }
+
+    fun performRedo() {
+        val result = undoRedoManager.redo(pages.getOrNull(currentPageIndex) ?: FormattedText(), currentPageIndex)
+        result?.let { (ft, idx) ->
+            if (idx < pages.size) {
+                pages[idx] = ft
+            }
+            currentPageIndex = idx
+        }
+    }
+
+    fun performFindReplace() {
+        if (findText.isEmpty()) return
+        searchResults = mutableListOf()
+        pages.forEachIndexed { pageIdx, ft ->
+            ft.paragraphs.forEachIndexed { paraIdx, para ->
+                para.spans.forEachIndexed { spanIdx, span ->
+                    var idx = span.text.indexOf(findText, ignoreCase = true)
+                    while (idx >= 0) {
+                        (searchResults as MutableList).add(
+                            SearchResult(pageIdx, spanIdx, idx, findText.length)
+                        )
+                        idx = span.text.indexOf(findText, idx + 1, ignoreCase = true)
+                    }
+                }
+            }
+        }
+        currentSearchResultIndex = if (searchResults.isNotEmpty()) 0 else -1
+    }
+
+    fun replaceCurrent() {
+        if (currentSearchResultIndex < 0 || searchResults.isEmpty()) return
+        val result = searchResults[currentSearchResultIndex]
+        val ft = pages[result.paragraphIndex]
+        val para = ft.paragraphs[result.paragraphIndex]
+        val span = para.spans[result.spanIndex]
+        val newText = span.text.replaceRange(result.startIndex, result.startIndex + result.length, replaceText)
+        para.spans[result.spanIndex] = span.copy(text = newText)
+        pages[result.paragraphIndex] = ft
+        performFindReplace()
+    }
+
+    fun replaceAll() {
+        if (findText.isEmpty()) return
+        pages.forEachIndexed { pageIdx, ft ->
+            ft.paragraphs.forEach { para ->
+                para.spans.forEachIndexed { spanIdx, span ->
+                    if (span.text.contains(findText, ignoreCase = true)) {
+                        para.spans[spanIdx] = span.copy(
+                            text = span.text.replace(findText, replaceText, ignoreCase = true)
+                        )
+                    }
+                }
+            }
+        }
+        searchResults = emptyList()
+        currentSearchResultIndex = -1
+    }
 
     val saveFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/octet-stream")
@@ -184,7 +735,7 @@ fun NoteEditorScreen(
         if (uri != null) {
             scope.launch {
                 try {
-                    val noteJson = buildNoteJson(pages, images)
+                    val noteJson = buildNoteJsonRich(pages, images, marginSettings)
                     val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
                     val result = repository.encryptNoteContent(
                         noteId, title, plainBytes, noteKey.toCharArray(), ""
@@ -203,7 +754,7 @@ fun NoteEditorScreen(
                         plaintext = ""
                         images.clear()
                         isLocked = true
-                        Toast.makeText(context, "\uD83D\uDD12 Note encrypted and saved", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "🔒 Note encrypted and saved", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(context, "Encryption failed", Toast.LENGTH_SHORT).show()
                     }
@@ -246,7 +797,7 @@ fun NoteEditorScreen(
         }
     }
 
-    val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || plaintext.isNotEmpty() || images.isNotEmpty())
+    val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || pages.any { it.toPlainText().isNotEmpty() } || images.isNotEmpty())
 
     fun attachKeyboardForTitle(kb: KeyboardState) {
         kb.attach(
@@ -262,14 +813,15 @@ fun NoteEditorScreen(
     fun attachKeyboardForContent(kb: KeyboardState) {
         kb.attach(
             onKey = { char ->
-                val toInsert = if (char == 'P' || char == 'p') "PPPPPPPP" else char.toString()
+                saveUndoState()
                 if (currentPageIndex < pages.size) {
-                    pages[currentPageIndex] = pages[currentPageIndex] + toInsert
+                    pages[currentPageIndex].appendText(char.toString())
                 }
             },
             onDel = {
-                if (currentPageIndex < pages.size && pages[currentPageIndex].isNotEmpty()) {
-                    pages[currentPageIndex] = pages[currentPageIndex].dropLast(1)
+                saveUndoState()
+                if (currentPageIndex < pages.size) {
+                    pages[currentPageIndex].deleteLastChar()
                 }
             },
             onDone = { kb.detach(); activeField = null }
@@ -387,7 +939,7 @@ fun NoteEditorScreen(
                                             if (result.isSuccess) {
                                                 val decrypted = result.getOrNull()!!
                                                 val decryptedStr = String(decrypted, Charsets.UTF_8)
-                                                val (loadedPages, attJson) = parseNoteJson(decryptedStr)
+                                                val (loadedPages, attJson) = parseNoteJsonRich(decryptedStr)
                                                 pages.clear()
                                                 pages.addAll(loadedPages)
                                                 images.clear()
@@ -521,7 +1073,7 @@ fun NoteEditorScreen(
                                             if (result.isSuccess) {
                                                 val decrypted = result.getOrNull()!!
                                                 val decryptedStr = String(decrypted, Charsets.UTF_8)
-                                                val (loadedPages, attJson) = parseNoteJson(decryptedStr)
+                                                val (loadedPages, attJson) = parseNoteJsonRich(decryptedStr)
                                                 pages.clear()
                                                 pages.addAll(loadedPages)
                                                 images.clear()
@@ -680,7 +1232,7 @@ fun NoteEditorScreen(
                                             isLocked = false
                                             title = ""
                                             pages.clear()
-                                            pages.add("")
+                                            pages.add(FormattedText())
                                         }
                                     }
                                 },
@@ -709,7 +1261,7 @@ fun NoteEditorScreen(
                             onClick = {
                                 showEncryptDialog = false
                                 scope.launch {
-                    val noteJson = buildNoteJson(pages, images)
+                                    val noteJson = buildNoteJsonRich(pages, images, marginSettings)
                                     val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
                                     val result = repository.encryptNoteContent(
                                         noteId, title, plainBytes, noteKey.toCharArray(), ""
@@ -719,13 +1271,13 @@ fun NoteEditorScreen(
                                         val b64 = Base64.getEncoder()
                                         encryptedOutput = "${b64.encodeToString(note.salt)}::${b64.encodeToString(note.iv)}::${b64.encodeToString(note.tag)}::${b64.encodeToString(note.ciphertext)}"
                                         showEncryptedOutput = true
-                        SecureMemory.clear(plaintext.toCharArray())
-                        plaintext = ""
-                        pages.clear()
-                        pages.add("")
+                                        SecureMemory.clear(plaintext.toCharArray())
+                                        plaintext = ""
+                                        pages.clear()
+                                        pages.add(FormattedText())
                                         images.clear()
                                         isLocked = true
-                                        Toast.makeText(context, "\uD83D\uDD12 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, "🔒 ${strings.encryptedNote}", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             },
@@ -764,6 +1316,234 @@ fun NoteEditorScreen(
             )
         }
 
+        // Leap 8: Find and Replace dialog
+        if (showFindReplace) {
+            Dialog(onDismissRequest = { showFindReplace = false }) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Find and Replace", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = findText,
+                            onValueChange = { findText = it },
+                            label = { Text("Find") },
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                IconButton(onClick = { performFindReplace() }) {
+                                    Icon(Icons.Default.Search, "Find")
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = replaceText,
+                            onValueChange = { replaceText = it },
+                            label = { Text("Replace with") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        if (searchResults.isNotEmpty()) {
+                            Text("Found ${searchResults.size} matches (${currentSearchResultIndex + 1}/${searchResults.size})")
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = { replaceCurrent() }, modifier = Modifier.weight(1f)) {
+                                Text("Replace")
+                            }
+                            Button(onClick = { replaceAll() }, modifier = Modifier.weight(1f)) {
+                                Text("Replace All")
+                            }
+                            TextButton(onClick = { showFindReplace = false }) {
+                                Text("Close")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Leap 4: Color picker dialog
+        if (showColorPicker) {
+            val presetColors = listOf(
+                "#000000", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF",
+                "#FFFF00", "#FF00FF", "#00FFFF", "#FF8800", "#8800FF",
+                "#FF4444", "#44FF44", "#4444FF", "#888888", "#CCCCCC",
+                "#FFEBEE", "#E8F5E9", "#E3F2FD", "#FFF3E0", "#F3E5F5"
+            )
+            Dialog(onDismissRequest = { showColorPicker = false }) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            if (colorPickerMode == "text") "Text Color" else "Highlight Color",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        // Color grid
+                        val rows = presetColors.chunked(5)
+                        rows.forEach { row ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                row.forEach { color ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .background(
+                                                Color(android.graphics.Color.parseColor(color)),
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                            .border(
+                                                1.dp,
+                                                if ((colorPickerMode == "text" && currentTextColor == color) ||
+                                                    (colorPickerMode == "highlight" && currentHighlightColor == color))
+                                                    MaterialTheme.colorScheme.primary else Color.Transparent,
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                            .clickable {
+                                                saveUndoState()
+                                                if (colorPickerMode == "text") {
+                                                    currentTextColor = if (currentTextColor == color) null else color
+                                                    pages.getOrNull(currentPageIndex)?.applyToCurrentSpan {
+                                                        it.copy(textColor = currentTextColor)
+                                                    }
+                                                } else {
+                                                    currentHighlightColor = if (currentHighlightColor == color) null else color
+                                                    pages.getOrNull(currentPageIndex)?.applyToCurrentSpan {
+                                                        it.copy(highlightColor = currentHighlightColor)
+                                                    }
+                                                }
+                                                showColorPicker = false
+                                            }
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = {
+                                saveUndoState()
+                                if (colorPickerMode == "text") {
+                                    currentTextColor = null
+                                    pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(textColor = null) }
+                                } else {
+                                    currentHighlightColor = null
+                                    pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(highlightColor = null) }
+                                }
+                                showColorPicker = false
+                            }, modifier = Modifier.weight(1f)) {
+                                Text("Clear")
+                            }
+                            TextButton(onClick = { showColorPicker = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Leap 10: Table insert dialog
+        if (showTableDialog) {
+            AlertDialog(
+                onDismissRequest = { showTableDialog = false },
+                title = { Text("Insert Table") },
+                text = {
+                    Column {
+                        OutlinedTextField(
+                            value = tableInsertData.rows.toString(),
+                            onValueChange = { tableInsertData = tableInsertData.copy(rows = it.toIntOrNull() ?: 3) },
+                            label = { Text("Rows") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = tableInsertData.columns.toString(),
+                            onValueChange = { tableInsertData = tableInsertData.copy(columns = it.toIntOrNull() ?: 3) },
+                            label = { Text("Columns") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        saveUndoState()
+                        val ft = pages.getOrNull(currentPageIndex)
+                        if (ft != null) {
+                            val rows = (0 until tableInsertData.rows).map {
+                                TableRow((0 until tableInsertData.columns).map { "" }.toMutableList())
+                            }.toMutableList()
+                            ft.paragraphs.add(Paragraph(tableRows = rows))
+                        }
+                        showTableDialog = false
+                    }) { Text("Insert") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTableDialog = false }) { Text("Cancel") }
+                }
+            )
+        }
+
+        // Leap 11: PDF Export dialog
+        if (showPdfExportDialog) {
+            AlertDialog(
+                onDismissRequest = { showPdfExportDialog = false },
+                title = { Text("Export to PDF") },
+                text = { Text("This will generate a PDF from your note content. The PDF will be saved to your Downloads folder.") },
+                confirmButton = {
+                    Button(onClick = {
+                        scope.launch {
+                            try {
+                                val pdfDocument = PdfDocument()
+                                val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
+                                var pageNum = 1
+                                pages.forEach { ft ->
+                                    val page = pdfDocument.startPage(pageInfo)
+                                    val canvas = page.canvas
+                                    val paint = android.graphics.Paint().apply {
+                                        color = android.graphics.Color.BLACK
+                                        textSize = 36f
+                                    }
+                                    canvas.drawText(title, 50f, 50f, paint)
+                                    paint.textSize = 14f
+                                    var y = 100f
+                                    ft.paragraphs.forEach { para ->
+                                        val line = para.spans.joinToString("") { it.text }
+                                        canvas.drawText(line, 50f, y, paint)
+                                        y += 20f
+                                        if (y > 800f) {
+                                            pdfDocument.finishPage(page)
+                                            pageNum++
+                                            val newPage = pdfDocument.startPage(pageInfo)
+                                            // continue on new page
+                                        }
+                                    }
+                                    pdfDocument.finishPage(page)
+                                }
+                                val downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
+                                val file = File(downloadsDir, "${title.ifEmpty { "note" }}.pdf")
+                                pdfDocument.writeTo(file.outputStream())
+                                pdfDocument.close()
+                                Toast.makeText(context, "PDF saved to ${file.absolutePath}", Toast.LENGTH_LONG).show()
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "PDF export failed: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        showPdfExportDialog = false
+                    }) { Text("Export") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showPdfExportDialog = false }) { Text("Cancel") }
+                }
+            )
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -786,6 +1566,25 @@ fun NoteEditorScreen(
                     },
                     actions = {
                         if (!isLocked) {
+                            // Leap 7: Undo/Redo buttons
+                            IconButton(onClick = { performUndo() }, enabled = undoRedoManager.canUndo()) {
+                                Icon(Icons.Default.Undo, "Undo", tint = if (undoRedoManager.canUndo()) MaterialTheme.colorScheme.onSurface else Color.Gray)
+                            }
+                            IconButton(onClick = { performRedo() }, enabled = undoRedoManager.canRedo()) {
+                                Icon(Icons.Default.Redo, "Redo", tint = if (undoRedoManager.canRedo()) MaterialTheme.colorScheme.onSurface else Color.Gray)
+                            }
+                            // Leap 8: Find and Replace
+                            IconButton(onClick = { showFindReplace = !showFindReplace }) {
+                                Icon(Icons.Default.FindReplace, "Find and Replace")
+                            }
+                            // Leap 10: Table insert
+                            IconButton(onClick = { showTableDialog = true }) {
+                                Icon(Icons.Default.TableChart, "Insert Table")
+                            }
+                            // Leap 11: PDF Export
+                            IconButton(onClick = { showPdfExportDialog = true }) {
+                                Icon(Icons.Default.Print, "Export PDF")
+                            }
                             Button(
                                 onClick = { showEncryptDialog = true },
                                 colors = ButtonDefaults.buttonColors(
@@ -862,15 +1661,86 @@ fun NoteEditorScreen(
                         )
                     }
 
-                    NoteFormattingToolbar(
-                        onInsertFormat = { format ->
-                            if (currentPageIndex < pages.size) {
-                                pages[currentPageIndex] = pages[currentPageIndex] + format
+                    // Leap 1-5: Rich text formatting toolbar
+                    RichTextToolbar(
+                        onToggleBold = {
+                            saveUndoState()
+                            pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(isBold = !it.isBold) }
+                        },
+                        onToggleItalic = {
+                            saveUndoState()
+                            pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(isItalic = !it.isItalic) }
+                        },
+                        onToggleUnderline = {
+                            saveUndoState()
+                            pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(isUnderline = !it.isUnderline) }
+                        },
+                        onToggleStrikethrough = {
+                            saveUndoState()
+                            pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(isStrikethrough = !it.isStrikethrough) }
+                        },
+                        currentFontFamily = currentFontFamily,
+                        onFontFamilyChange = { newFamily ->
+                            saveUndoState()
+                            currentFontFamily = newFamily
+                            pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(fontFamily = newFamily) }
+                        },
+                        currentFontSize = currentFontSize,
+                        onFontSizeChange = { newSize ->
+                            saveUndoState()
+                            currentFontSize = newSize
+                            pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(fontSize = newSize) }
+                        },
+                        currentAlignment = currentAlignment,
+                        onAlignmentChange = {
+                            saveUndoState()
+                            currentAlignment = it
+                            pages.getOrNull(currentPageIndex)?.let { ft ->
+                                if (ft.paragraphs.isNotEmpty()) {
+                                    val paraIdx = ft.paragraphs.lastIndex
+                                    ft.paragraphs[paraIdx] = ft.paragraphs[paraIdx].copy(alignment = it)
+                                }
                             }
+                        },
+                        onTextColorClick = {
+                            colorPickerMode = "text"
+                            showColorPicker = true
+                        },
+                        onHighlightColorClick = {
+                            colorPickerMode = "highlight"
+                            showColorPicker = true
+                        },
+                        currentListType = currentListType,
+                        onListTypeChange = {
+                            saveUndoState()
+                            currentListType = it
+                            pages.getOrNull(currentPageIndex)?.let { ft ->
+                                if (ft.paragraphs.isNotEmpty()) {
+                                    val paraIdx = ft.paragraphs.lastIndex
+                                    ft.paragraphs[paraIdx] = ft.paragraphs[paraIdx].copy(listType = it)
+                                }
+                            }
+                        },
+                        currentMargin = marginSettings.preset,
+                        onMarginChange = {
+                            marginSettings = marginSettings.copy(preset = it)
                         },
                         onAddAttachment = { type ->
                             pendingAttachmentType = type
                             attachmentLauncher.launch(type.toMimePattern())
+                        },
+                        onInsertNewline = {
+                            saveUndoState()
+                            pages.getOrNull(currentPageIndex)?.insertNewline()
+                        },
+                        onInsertTable = {
+                            showTableDialog = true
+                        },
+                        onFindReplace = {
+                            showFindReplace = true
+                        },
+                        onExportPdf = {
+                            showPdfExportDialog = true
                         }
                     )
 
@@ -889,39 +1759,41 @@ fun NoteEditorScreen(
                         IconButton(
                             onClick = { pageTheme = "light" },
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(28.dp)
                                 .border(
-                                    width = 1.dp,
+                                    width = 0.5.dp,
                                     color = if (pageTheme == "light") MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = RoundedCornerShape(6.dp)
+                                    shape = RoundedCornerShape(4.dp)
                                 )
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LightMode,
                                 contentDescription = "Light mode",
-                                tint = if (pageTheme == "light") Color(0xFFFFB300) else Color.Gray
+                                tint = if (pageTheme == "light") Color(0xFFFFB300) else Color.Gray,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         IconButton(
                             onClick = { pageTheme = "dark" },
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(28.dp)
                                 .border(
-                                    width = 1.dp,
+                                    width = 0.5.dp,
                                     color = if (pageTheme == "dark") MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = RoundedCornerShape(6.dp)
+                                    shape = RoundedCornerShape(4.dp)
                                 )
                         ) {
                             Icon(
                                 imageVector = Icons.Default.NightsStay,
                                 contentDescription = "Dark mode",
-                                tint = if (pageTheme == "dark") Color(0xFF90CAF9) else Color.Gray
+                                tint = if (pageTheme == "dark") Color(0xFF90CAF9) else Color.Gray,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
 
-                    WordEditorCanvas(
+                    WordEditorCanvasRich(
                         pages = pages,
                         images = images,
                         currentPageIndex = currentPageIndex,
@@ -948,7 +1820,10 @@ fun NoteEditorScreen(
                         activeField = activeField,
                         onFieldActivate = { activeField = it },
                         onFieldDeactivate = { activeField = null },
-                        pageTheme = pageTheme
+                        pageTheme = pageTheme,
+                        marginSettings = marginSettings,
+                        pageWidth = PAGE_WIDTH_DP,
+                        pageHeight = PAGE_HEIGHT_DP
                     )
                 }
             }
@@ -956,9 +1831,241 @@ fun NoteEditorScreen(
     } // KeyboardHost
 }
 
+// ─── Leap 1-5: Rich Text Toolbar ───
+
 @Composable
-private fun WordEditorCanvas(
-    pages: MutableList<String>,
+private fun RichTextToolbar(
+    onToggleBold: () -> Unit,
+    onToggleItalic: () -> Unit,
+    onToggleUnderline: () -> Unit,
+    onToggleStrikethrough: () -> Unit,
+    currentFontFamily: String,
+    onFontFamilyChange: (String) -> Unit,
+    currentFontSize: Int,
+    onFontSizeChange: (Int) -> Unit,
+    currentAlignment: TextAlignMode,
+    onAlignmentChange: (TextAlignMode) -> Unit,
+    onTextColorClick: () -> Unit,
+    onHighlightColorClick: () -> Unit,
+    currentListType: ListType,
+    onListTypeChange: (ListType) -> Unit,
+    currentMargin: MarginPreset,
+    onMarginChange: (MarginPreset) -> Unit,
+    onAddAttachment: (AttachmentType) -> Unit,
+    onInsertNewline: () -> Unit,
+    onInsertTable: () -> Unit,
+    onFindReplace: () -> Unit,
+    onExportPdf: () -> Unit
+) {
+    var showFontMenu by remember { mutableStateOf(false) }
+    var showSizeMenu by remember { mutableStateOf(false) }
+    var showMarginMenu by remember { mutableStateOf(false) }
+    var showAttachMenu by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+            .padding(horizontal = 4.dp, vertical = 4.dp)
+    ) {
+        // Row 1: Formatting buttons
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            FormatToggleIcon(Icons.Default.FormatBold, "Bold") { onToggleBold() }
+            FormatToggleIcon(Icons.Default.FormatItalic, "Italic") { onToggleItalic() }
+            FormatToggleIcon(Icons.Default.FormatUnderlined, "Underline") { onToggleUnderline() }
+            FormatToggleIcon(Icons.Default.FormatStrikethrough, "Strikethrough") { onToggleStrikethrough() }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Font family dropdown
+            Box {
+                TextButton(onClick = { showFontMenu = true }) {
+                    Text(currentFontFamily, fontSize = 12.sp)
+                }
+                DropdownMenu(
+                    expanded = showFontMenu,
+                    onDismissRequest = { showFontMenu = false }
+                ) {
+                    listOf("Default", "Serif", "Monospace", "SansCondensed").forEach { font ->
+                        DropdownMenuItem(
+                            text = { Text(font) },
+                            onClick = {
+                                onFontFamilyChange(font)
+                                showFontMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Font size dropdown
+            Box {
+                TextButton(onClick = { showSizeMenu = true }) {
+                    Text("${currentFontSize}sp", fontSize = 12.sp)
+                }
+                DropdownMenu(
+                    expanded = showSizeMenu,
+                    onDismissRequest = { showSizeMenu = false }
+                ) {
+                    listOf(12, 14, 16, 18, 20, 24, 28, 32).forEach { size ->
+                        DropdownMenuItem(
+                            text = { Text("${size}sp") },
+                            onClick = {
+                                onFontSizeChange(size)
+                                showSizeMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Alignment buttons
+            FormatToggleIcon(Icons.Default.FormatAlignLeft, "Left", active = currentAlignment == TextAlignMode.LEFT) {
+                onAlignmentChange(TextAlignMode.LEFT)
+            }
+            FormatToggleIcon(Icons.Default.FormatAlignCenter, "Center", active = currentAlignment == TextAlignMode.CENTER) {
+                onAlignmentChange(TextAlignMode.CENTER)
+            }
+            FormatToggleIcon(Icons.Default.FormatAlignRight, "Right", active = currentAlignment == TextAlignMode.RIGHT) {
+                onAlignmentChange(TextAlignMode.RIGHT)
+            }
+            FormatToggleIcon(Icons.Default.FormatAlignJustify, "Justify", active = currentAlignment == TextAlignMode.JUSTIFY) {
+                onAlignmentChange(TextAlignMode.JUSTIFY)
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Color pickers
+            IconButton(onClick = onTextColorClick) {
+                Icon(Icons.Default.FormatColorText, "Text Color", tint = MaterialTheme.colorScheme.onSurface)
+            }
+            IconButton(onClick = onHighlightColorClick) {
+                Icon(Icons.Default.FormatColorFill, "Highlight Color", tint = MaterialTheme.colorScheme.onSurface)
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // List buttons
+            FormatToggleIcon(Icons.Default.FormatListBulleted, "Bulleted List", active = currentListType == ListType.BULLETED) {
+                onListTypeChange(if (currentListType == ListType.BULLETED) ListType.NONE else ListType.BULLETED)
+            }
+            FormatToggleIcon(Icons.Default.FormatListNumbered, "Numbered List", active = currentListType == ListType.NUMBERED) {
+                onListTypeChange(if (currentListType == ListType.NUMBERED) ListType.NONE else ListType.NUMBERED)
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Margin preset
+            Box {
+                TextButton(onClick = { showMarginMenu = true }) {
+                    Text(
+                        when (currentMargin) {
+                            MarginPreset.NARROW -> "Narrow"
+                            MarginPreset.NORMAL -> "Normal"
+                            MarginPreset.WIDE -> "Wide"
+                        },
+                        fontSize = 12.sp
+                    )
+                }
+                DropdownMenu(
+                    expanded = showMarginMenu,
+                    onDismissRequest = { showMarginMenu = false }
+                ) {
+                    MarginPreset.entries.forEach { preset ->
+                        DropdownMenuItem(
+                            text = { Text(preset.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                            onClick = {
+                                onMarginChange(preset)
+                                showMarginMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Table insert
+            IconButton(onClick = onInsertTable) {
+                Icon(Icons.Default.GridOn, "Insert Table")
+            }
+
+            // Find and Replace
+            IconButton(onClick = onFindReplace) {
+                Icon(Icons.Default.FindReplace, "Find and Replace")
+            }
+
+            // Export PDF
+            IconButton(onClick = onExportPdf) {
+                Icon(Icons.Default.Print, "Export PDF")
+            }
+
+            // Attach
+            Box {
+                IconButton(onClick = { showAttachMenu = true }) {
+                    Icon(Icons.Default.AttachFile, "Attach")
+                }
+                DropdownMenu(
+                    expanded = showAttachMenu,
+                    onDismissRequest = { showAttachMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        leadingIcon = { Icon(Icons.Default.Image, null, modifier = Modifier.size(18.dp)) },
+                        text = { Text("Image") },
+                        onClick = { showAttachMenu = false; onAddAttachment(AttachmentType.IMAGE) }
+                    )
+                    DropdownMenuItem(
+                        leadingIcon = { Icon(Icons.Default.MusicNote, null, modifier = Modifier.size(18.dp)) },
+                        text = { Text("Audio") },
+                        onClick = { showAttachMenu = false; onAddAttachment(AttachmentType.AUDIO) }
+                    )
+                    DropdownMenuItem(
+                        leadingIcon = { Icon(Icons.Default.VideoFile, null, modifier = Modifier.size(18.dp)) },
+                        text = { Text("Video") },
+                        onClick = { showAttachMenu = false; onAddAttachment(AttachmentType.VIDEO) }
+                    )
+                    DropdownMenuItem(
+                        leadingIcon = { Icon(Icons.Default.Description, null, modifier = Modifier.size(18.dp)) },
+                        text = { Text("Document") },
+                        onClick = { showAttachMenu = false; onAddAttachment(AttachmentType.DOCUMENT) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FormatToggleIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    active: Boolean = false,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .background(
+                if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent,
+                RoundedCornerShape(4.dp)
+            )
+    ) {
+        Icon(icon, label, tint = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
+    }
+}
+
+// ─── Leap 1-11: Rich Word Editor Canvas ───
+
+@Composable
+private fun WordEditorCanvasRich(
+    pages: MutableList<FormattedText>,
     images: List<EditorImage>,
     currentPageIndex: Int,
     onPageSelect: (Int) -> Unit,
@@ -968,7 +2075,10 @@ private fun WordEditorCanvas(
     activeField: String?,
     onFieldActivate: (String) -> Unit,
     onFieldDeactivate: () -> Unit,
-    pageTheme: String
+    pageTheme: String,
+    marginSettings: MarginSettings,
+    pageWidth: Int,
+    pageHeight: Int
 ) {
     val kbState = LocalKeyboardState.current
     val scrollState = rememberScrollState()
@@ -990,10 +2100,9 @@ private fun WordEditorCanvas(
                 .verticalScroll(scrollState)
                 .padding(vertical = 16.dp)
         ) {
-            pages.forEachIndexed { index, pageText ->
-                PageBlock(
-                    text = pageText,
-                    onTextChange = { pages[index] = it },
+            pages.forEachIndexed { index, ft ->
+                PageBlockRich(
+                    formattedText = ft,
                     images = images,
                     pageIndex = index,
                     isSelected = index == currentPageIndex,
@@ -1006,7 +2115,10 @@ private fun WordEditorCanvas(
                     pageBorder = pageBorder,
                     isDark = isDark,
                     textColor = textColor,
-                    placeholderColor = placeholderColor
+                    placeholderColor = placeholderColor,
+                    marginSettings = marginSettings,
+                    pageWidth = pageWidth,
+                    pageHeight = pageHeight
                 )
             }
 
@@ -1014,20 +2126,26 @@ private fun WordEditorCanvas(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
-                    .padding(horizontal = 32.dp, vertical = 24.dp)
-                    .background(pageBg, RoundedCornerShape(16.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
-                    .clickable { pages.add("") }
-                    .padding(24.dp),
+                    .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Page", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Text("Add new page", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                        Text("Tap to insert a blank page below", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), style = MaterialTheme.typography.bodyMedium)
+                Box(
+                    modifier = Modifier
+                        .width(pageWidth.dp)
+                        .height(80.dp)
+                        .background(pageBg, RoundedCornerShape(12.dp))
+                        .border(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .clickable { pages.add(FormattedText()) }
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Page", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(horizontalAlignment = Alignment.Start) {
+                            Text("Add new page", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                            Text("Tap to insert a blank page below", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
             }
@@ -1048,6 +2166,219 @@ private fun WordEditorCanvas(
         }
     }
 }
+
+// ─── Leap 1-11: Rich Page Block ───
+
+@Composable
+private fun PageBlockRich(
+    formattedText: FormattedText,
+    images: List<EditorImage>,
+    pageIndex: Int,
+    isSelected: Boolean,
+    onPageSelect: () -> Unit,
+    onImageSelect: (String) -> Unit,
+    onImageUpdate: (EditorImage) -> Unit,
+    onImageDelete: (String) -> Unit,
+    pageNumber: Int,
+    pageBg: Color,
+    pageBorder: Color,
+    isDark: Boolean,
+    textColor: Color,
+    placeholderColor: Color,
+    marginSettings: MarginSettings,
+    pageWidth: Int,
+    pageHeight: Int
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+    Box(
+        modifier = Modifier
+            .width(pageWidth.dp)
+            .height(pageHeight.dp)
+            .background(pageBg, RoundedCornerShape(2.dp))
+            .border(
+                width = if (isSelected) 1.dp else 0.5.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else pageBorder,
+                shape = RoundedCornerShape(2.dp)
+            )
+            .clickable { onPageSelect() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = marginSettings.horizontal.dp, vertical = marginSettings.vertical.dp)
+        ) {
+            // Leap 9: Header
+            if (formattedText.headerText.isNotEmpty()) {
+                Text(
+                    text = formattedText.headerText,
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // Content
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                formattedText.paragraphs.forEach { paragraph ->
+                    val textAlign = when (paragraph.alignment) {
+                        TextAlignMode.LEFT -> TextAlign.Start
+                        TextAlignMode.CENTER -> TextAlign.Center
+                        TextAlignMode.RIGHT -> TextAlign.End
+                        TextAlignMode.JUSTIFY -> TextAlign.Justify
+                    }
+
+                    // List prefix
+                    val prefix = when (paragraph.listType) {
+                        ListType.BULLETED -> "• "
+                        ListType.NUMBERED -> {
+                            val idx = formattedText.paragraphs.indexOf(paragraph) + 1
+                            "$idx. "
+                        }
+                        ListType.NONE -> ""
+                    }
+
+                    Row {
+                        if (prefix.isNotEmpty()) {
+                            Text(
+                                text = prefix,
+                                color = textColor,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                textAlign = textAlign
+                            )
+                        }
+                        Text(
+                            text = formattedText.toAnnotatedString(),
+                            color = textColor,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = textAlign
+                        )
+                    }
+
+                    // Leap 10: Table rendering
+                    val pTableRows = paragraph.tableRows
+                    if (pTableRows != null && pTableRows.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                        ) {
+                            pTableRows.forEachIndexed { rowIdx, row ->
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    row.cells.forEachIndexed { cellIdx, cell ->
+                                        Text(
+                                            text = cell,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .border(
+                                                    0.5.dp,
+                                                    Color.Gray.copy(alpha = 0.5f)
+                                                )
+                                                .padding(4.dp),
+                                            color = textColor,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                }
+
+                if (formattedText.toPlainText().isEmpty()) {
+                    Text(
+                        text = "Start typing here...",
+                        color = placeholderColor,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+            // Leap 9: Footer
+            if (formattedText.footerText.isNotEmpty() || formattedText.showPageNumbers) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = formattedText.footerText,
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    if (formattedText.showPageNumbers) {
+                        Text(
+                            text = "Page $pageNumber",
+                            color = Color.Gray,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+        }
+
+        // Images behind text
+        images.filter { it.layer == ImageLayer.BEHIND_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
+            DraggableImage(
+                image = img,
+                onSelect = onImageSelect,
+                onUpdate = onImageUpdate,
+                onDelete = onImageDelete
+            )
+        }
+
+        // Integrated images
+        val integratedImages = images.filter { it.layer == ImageLayer.INTEGRATED && it.pageIndex == pageNumber - 1 }
+        if (integratedImages.isNotEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(marginSettings.horizontal.dp, marginSettings.vertical.dp)) {
+                val primaryImage = integratedImages.first()
+                DraggableImage(
+                    image = primaryImage,
+                    onSelect = onImageSelect,
+                    onUpdate = onImageUpdate,
+                    onDelete = onImageDelete
+                )
+                integratedImages.drop(1).forEach { img ->
+                    DraggableImage(
+                        image = img,
+                        onSelect = onImageSelect,
+                        onUpdate = onImageUpdate,
+                        onDelete = onImageDelete
+                    )
+                }
+            }
+        }
+
+        // Images in front of text
+        images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
+            DraggableImage(
+                image = img,
+                onSelect = onImageSelect,
+                onUpdate = onImageUpdate,
+                onDelete = onImageDelete
+            )
+        }
+    }
+    }
+}
+
+// ─── Existing PageBlock (backward compat) ───
 
 @Composable
 private fun PageBlock(
@@ -1070,7 +2401,7 @@ private fun PageBlock(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(842.dp)
+            .height(750.dp)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .background(pageBg, RoundedCornerShape(2.dp))
             .border(
@@ -1102,92 +2433,6 @@ private fun PageBlock(
             )
         }
 
-        val integratedImages = images.filter { it.layer == ImageLayer.INTEGRATED && it.pageIndex == pageNumber - 1 }
-        if (integratedImages.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(48.dp)
-            ) {
-                Text(
-                    text = text.ifEmpty { "Start typing here..." },
-                    color = if (text.isEmpty()) placeholderColor else textColor,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        } else {
-            Box(modifier = Modifier.fillMaxSize().padding(48.dp)) {
-                val primaryImage = integratedImages.first()
-                val imageTop = primaryImage.y
-                val imageBottom = primaryImage.y + primaryImage.height
-                val imageLeft = primaryImage.x
-                val imageRight = primaryImage.x + primaryImage.width
-                val lineHeight = 24f
-                val linesAbove = (imageTop / lineHeight).toInt().coerceAtLeast(0)
-                val linesThrough = ((imageBottom - imageTop) / lineHeight).toInt().coerceAtLeast(1)
-                val charsPerLine = 35
-                val charsAbove = (linesAbove * charsPerLine).coerceAtMost(text.length)
-                val textAbove = text.take(charsAbove)
-                val textRemaining = text.drop(charsAbove)
-                val charsThrough = (linesThrough * charsPerLine).coerceAtMost(textRemaining.length)
-                val textThrough = textRemaining.take(charsThrough)
-                val textAfter = textRemaining.drop(charsThrough)
-                Column(modifier = Modifier.fillMaxSize()) {
-                    if (textAbove.isNotEmpty()) {
-                        Text(
-                            text = textAbove,
-                            color = textColor,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    if (textThrough.isNotEmpty()) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            val leftWidth = (imageLeft - 48f).coerceAtLeast(0f)
-                            Text(
-                                text = textThrough,
-                                color = textColor,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.width(leftWidth.dp)
-                            )
-                            Spacer(modifier = Modifier.width(primaryImage.width.dp))
-                        }
-                    }
-                    if (textAfter.isNotEmpty()) {
-                        Text(
-                            text = textAfter,
-                            color = textColor,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    if (text.isEmpty()) {
-                        Text(
-                            text = "Start typing here...",
-                            color = placeholderColor,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-                DraggableImage(
-                    image = primaryImage,
-                    onSelect = onImageSelect,
-                    onUpdate = onImageUpdate,
-                    onDelete = onImageDelete
-                )
-                integratedImages.drop(1).forEach { img ->
-                    DraggableImage(
-                        image = img,
-                        onSelect = onImageSelect,
-                        onUpdate = onImageUpdate,
-                        onDelete = onImageDelete
-                    )
-                }
-            }
-        }
-
         images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
             DraggableImage(
                 image = img,
@@ -1210,6 +2455,8 @@ private fun PageBlock(
         }
     }
 }
+
+// ─── DraggableImage (unchanged) ───
 
 @Composable
 private fun DraggableImage(
@@ -1328,6 +2575,8 @@ private fun ResizeHandle(
     )
 }
 
+// ─── ImageOptionsDialog (unchanged) ───
+
 @Composable
 private fun ImageOptionsDialog(
     image: EditorImage,
@@ -1354,7 +2603,7 @@ private fun ImageOptionsDialog(
                 Text("Layer:", fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(4.dp))
 
-                ImageLayer.entries.forEach { layer ->
+                listOf(ImageLayer.IN_FRONT_OF_TEXT, ImageLayer.BEHIND_TEXT, ImageLayer.INTEGRATED).forEach { layer ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1362,20 +2611,44 @@ private fun ImageOptionsDialog(
                                 onUpdate(image.copy(layer = layer))
                                 onDismiss()
                             }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = when (layer) {
-                                ImageLayer.INLINE -> "Inline with text"
-                                ImageLayer.BEHIND_TEXT -> "Behind text (background)"
-                                ImageLayer.IN_FRONT_OF_TEXT -> "In front of text"
-                                ImageLayer.INTEGRATED -> "Integrated (text flows around)"
+                        Icon(
+                            imageVector = when (layer) {
+                                ImageLayer.IN_FRONT_OF_TEXT -> Icons.Default.Image
+                                ImageLayer.BEHIND_TEXT -> Icons.Default.FormatColorFill
+                                ImageLayer.INTEGRATED -> Icons.Default.FormatAlignLeft
+                                else -> Icons.Default.Image
                             },
-                            modifier = Modifier.weight(1f)
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = if (image.layer == layer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = when (layer) {
+                                    ImageLayer.IN_FRONT_OF_TEXT -> "In Front of Text"
+                                    ImageLayer.BEHIND_TEXT -> "As Background"
+                                    ImageLayer.INTEGRATED -> "Fit in Text"
+                                    else -> ""
+                                },
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = when (layer) {
+                                    ImageLayer.IN_FRONT_OF_TEXT -> "Picture covers the text area"
+                                    ImageLayer.BEHIND_TEXT -> "Text appears in front of picture"
+                                    ImageLayer.INTEGRATED -> "Text wraps around the picture"
+                                    else -> ""
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
                         if (image.layer == layer) {
-                            Text("✓", color = MaterialTheme.colorScheme.primary)
+                            Text("✓", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -1589,12 +2862,22 @@ private fun DecoyEncryptedView(
     }
 }
 
-private fun buildNoteJson(pages: List<String>, images: List<EditorImage>): String {
+// ─── Leap 1-11: Build Note JSON with rich text ───
+
+private fun buildNoteJsonRich(
+    pages: List<FormattedText>,
+    images: List<EditorImage>,
+    marginSettings: MarginSettings
+): String {
     val json = org.json.JSONObject()
     val pagesArray = org.json.JSONArray()
-    pages.forEach { pagesArray.put(it) }
+    pages.forEach { ft ->
+        pagesArray.put(ft.toJson())
+    }
     json.put("pages", pagesArray)
-    
+    json.put("version", 2)
+    json.put("marginPreset", marginSettings.preset.name)
+
     val imagesArray = org.json.JSONArray()
     images.forEach { img ->
         val imgObj = org.json.JSONObject()
@@ -1612,27 +2895,34 @@ private fun buildNoteJson(pages: List<String>, images: List<EditorImage>): Strin
         imgObj.put("pageIndex", img.pageIndex)
         imagesArray.put(imgObj)
     }
-    
+
     json.put("images", imagesArray)
     return json.toString()
 }
 
-private fun parseNoteJson(plaintext: String): Pair<List<String>, String> {
+// ─── Leap 1-11: Parse Note JSON with rich text ───
+
+private fun parseNoteJsonRich(plaintext: String): Pair<List<FormattedText>, String> {
     return try {
         val json = org.json.JSONObject(plaintext)
-        if (json.has("images")) {
-            val pagesList = mutableListOf<String>()
-            if (json.has("pages")) {
-                val pagesArray = json.getJSONArray("pages")
-                for (i in 0 until pagesArray.length()) {
-                    pagesList.add(pagesArray.getString(i))
-                }
-            } else {
-                pagesList.add(json.optString("content", ""))
+        val pagesList = mutableListOf<FormattedText>()
+
+        if (json.has("pages")) {
+            val pagesArray = json.getJSONArray("pages")
+            for (i in 0 until pagesArray.length()) {
+                val pageStr = pagesArray.getString(i)
+                pagesList.add(FormattedText.fromJson(pageStr))
             }
-            val imagesArray = json.getJSONArray("images")
-            val attachmentsList = mutableListOf<NoteAttachment>()
-            
+        } else if (json.has("content")) {
+            pagesList.add(FormattedText.fromPlainText(json.getString("content")))
+        }
+
+        if (pagesList.isEmpty()) pagesList.add(FormattedText())
+
+        val imagesArray = json.optJSONArray("images")
+        val attachmentsList = mutableListOf<NoteAttachment>()
+
+        if (imagesArray != null) {
             for (i in 0 until imagesArray.length()) {
                 val imgObj = imagesArray.getJSONObject(i)
                 val att = NoteAttachment(
@@ -1659,7 +2949,87 @@ private fun parseNoteJson(plaintext: String): Pair<List<String>, String> {
                 )
                 attachmentsList.add(att)
             }
-            
+        }
+
+        pagesList to attachmentsToJson(attachmentsList, embedFiles = true)
+    } catch (_: Exception) {
+        listOf(FormattedText()) to "[]"
+    }
+}
+
+// ─── Backward compat: buildNoteJson and parseNoteJson ───
+
+private fun buildNoteJson(pages: List<String>, images: List<EditorImage>): String {
+    val json = org.json.JSONObject()
+    val pagesArray = org.json.JSONArray()
+    pages.forEach { pagesArray.put(it) }
+    json.put("pages", pagesArray)
+
+    val imagesArray = org.json.JSONArray()
+    images.forEach { img ->
+        val imgObj = org.json.JSONObject()
+        imgObj.put("id", img.attachment.id)
+        imgObj.put("originalName", img.attachment.originalName)
+        imgObj.put("mimeType", img.attachment.mimeType)
+        imgObj.put("size", img.attachment.size)
+        imgObj.put("storedPath", img.attachment.storedPath)
+        imgObj.put("type", img.attachment.type.name)
+        imgObj.put("x", img.x)
+        imgObj.put("y", img.y)
+        imgObj.put("width", img.width)
+        imgObj.put("height", img.height)
+        imgObj.put("layer", img.layer.name)
+        imgObj.put("pageIndex", img.pageIndex)
+        imagesArray.put(imgObj)
+    }
+
+    json.put("images", imagesArray)
+    return json.toString()
+}
+
+private fun parseNoteJson(plaintext: String): Pair<List<String>, String> {
+    return try {
+        val json = org.json.JSONObject(plaintext)
+        if (json.has("images")) {
+            val pagesList = mutableListOf<String>()
+            if (json.has("pages")) {
+                val pagesArray = json.getJSONArray("pages")
+                for (i in 0 until pagesArray.length()) {
+                    pagesList.add(pagesArray.getString(i))
+                }
+            } else {
+                pagesList.add(json.optString("content", ""))
+            }
+            val imagesArray = json.getJSONArray("images")
+            val attachmentsList = mutableListOf<NoteAttachment>()
+
+            for (i in 0 until imagesArray.length()) {
+                val imgObj = imagesArray.getJSONObject(i)
+                val att = NoteAttachment(
+                    id = imgObj.optString("id", java.util.UUID.randomUUID().toString()),
+                    originalName = imgObj.optString("originalName", "image"),
+                    mimeType = imgObj.optString("mimeType", "image/jpeg"),
+                    size = imgObj.optLong("size", 0),
+                    storedPath = imgObj.optString("storedPath", ""),
+                    type = try {
+                        NoteAttachment.AttachmentType.valueOf(imgObj.optString("type", "IMAGE"))
+                    } catch (_: Exception) {
+                        NoteAttachment.AttachmentType.IMAGE
+                    },
+                    isIntegrated = imgObj.optBoolean("isIntegrated", false),
+                    encryptedPath = imgObj.optString("encryptedPath", ""),
+                    metadata = mapOf(
+                        "x" to imgObj.optDouble("x", 0.0).toString(),
+                        "y" to imgObj.optDouble("y", 0.0).toString(),
+                        "width" to imgObj.optDouble("width", 200.0).toString(),
+                        "height" to imgObj.optDouble("height", 200.0).toString(),
+                        "layer" to imgObj.optString("layer", "IN_FRONT_OF_TEXT"),
+                        "pageIndex" to imgObj.optInt("pageIndex", 0).toString()
+                    )
+                )
+                attachmentsList.add(att)
+            }
+
             pagesList to attachmentsToJson(attachmentsList, embedFiles = true)
         } else {
             val content = json.optString("content", plaintext)

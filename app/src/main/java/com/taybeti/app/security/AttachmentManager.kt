@@ -234,6 +234,11 @@ object AttachmentManager {
                     else "" to ""
                 }.filter { it.key.isNotEmpty() }
                 
+                val extraMeta = mutableMapOf<String, String>()
+                listOf("x", "y", "width", "height", "layer", "pageIndex").forEach { key ->
+                    map[key]?.let { extraMeta[key] = it }
+                }
+                
                 val att = NoteAttachment(
                     id = map["id"] ?: UUID.randomUUID().toString(),
                     originalName = map["originalName"] ?: "attachment",
@@ -246,7 +251,8 @@ object AttachmentManager {
                         NoteAttachment.AttachmentType.OTHER
                     },
                     isIntegrated = map["isIntegrated"]?.toBoolean() ?: false,
-                    encryptedPath = map["encryptedPath"] ?: ""
+                    encryptedPath = map["encryptedPath"] ?: "",
+                    metadata = extraMeta
                 )
                 
                 // If fileData exists (base64-encoded file content), write it to disk
@@ -277,7 +283,12 @@ object AttachmentManager {
                     ""","fileData":"$encoded""""
                 } else ""
             } else ""
-            """{"id":"${att.id}","originalName":"${att.originalName.replace("\\", "\\\\")}","mimeType":"${att.mimeType}","size":${att.size},"storedPath":"${att.storedPath.replace("\\", "\\\\")}","type":"${att.type.name}","isIntegrated":${att.isIntegrated},"encryptedPath":"${att.encryptedPath.replace("\\", "\\\\")}"$fileData}"""
+            val metaFields = listOf("x", "y", "width", "height", "layer", "pageIndex")
+            val metaJson = metaFields.mapNotNull { key ->
+                att.metadata[key]?.let { value -> """"$key":"$value"""" }
+            }.joinToString(",")
+            val metaStr = if (metaJson.isNotEmpty()) ",$metaJson" else ""
+            """{"id":"${att.id}","originalName":"${att.originalName.replace("\\", "\\\\")}","mimeType":"${att.mimeType}","size":${att.size},"storedPath":"${att.storedPath.replace("\\", "\\\\")}","type":"${att.type.name}","isIntegrated":${att.isIntegrated},"encryptedPath":"${att.encryptedPath.replace("\\", "\\\\")}"$fileData$metaStr}"""
         }
     }
 }
