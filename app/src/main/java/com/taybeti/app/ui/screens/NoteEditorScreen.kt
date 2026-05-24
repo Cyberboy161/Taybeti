@@ -693,6 +693,7 @@ fun NoteEditorScreen(
     var zoomScale by remember { mutableStateOf(1f) }
 
     var selectedDrawingImagePath by remember { mutableStateOf<String?>(null) }
+    var imageVersion by remember { mutableStateOf(0) }
 
     fun saveUndoState() {
         val now = System.currentTimeMillis()
@@ -2193,6 +2194,7 @@ fun NoteEditorScreen(
                                     if (idx >= 0) {
                                         images.removeAt(idx)
                                         images.add(idx, updated)
+                                        imageVersion++
                                     }
                                 },
                                 onDelete = {
@@ -2228,6 +2230,7 @@ fun NoteEditorScreen(
                             if (idx >= 0) {
                                 images.removeAt(idx)
                                 images.add(idx, updatedImage)
+                                imageVersion++
                             }
                         },
                         onImageDelete = { id ->
@@ -2250,7 +2253,8 @@ fun NoteEditorScreen(
                         onTableCellTap = { paraIdx, rowIdx, cellIdx ->
                             editingTableCell = Triple(paraIdx, rowIdx, cellIdx)
                         },
-                        zoomScale = zoomScale
+                        zoomScale = zoomScale,
+                        imageVersion = imageVersion
                     )
                 }
             }
@@ -2492,7 +2496,8 @@ private fun WordEditorCanvasRich(
     pageHeight: Int,
     pageBackgroundColor: Color,
     onTableCellTap: (Int, Int, Int) -> Unit,
-    zoomScale: Float
+    zoomScale: Float,
+    imageVersion: Int
 ) {
     val scrollState = rememberScrollState()
     var prevPageCount by remember { mutableStateOf(pages.size) }
@@ -3113,6 +3118,7 @@ private fun ImageOptionsDialog(
     var pendingLayer by remember { mutableStateOf(image.layer) }
     var pendingWidth by remember { mutableStateOf(image.width) }
     var pendingHeight by remember { mutableStateOf(image.height) }
+    val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Image Options", fontWeight = FontWeight.Bold) },
@@ -3222,6 +3228,7 @@ private fun ImageOptionsDialog(
                     Text("Delete", color = MaterialTheme.colorScheme.error)
                 }
                 TextButton(onClick = {
+                    Toast.makeText(context, "Saving layer: ${pendingLayer.name}", Toast.LENGTH_SHORT).show()
                     onUpdate(image.copy(layer = pendingLayer, width = pendingWidth, height = pendingHeight))
                     onDismiss()
                 }) {
