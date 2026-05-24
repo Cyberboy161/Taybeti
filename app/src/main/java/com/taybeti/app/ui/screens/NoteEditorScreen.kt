@@ -686,6 +686,7 @@ fun NoteEditorScreen(
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
     var zoomScale by remember { mutableStateOf(1f) }
+    var lastContentKeyTime by remember { mutableStateOf(0L) }
 
     fun saveUndoState() {
         val now = System.currentTimeMillis()
@@ -869,6 +870,9 @@ fun NoteEditorScreen(
         kb.attach(
             field = "content",
             onKey = { char ->
+                val now = System.currentTimeMillis()
+                if (now - lastContentKeyTime < 300L) return@attach
+                lastContentKeyTime = now
                 saveUndoState()
                 if (currentPageIndex < pages.size) {
                     pages[currentPageIndex].appendText(char.toString())
@@ -1664,7 +1668,7 @@ fun NoteEditorScreen(
                                         .clipToBounds(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Canvas(modifier = Modifier.fillMaxSize()) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
                                         val w = size.width
                                         val h = size.height
                                         when (tmpl) {
@@ -2480,9 +2484,9 @@ private fun WordEditorCanvasRich(
 ) {
     val scrollState = rememberScrollState()
     val isDark = pageTheme == "dark"
-    val pageBg = if (isDark) Color(0xFF222222) else Color.White
+    val pageBg = if (isDark) Color(0xFF1A1A1A) else Color.White
     val pageBorder = if (isDark) Color(0xFF444444) else Color.LightGray.copy(alpha = 0.3f)
-    val canvasBg = if (isDark) Color(0xFF2A2A2A) else Color(0xFFF0F0F0)
+    val canvasBg = if (isDark) Color(0xFF0D0D0D) else Color(0xFFF0F0F0)
     val textColor = if (isDark) Color.White else Color.Black
     val placeholderColor = Color.Gray
 
@@ -3965,10 +3969,7 @@ private fun DrawingPanelDialog(
                             )
                         }
                 ) {
-                    Canvas(modifier = Modifier.fillMaxSize().graphicsLayer {
-                        scaleX = canvasZoom; scaleY = canvasZoom
-                        transformOrigin = TransformOrigin(0f, 0f)
-                    }) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
                         paths.forEach { drawingPath ->
                             val alpha = if (drawingPath.isEraser) 1f else getBrushAlpha(drawingPath.brushType)
                             drawPath(
