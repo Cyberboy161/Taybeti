@@ -12,8 +12,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -38,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.ContentCopy
@@ -123,6 +126,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -221,6 +225,7 @@ data class TextSpan(
 
 enum class TextAlignMode { LEFT, CENTER, RIGHT, JUSTIFY }
 enum class ListType { NONE, BULLETED, NUMBERED }
+enum class PageTemplate { BLANK, LINED, GRID, DOTTED, CORNELL }
 enum class MarginPreset { NARROW, NORMAL, WIDE }
 
 data class Paragraph(
@@ -238,7 +243,8 @@ data class FormattedText(
     val paragraphs: MutableList<Paragraph> = mutableListOf(Paragraph()),
     var headerText: String = "",
     var footerText: String = "",
-    var showPageNumbers: Boolean = true
+    var showPageNumbers: Boolean = true,
+    var template: PageTemplate = PageTemplate.BLANK
 ) {
     fun toPlainText(): String {
         return paragraphs.joinToString("\n") { paragraph ->
@@ -310,6 +316,10 @@ data class FormattedText(
     }
 
     fun appendText(char: String) {
+        if (char == "\n") {
+            insertNewline()
+            return
+        }
         if (paragraphs.isEmpty()) paragraphs.add(Paragraph())
         val para = paragraphs.last()
         if (para.spans.isEmpty()) para.spans.add(TextSpan())
@@ -383,7 +393,8 @@ data class FormattedText(
         sb.append("],")
         sb.append("\"header\":\"${escapeJson(headerText)}\",")
         sb.append("\"footer\":\"${escapeJson(footerText)}\",")
-        sb.append("\"showPageNumbers\":$showPageNumbers")
+        sb.append("\"showPageNumbers\":$showPageNumbers,")
+        sb.append("\"template\":\"${template.name}\"")
         sb.append("}")
         return sb.toString()
     }
@@ -404,6 +415,7 @@ data class FormattedText(
                 ft.headerText = obj.optString("header", "")
                 ft.footerText = obj.optString("footer", "")
                 ft.showPageNumbers = obj.optBoolean("showPageNumbers", true)
+                ft.template = try { PageTemplate.valueOf(obj.optString("template", "BLANK")) } catch (_: Exception) { PageTemplate.BLANK }
                 val parasArray = obj.optJSONArray("paragraphs")
                 if (parasArray != null) {
                     ft.paragraphs.clear()
@@ -662,10 +674,11 @@ fun NoteEditorScreen(
     var lastUndoSaveTime by remember { mutableStateOf(0L) }
     var showTemplatePicker by remember { mutableStateOf(false) }
     var showPageColorPicker by remember { mutableStateOf(false) }
-    var pageBackgroundColor by remember { mutableStateOf(Color.White) }
+    var pageBackgroundColor by remember { mutableStateOf(Color(0xFF2A2A2A)) }
     var showDrawingPanel by remember { mutableStateOf(false) }
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
+    var zoomScale by remember { mutableStateOf(1f) }
 
     fun saveUndoState() {
         val now = System.currentTimeMillis()
@@ -1586,37 +1599,106 @@ fun NoteEditorScreen(
                 onDismissRequest = { showTemplatePicker = false },
                 title = { Text("Page Templates") },
                 text = {
-                    Column {
-                        listOf(
-                            "Blank" to "Empty page",
-                            "Lined" to "Horizontal lines for writing",
-                            "Grid" to "Grid pattern",
-                            "Dotted" to "Dot grid pattern",
-                            "Cornell" to "Cornell note-taking layout"
-                        ).forEach { (name, desc) ->
+                    val isDark = pageTheme == "dark"
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        PageTemplate.entries.forEach { tmpl ->
+                            val ft = pages.getOrNull(currentPageIndex)
+                            val isActive = ft?.template == tmpl
+                            val name = when (tmpl) {
+                                PageTemplate.BLANK -> "Blank"
+                                PageTemplate.LINED -> "Lined"
+                                PageTemplate.GRID -> "Grid"
+                                PageTemplate.DOTTED -> "Dotted"
+                                PageTemplate.CORNELL -> "Cornell"
+                            }
+                            val desc = when (tmpl) {
+                                PageTemplate.BLANK -> "Empty page"
+                                PageTemplate.LINED -> "Horizontal lines"
+                                PageTemplate.GRID -> "Grid pattern"
+                                PageTemplate.DOTTED -> "Dot grid"
+                                PageTemplate.CORNELL -> "Cornell layout"
+                            }
+                            val bgColor = if (isDark) Color(0xFF1E1E1E) else Color.White
+                            val lineColor = if (isDark) Color(0xFF444444) else Color(0xFFCCCCCC)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
                                     .clickable {
-                                        val ft = pages.getOrNull(currentPageIndex)
-                                        if (ft != null) {
-                                            ft.headerText = when (name) {
-                                                "Cornell" -> "Topic: ___________"
+                                        val curFt = pages.getOrNull(currentPageIndex)
+                                        if (curFt != null) {
+                                            curFt.template = tmpl
+                                            curFt.headerText = when (tmpl) {
+                                                PageTemplate.CORNELL -> "Topic: ___________"
                                                 else -> ""
                                             }
-                                            ft.footerText = when (name) {
-                                                "Cornell" -> "Summary: ___________"
+                                            curFt.footerText = when (tmpl) {
+                                                PageTemplate.CORNELL -> "Summary: ___________"
                                                 else -> ""
                                             }
                                         }
                                         showTemplatePicker = false
-                                    }
-                                    .padding(vertical = 12.dp),
+                                    },
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // Preview thumbnail
+                                Box(
+                                    modifier = Modifier
+                                        .size(64.dp, 48.dp)
+                                        .background(bgColor, RoundedCornerShape(4.dp))
+                                        .border(
+                                            1.dp,
+                                            if (isActive) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f),
+                                            RoundedCornerShape(4.dp)
+                                        )
+                                        .clipToBounds(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Canvas(modifier = Modifier.fillMaxSize()) {
+                                        val w = size.width
+                                        val h = size.height
+                                        when (tmpl) {
+                                            PageTemplate.LINED -> {
+                                                val spacing = h / 6
+                                                for (i in 1 until 6) {
+                                                    drawLine(lineColor, Offset(0f, spacing * i), Offset(w, spacing * i), strokeWidth = 0.5f)
+                                                }
+                                            }
+                                            PageTemplate.GRID -> {
+                                                for (i in 1 until 6) {
+                                                    val y = h * i / 6
+                                                    drawLine(lineColor, Offset(0f, y), Offset(w, y), strokeWidth = 0.5f)
+                                                }
+                                                for (i in 1 until 5) {
+                                                    val x = w * i / 4
+                                                    drawLine(lineColor, Offset(x, 0f), Offset(x, h), strokeWidth = 0.5f)
+                                                }
+                                            }
+                                            PageTemplate.DOTTED -> {
+                                                val dotSpacingX = w / 5
+                                                val dotSpacingY = h / 5
+                                                for (ix in 1 until 5) {
+                                                    for (iy in 1 until 5) {
+                                                        drawCircle(lineColor, radius = 1.5f, center = Offset(dotSpacingX * ix, dotSpacingY * iy))
+                                                    }
+                                                }
+                                            }
+                                            PageTemplate.CORNELL -> {
+                                                val qr = h * 0.35f
+                                                drawLine(lineColor, Offset(0f, qr), Offset(w, qr), strokeWidth = 1f)
+                                                drawLine(lineColor, Offset(w * 0.3f, qr), Offset(w * 0.3f, h), strokeWidth = 0.5f)
+                                            }
+                                            PageTemplate.BLANK -> {}
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(name, fontWeight = FontWeight.Medium)
+                                    Text(name, fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium)
                                     Text(desc, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                }
+                                if (isActive) {
+                                    Icon(Icons.Default.Check, "Active", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                 }
                             }
                         }
@@ -1966,85 +2048,108 @@ fun NoteEditorScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Theme toggle + page options
-                    Row(
+                    // Theme, color, template, draw, zoom — all in one outlined bar
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
                     ) {
-                        Text("Theme:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Box(
+                        Row(
                             modifier = Modifier
-                                .size(32.dp)
-                                .border(
-                                    width = 1.dp,
-                                    color = if (pageTheme == "light") MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = RoundedCornerShape(4.dp)
-                                )
-                                .clickable { pageTheme = "light" },
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.LightMode,
-                                contentDescription = "Light mode",
-                                tint = if (pageTheme == "light") Color(0xFFFFB300) else Color.Gray,
-                                modifier = Modifier.size(18.dp)
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .border(1.dp, if (pageTheme == "light") MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(4.dp))
+                                    .clickable { pageTheme = "light" },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.LightMode, "Light", tint = if (pageTheme == "light") Color(0xFFFFB300) else Color.Gray, modifier = Modifier.size(22.dp))
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .border(1.dp, if (pageTheme == "dark") MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(4.dp))
+                                    .clickable { pageTheme = "dark" },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.NightsStay, "Dark", tint = if (pageTheme == "dark") Color(0xFF90CAF9) else Color.Gray, modifier = Modifier.size(22.dp))
+                            }
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(modifier = Modifier.width(1.dp).height(24.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(pageBackgroundColor, RoundedCornerShape(4.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                    .clickable { showPageColorPicker = true },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.ColorLens, "Color", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                    .clickable { showTemplatePicker = true },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.GridOn, "Template", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                    .clickable { showDrawingPanel = true },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Edit, "Draw", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(modifier = Modifier.width(1.dp).height(24.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                    .clickable { zoomScale = (zoomScale - 0.1f).coerceIn(0.5f, 3f) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Remove, "Zoom Out", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface)
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                "${(zoomScale * 100).toInt()}%",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.width(48.dp),
+                                textAlign = TextAlign.Center
                             )
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .border(
-                                    width = 1.dp,
-                                    color = if (pageTheme == "dark") MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = RoundedCornerShape(4.dp)
-                                )
-                                .clickable { pageTheme = "dark" },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.NightsStay,
-                                contentDescription = "Dark mode",
-                                tint = if (pageTheme == "dark") Color(0xFF90CAF9) else Color.Gray,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(pageBackgroundColor, RoundedCornerShape(4.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
-                                .clickable { showPageColorPicker = true },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.ColorLens, "Page Color", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
-                                .clickable { showTemplatePicker = true },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.GridOn, "Template", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
-                                .clickable { showDrawingPanel = true },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.Edit, "Draw", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                    .clickable { zoomScale = (zoomScale + 0.1f).coerceIn(0.5f, 3f) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Add, "Zoom In", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface)
+                            }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     if (showImageOptions) {
                         val selectedImg = images.find { it.attachment.id == selectedImageId }
@@ -2064,6 +2169,9 @@ fun NoteEditorScreen(
                                         }
                                         images.remove(img)
                                     }
+                                },
+                                onOpenDrawing = {
+                                    showDrawingPanel = true
                                 }
                             )
                         } else {
@@ -2075,7 +2183,7 @@ fun NoteEditorScreen(
                         pages = pages,
                         images = images,
                         currentPageIndex = currentPageIndex,
-                        onPageSelect = { currentPageIndex = it },
+                        onPageSelect = { idx -> currentPageIndex = idx },
                         onImageSelect = { id ->
                             selectedImageId = id
                             showImageOptions = true
@@ -2105,12 +2213,13 @@ fun NoteEditorScreen(
                         pageBackgroundColor = pageBackgroundColor,
                         onTableCellTap = { paraIdx, rowIdx, cellIdx ->
                             editingTableCell = Triple(paraIdx, rowIdx, cellIdx)
-                        }
+                        },
+                        zoomScale = zoomScale
                     )
                 }
             }
         }
-    } // KeyboardHost
+    }
 }
 
 // ─── Leap 1-5: Rich Text Toolbar ───
@@ -2149,7 +2258,6 @@ private fun RichTextToolbar(
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
             .padding(horizontal = 4.dp, vertical = 4.dp)
     ) {
-        // Row 1: Formatting buttons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2163,7 +2271,6 @@ private fun RichTextToolbar(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Font family dropdown
             Box {
                 TextButton(onClick = { showFontMenu = true }) {
                     Text(currentFontFamily, fontSize = 12.sp)
@@ -2184,7 +2291,6 @@ private fun RichTextToolbar(
                 }
             }
 
-            // Font size dropdown
             Box {
                 TextButton(onClick = { showSizeMenu = true }) {
                     Text("${currentFontSize}sp", fontSize = 12.sp)
@@ -2207,7 +2313,6 @@ private fun RichTextToolbar(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Alignment buttons
             FormatToggleIcon(Icons.Default.FormatAlignLeft, "Left", active = currentAlignment == TextAlignMode.LEFT) {
                 onAlignmentChange(TextAlignMode.LEFT)
             }
@@ -2223,7 +2328,6 @@ private fun RichTextToolbar(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Color pickers
             IconButton(onClick = onTextColorClick) {
                 Icon(Icons.Default.FormatColorText, "Text Color", tint = MaterialTheme.colorScheme.onSurface)
             }
@@ -2233,7 +2337,6 @@ private fun RichTextToolbar(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // List buttons
             FormatToggleIcon(Icons.Default.FormatListBulleted, "Bulleted List", active = currentListType == ListType.BULLETED) {
                 onListTypeChange(if (currentListType == ListType.BULLETED) ListType.NONE else ListType.BULLETED)
             }
@@ -2243,7 +2346,6 @@ private fun RichTextToolbar(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Margin preset
             Box {
                 TextButton(onClick = { showMarginMenu = true }) {
                     Text(
@@ -2273,17 +2375,14 @@ private fun RichTextToolbar(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Table insert
             IconButton(onClick = onInsertTable) {
                 Icon(Icons.Default.GridOn, "Insert Table")
             }
 
-            // Find and Replace
             IconButton(onClick = onFindReplace) {
                 Icon(Icons.Default.FindReplace, "Find and Replace")
             }
 
-            // Attach
             Box {
                 IconButton(onClick = { showAttachMenu = true }) {
                     Icon(Icons.Default.AttachFile, "Attach")
@@ -2356,7 +2455,8 @@ private fun WordEditorCanvasRich(
     pageWidth: Int,
     pageHeight: Int,
     pageBackgroundColor: Color,
-    onTableCellTap: (Int, Int, Int) -> Unit
+    onTableCellTap: (Int, Int, Int) -> Unit,
+    zoomScale: Float
 ) {
     val scrollState = rememberScrollState()
     val isDark = pageTheme == "dark"
@@ -2365,17 +2465,11 @@ private fun WordEditorCanvasRich(
     val canvasBg = if (isDark) Color(0xFF121212) else Color(0xFFF0F0F0)
     val textColor = if (isDark) Color.White else Color.Black
     val placeholderColor = Color.Gray
-    var zoomScale by remember { mutableStateOf(1f) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(canvasBg)
-            .pointerInput(Unit) {
-                detectTransformGestures { _, _, zoom, _ ->
-                    zoomScale = (zoomScale * zoom).coerceIn(0.5f, 3f)
-                }
-            }
     ) {
         Column(
             modifier = Modifier
@@ -2411,7 +2505,6 @@ private fun WordEditorCanvasRich(
                 )
             }
 
-            // Add page button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2440,7 +2533,6 @@ private fun WordEditorCanvasRich(
             }
         }
 
-        // Scrollbar
         if (scrollState.maxValue > 0) {
             val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue
             Box(
@@ -2497,12 +2589,63 @@ private fun PageBlockRich(
             )
             .clickable { onPageSelect() }
     ) {
+        // Template background pattern
+        if (formattedText.template != PageTemplate.BLANK) {
+            val lineColor = if (isDark) Color(0xFF333333) else Color(0xFFE0E0E0)
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val w = size.width
+                val h = size.height
+                when (formattedText.template) {
+                    PageTemplate.LINED -> {
+                        val spacing = h / 24
+                        var y = spacing
+                        while (y < h) {
+                            drawLine(lineColor, Offset(0f, y), Offset(w, y), strokeWidth = 0.5f)
+                            y += spacing
+                        }
+                    }
+                    PageTemplate.GRID -> {
+                        val spacingX = w / 20
+                        val spacingY = h / 24
+                        var x = spacingX
+                        while (x < w) {
+                            drawLine(lineColor, Offset(x, 0f), Offset(x, h), strokeWidth = 0.3f)
+                            x += spacingX
+                        }
+                        var y = spacingY
+                        while (y < h) {
+                            drawLine(lineColor, Offset(0f, y), Offset(w, y), strokeWidth = 0.3f)
+                            y += spacingY
+                        }
+                    }
+                    PageTemplate.DOTTED -> {
+                        val spacingX = w / 24
+                        val spacingY = h / 24
+                        var x = spacingX
+                        while (x < w) {
+                            var y = spacingY
+                            while (y < h) {
+                                drawCircle(lineColor, radius = 1.5f, center = Offset(x, y))
+                                y += spacingY
+                            }
+                            x += spacingX
+                        }
+                    }
+                    PageTemplate.CORNELL -> {
+                        val cueColWidth = w * 0.3f
+                        val summaryHeight = h * 0.2f
+                        drawLine(lineColor, Offset(0f, h - summaryHeight), Offset(w, h - summaryHeight), strokeWidth = 1.5f)
+                        drawLine(lineColor, Offset(cueColWidth, 0f), Offset(cueColWidth, h - summaryHeight), strokeWidth = 1f)
+                    }
+                    else -> {}
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = marginSettings.horizontal.dp, vertical = marginSettings.vertical.dp)
         ) {
-            // Leap 9: Header
             if (formattedText.headerText.isNotEmpty()) {
                 Text(
                     text = formattedText.headerText,
@@ -2514,7 +2657,6 @@ private fun PageBlockRich(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Content
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2619,25 +2761,35 @@ private fun PageBlockRich(
                     }
                 } else if (isSelected && formattedText.paragraphs.isNotEmpty()) {
                     val lastPara = formattedText.paragraphs.last()
-                    if (lastPara.tableRows == null && lastPara.spans.all { it.text.isEmpty() }) {
-                        val cursorAlpha = remember { Animatable(1f) }
-                        LaunchedEffect(Unit) {
-                            while (true) {
-                                cursorAlpha.animateTo(0f, animationSpec = tween(500))
-                                cursorAlpha.animateTo(1f, animationSpec = tween(500))
+                    if (lastPara.tableRows == null) {
+                        val lastText = lastPara.spans.joinToString("") { it.text }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = lastText,
+                                color = textColor,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            val cursorAlpha = remember { Animatable(1f) }
+                            LaunchedEffect(Unit) {
+                                while (true) {
+                                    cursorAlpha.animateTo(0f, animationSpec = tween(500))
+                                    cursorAlpha.animateTo(1f, animationSpec = tween(500))
+                                }
                             }
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(20.dp)
+                                    .background(textColor.copy(alpha = cursorAlpha.value))
+                            )
                         }
-                        Box(
-                            modifier = Modifier
-                                .width(2.dp)
-                                .height(20.dp)
-                                .background(textColor.copy(alpha = cursorAlpha.value))
-                        )
                     }
                 }
             }
 
-            // Leap 9: Footer
             if (formattedText.footerText.isNotEmpty() || formattedText.showPageNumbers) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -2661,7 +2813,6 @@ private fun PageBlockRich(
             }
         }
 
-        // Images behind text
         images.filter { it.layer == ImageLayer.BEHIND_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
             DraggableImage(
                 image = img,
@@ -2671,7 +2822,6 @@ private fun PageBlockRich(
             )
         }
 
-        // Integrated images
         val integratedImages = images.filter { it.layer == ImageLayer.INTEGRATED && it.pageIndex == pageNumber - 1 }
         if (integratedImages.isNotEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(marginSettings.horizontal.dp, marginSettings.vertical.dp)) {
@@ -2693,7 +2843,6 @@ private fun PageBlockRich(
             }
         }
 
-        // Images in front of text
         images.filter { it.layer == ImageLayer.IN_FRONT_OF_TEXT && it.pageIndex == pageNumber - 1 }.forEach { img ->
             DraggableImage(
                 image = img,
@@ -2928,7 +3077,8 @@ private fun ImageOptionsDialog(
     image: EditorImage,
     onDismiss: () -> Unit,
     onUpdate: (EditorImage) -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onOpenDrawing: () -> Unit = {}
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -3022,6 +3172,18 @@ private fun ImageOptionsDialog(
                         Icon(Icons.Default.Add, contentDescription = "Enlarge")
                         Text("Larger")
                     }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                TextButton(
+                    onClick = {
+                        onOpenDrawing()
+                        onDismiss()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Open in Drawing Panel")
                 }
             }
         },
@@ -3407,7 +3569,7 @@ private fun HSVColorWheel(
 ) {
     var hue by remember { mutableStateOf(0f) }
     var saturation by remember { mutableStateOf(1f) }
-    var value by remember { mutableStateOf(1f) }
+    var value by remember { mutableStateOf(0.75f) }
 
     LaunchedEffect(selectedColor) {
         val hsv = FloatArray(3)
@@ -3496,6 +3658,9 @@ private fun DrawingPanelDialog(
     var showBrushMenu by remember { mutableStateOf(false) }
     var canvasWidth by remember { mutableStateOf(1200) }
     var canvasHeight by remember { mutableStateOf(900) }
+    var canvasActualWidth by remember { mutableStateOf(400) }
+    var canvasActualHeight by remember { mutableStateOf(600) }
+    var eraserPos by remember { mutableStateOf<Offset?>(null) }
     val paths = remember { mutableStateListOf<DrawingPath>() }
     var currentPath by remember { mutableStateOf<DrawingPath?>(null) }
 
@@ -3605,18 +3770,42 @@ private fun DrawingPanelDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Size: ${strokeWidth.toInt()}px", style = MaterialTheme.typography.bodySmall)
-                    Text("Brush: ${currentBrush.name}", style = MaterialTheme.typography.bodySmall)
+                    // Size indicator
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.FormatSize, "Size", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("${strokeWidth.toInt()}px", style = MaterialTheme.typography.bodySmall)
+                    }
+                    // Brush indicator
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            when (currentBrush) {
+                                BrushType.PEN -> Icons.Default.Edit
+                                BrushType.MARKER -> Icons.Default.FormatBold
+                                BrushType.HIGHLIGHTER -> Icons.Default.FormatColorFill
+                                BrushType.CALLIGRAPHY -> Icons.Default.FormatItalic
+                            },
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = strokeColor
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(currentBrush.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall)
+                    }
                     if (isEraser) {
-                        Text("ERASER", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                        Icon(Icons.Default.FormatClear, "Eraser Active", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                     }
                 }
 
                 if (isEraser) {
-                    Text("Eraser Size: ${eraserSize.toInt()}px", style = MaterialTheme.typography.bodySmall)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.FormatClear, "Eraser Size", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Size: ${eraserSize.toInt()}px", style = MaterialTheme.typography.bodySmall)
+                    }
                     Slider(
                         value = eraserSize,
                         onValueChange = { eraserSize = it },
@@ -3633,6 +3822,7 @@ private fun DrawingPanelDialog(
                         .fillMaxWidth()
                         .background(Color.White, RoundedCornerShape(8.dp))
                         .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                        .onSizeChanged { canvasActualWidth = it.width; canvasActualHeight = it.height }
                         .pointerInput(strokeColor, strokeWidth, isEraser, currentBrush, eraserSize) {
                             detectDragGestures(
                                 onDragStart = { offset ->
@@ -3647,14 +3837,17 @@ private fun DrawingPanelDialog(
                                         brushType = currentBrush,
                                         isEraser = isEraser
                                     )
+                                    if (isEraser) eraserPos = offset
                                 },
                                 onDragEnd = {
                                     currentPath?.let { paths.add(it) }
                                     currentPath = null
+                                    eraserPos = null
                                 },
                                 onDrag = { change, _ ->
                                     change.consume()
                                     currentPath?.path?.lineTo(change.position.x, change.position.y)
+                                    if (isEraser) eraserPos = change.position
                                 }
                             )
                         }
@@ -3684,6 +3877,16 @@ private fun DrawingPanelDialog(
                                 )
                             )
                         }
+                        // Eraser outline preview
+                        if (isEraser && eraserPos != null) {
+                            val pos = eraserPos!!
+                            drawCircle(
+                                color = Color.Gray.copy(alpha = 0.5f),
+                                radius = eraserSize / 2f,
+                                center = pos,
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+                            )
+                        }
                     }
                 }
 
@@ -3700,14 +3903,16 @@ private fun DrawingPanelDialog(
                     ) { Text("Cancel") }
                     Button(
                         onClick = {
-                            val bitmap = Bitmap.createBitmap(canvasWidth, canvasHeight, Bitmap.Config.ARGB_8888)
+                            val scale = 2.5f
+                            val bmpW = (canvasActualWidth * scale).toInt().coerceAtLeast(400)
+                            val bmpH = (canvasActualHeight * scale).toInt().coerceAtLeast(400)
+                            val bitmap = Bitmap.createBitmap(bmpW, bmpH, Bitmap.Config.ARGB_8888)
                             val androidCanvas = android.graphics.Canvas(bitmap)
                             androidCanvas.drawColor(android.graphics.Color.WHITE)
                             
-                            val scaleX = canvasWidth.toFloat() / 1200f
-                            val scaleY = canvasHeight.toFloat() / 900f
-                            
                             val composeCanvas = androidx.compose.ui.graphics.Canvas(androidCanvas)
+                            composeCanvas.scale(scale, scale)
+                            
                             val composePaint = androidx.compose.ui.graphics.Paint().apply {
                                 isAntiAlias = true
                                 style = androidx.compose.ui.graphics.PaintingStyle.Stroke
@@ -3718,7 +3923,7 @@ private fun DrawingPanelDialog(
                             paths.forEach { drawingPath ->
                                 val alpha = if (drawingPath.isEraser) 1f else getBrushAlpha(drawingPath.brushType)
                                 composePaint.color = drawingPath.color.copy(alpha = alpha)
-                                composePaint.strokeWidth = drawingPath.width * scaleX
+                                composePaint.strokeWidth = drawingPath.width
                                 composeCanvas.drawPath(drawingPath.path, composePaint)
                             }
                             
