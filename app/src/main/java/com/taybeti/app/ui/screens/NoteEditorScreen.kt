@@ -255,6 +255,7 @@ data class FormattedText(
     var showPageNumbers: Boolean = true,
     var template: PageTemplate = PageTemplate.BLANK
 ) {
+    var renderVersion by mutableStateOf(0)
     fun toPlainText(): String {
         return paragraphs.joinToString("\n") { paragraph ->
             paragraph.spans.joinToString("") { it.text }
@@ -323,6 +324,7 @@ data class FormattedText(
     fun appendText(char: String) {
         if (char == "\n") {
             insertNewline()
+            renderVersion++
             return
         }
         if (paragraphs.isEmpty()) paragraphs.add(Paragraph())
@@ -330,6 +332,7 @@ data class FormattedText(
         if (para.spans.isEmpty()) para.spans.add(TextSpan())
         val lastSpan = para.spans.last()
         para.spans[para.spans.lastIndex] = lastSpan.copy(text = lastSpan.text + char)
+        renderVersion++
     }
 
     fun deleteLastChar() {
@@ -345,6 +348,7 @@ data class FormattedText(
         } else if (paragraphs.size > 1) {
             paragraphs.removeAt(paragraphs.lastIndex)
         }
+        renderVersion++
     }
 
     fun insertNewline() {
@@ -355,6 +359,7 @@ data class FormattedText(
             listType = if (currentPara.listType == ListType.NUMBERED) ListType.NUMBERED else ListType.NONE
         )
         paragraphs.add(newPara)
+        renderVersion++
     }
 
     fun toJson(): String {
@@ -2074,8 +2079,8 @@ fun NoteEditorScreen(
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
+) {
+    Box(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .border(1.dp, if (pageTheme == "light") MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(4.dp))
@@ -2602,6 +2607,8 @@ private fun PageBlockRich(
     pageHeight: Int,
     onTableCellTap: (Int, Int) -> Unit
 ) {
+    // Read renderVersion so Compose re-renders when text changes
+    val rv = formattedText.renderVersion
     Box(
         modifier = Modifier
             .fillMaxWidth()
