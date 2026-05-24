@@ -3562,85 +3562,87 @@ data class DrawingPath(
 )
 
 @Composable
-private fun HSVColorWheel(
+private fun ColorPresets(
     selectedColor: Color,
     onColorSelected: (Color) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var hue by remember { mutableStateOf(0f) }
-    var saturation by remember { mutableStateOf(1f) }
-    var value by remember { mutableStateOf(0.75f) }
+    val colors = listOf(
+        Color.Black to "Black",
+        Color(0xFF333333) to "Dark Gray",
+        Color(0xFF666666) to "Gray",
+        Color(0xFF999999) to "Light Gray",
+        Color.White to "White",
+        Color(0xFFCC0000) to "Red",
+        Color(0xFFFF6600) to "Orange",
+        Color(0xFFFFCC00) to "Yellow",
+        Color(0xFF00CC00) to "Green",
+        Color(0xFF0066FF) to "Blue",
+        Color(0xFF6600CC) to "Purple",
+        Color(0xFFFF3399) to "Pink",
+        Color(0xFF663300) to "Brown",
+        Color(0xFF00CCCC) to "Cyan",
+        Color(0xFF336600) to "Dark Green",
+        Color(0xFF000088) to "Navy"
+    )
 
-    LaunchedEffect(selectedColor) {
-        val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(
-            android.graphics.Color.rgb(
-                (selectedColor.red * 255).toInt(),
-                (selectedColor.green * 255).toInt(),
-                (selectedColor.blue * 255).toInt()
-            ),
-            hsv
-        )
-        hue = hsv[0]
-        saturation = hsv[1]
-        value = hsv[2]
-    }
-
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Canvas(
-            modifier = Modifier
-                .size(200.dp)
-                .pointerInput(Unit) {
-                    detectTapGestures { offset ->
-                        val centerX = size.width / 2f
-                        val centerY = size.height / 2f
-                        val dx = offset.x - centerX
-                        val dy = offset.y - centerY
-                        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-                        val radius = size.width / 2f
-
-                        if (distance <= radius) {
-                            saturation = (distance / radius).coerceIn(0f, 1f)
-                            hue = ((kotlin.math.atan2(dy.toDouble(), dx.toDouble()) * 180 / Math.PI).toFloat() + 360) % 360
-                            val newColor = Color.hsv(hue, saturation, value)
-                            onColorSelected(newColor)
-                        }
-                    }
-                }
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            val centerX = size.width / 2f
-            val centerY = size.height / 2f
-            val radius = size.width / 2f
-
-            for (angle in 0..359) {
-                for (r in 0 until radius.toInt()) {
-                    val sat = r.toFloat() / radius
-                    val color = Color.hsv(angle.toFloat(), sat, value)
-                    val x = centerX + r * kotlin.math.cos(angle * Math.PI / 180).toFloat()
-                    val y = centerY + r * kotlin.math.sin(angle * Math.PI / 180).toFloat()
-                    drawCircle(color, 1f, androidx.compose.ui.geometry.Offset(x, y))
-                }
+            var idx = 0
+            while (idx < 8 && idx < colors.size) {
+                val (c, name) = colors[idx]
+                ColorSwatch(c, name, selectedColor, onColorSelected, Modifier.weight(1f))
+                idx++
             }
-
-            val selectedX = centerX + saturation * radius * kotlin.math.cos(hue * Math.PI / 180).toFloat()
-            val selectedY = centerY + saturation * radius * kotlin.math.sin(hue * Math.PI / 180).toFloat()
-            drawCircle(Color.White, 8f, androidx.compose.ui.geometry.Offset(selectedX, selectedY))
-            drawCircle(Color.Black, 6f, androidx.compose.ui.geometry.Offset(selectedX, selectedY))
         }
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            var idx = 8
+            while (idx < colors.size) {
+                val (c, name) = colors[idx]
+                ColorSwatch(c, name, selectedColor, onColorSelected, Modifier.weight(1f))
+                idx++
+            }
+        }
+    }
+}
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text("Brightness: ${(value * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
-        Slider(
-            value = value,
-            onValueChange = {
-                value = it
-                val newColor = Color.hsv(hue, saturation, value)
-                onColorSelected(newColor)
-            },
-            valueRange = 0.1f..1f,
-            modifier = Modifier.fillMaxWidth()
-        )
+@Composable
+private fun ColorSwatch(
+    color: Color,
+    name: String,
+    selectedColor: Color,
+    onSelected: (Color) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isSelected = color == selectedColor
+    Box(
+        modifier = modifier
+            .height(36.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(color)
+            .border(
+                width = if (isSelected) 3.dp else 1.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(6.dp)
+            )
+            .clickable { onSelected(color) },
+        contentAlignment = Alignment.Center
+    ) {
+        if (isSelected) {
+            Icon(
+                Icons.Default.Check,
+                "Selected",
+                tint = if ((color.red + color.green + color.blue) / 3f > 0.6f) Color.Black else Color.White,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 
@@ -3742,9 +3744,15 @@ private fun DrawingPanelDialog(
                                 tint = if (isEraser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        IconButton(onClick = { showColorWheel = !showColorWheel }) {
-                            Icon(Icons.Default.ColorLens, "Color", tint = strokeColor)
-                        }
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(strokeColor)
+                                .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                .clickable { showColorWheel = !showColorWheel },
+                            contentAlignment = Alignment.Center
+                        )
                         IconButton(onClick = { strokeWidth = (strokeWidth + 1f).coerceAtMost(20f) }) {
                             Icon(Icons.Default.Add, "Thicker")
                         }
@@ -3761,7 +3769,7 @@ private fun DrawingPanelDialog(
                 }
 
                 if (showColorWheel) {
-                    HSVColorWheel(
+                    ColorPresets(
                         selectedColor = strokeColor,
                         onColorSelected = { strokeColor = it },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)

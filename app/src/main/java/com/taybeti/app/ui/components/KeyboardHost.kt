@@ -30,10 +30,24 @@ class KeyboardState {
         private set
     var isVisible by mutableStateOf(false)
         private set
+    private var lastKeyPressTime = 0L
+    private var lastDeleteTime = 0L
 
     fun attach(onKey: (Char) -> Unit, onDel: () -> Unit, onDone: () -> Unit) {
-        onKeyPress = onKey
-        onDelete = onDel
+        onKeyPress = { char ->
+            val now = System.currentTimeMillis()
+            if (now - lastKeyPressTime > 50L) {
+                lastKeyPressTime = now
+                onKey(char)
+            }
+        }
+        onDelete = {
+            val now = System.currentTimeMillis()
+            if (now - lastDeleteTime > 50L) {
+                lastDeleteTime = now
+                onDel()
+            }
+        }
         this.onDone = onDone
         isVisible = true
     }
