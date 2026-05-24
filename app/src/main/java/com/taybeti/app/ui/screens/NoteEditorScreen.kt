@@ -2190,7 +2190,10 @@ fun NoteEditorScreen(
                                 onDismiss = { showImageOptions = false },
                                 onUpdate = { updated ->
                                     val idx = images.indexOfFirst { it.attachment.id == updated.attachment.id }
-                                    if (idx >= 0) images[idx] = updated
+                                    if (idx >= 0) {
+                                        images.removeAt(idx)
+                                        images.add(idx, updated)
+                                    }
                                 },
                                 onDelete = {
                                     val img = images.find { it.attachment.id == selectedImageId }
@@ -2223,7 +2226,8 @@ fun NoteEditorScreen(
                         onImageUpdate = { updatedImage ->
                             val idx = images.indexOfFirst { it.attachment.id == updatedImage.attachment.id }
                             if (idx >= 0) {
-                                images[idx] = updatedImage
+                                images.removeAt(idx)
+                                images.add(idx, updatedImage)
                             }
                         },
                         onImageDelete = { id ->
