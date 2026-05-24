@@ -2689,6 +2689,8 @@ private fun PageBlockRich(
 
             val innerScrollState = rememberScrollState()
             LaunchedEffect(formattedText.paragraphs.size, formattedText.toPlainText().length) {
+                // Wait for layout to update maxValue before scrolling
+                kotlinx.coroutines.delay(50L)
                 innerScrollState.animateScrollTo(innerScrollState.maxValue)
             }
             Column(
