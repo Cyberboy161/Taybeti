@@ -8,14 +8,14 @@
         @page { size: A4; margin: 5mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier New', Courier, monospace; background: #fff; color: #111; }
-
+        h2 { text-align: center; font-size: 14px; margin: 8px 0 4px; color: #888; font-weight: 400; }
         .page {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(2, 1fr);
             gap: 2.5mm;
             width: 100%;
-            min-height: 100vh;
+            min-height: 95vh;
         }
         .card {
             position: relative;
@@ -25,101 +25,20 @@
             background: #fff;
         }
 
-        /* ── FRONT SIDE ── */
+        /* ── PAGE 1: FRONT ── */
         .front .half {
             flex: 1;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
-            padding: 4px 8px;
+            padding: 6px 10px 8px;
         }
-        .front .half-top {
-            border-bottom: 1.5px dashed #000;
-        }
+        .front .half-top { border-bottom: 1.5px dashed #000; }
         .front .write-line {
             width: 80%;
             border-bottom: 1px solid #666;
-            min-height: 12px;
+            min-height: 13px;
         }
-
-        /* ── BACK SIDE ── */
-        .back .half {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .back .half-top {
-            border-bottom: 1.5px dashed #000;
-        }
-        /* Decorative frame to disguise the QR code */
-        .qr-frame {
-            position: relative;
-            width: 24mm;
-            height: 24mm;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        /* Outer decorative border */
-        .qr-frame::before {
-            content: '';
-            position: absolute;
-            inset: -2mm;
-            border: 1px solid #aaa;
-            border-radius: 3px;
-            pointer-events: none;
-        }
-        /* Inner decorative dots at corners */
-        .qr-corner {
-            position: absolute;
-            width: 3mm;
-            height: 3mm;
-            background: #999;
-            border-radius: 50%;
-            z-index: 2;
-        }
-        .qr-corner.tl { top: -1.5mm; left: -1.5mm; }
-        .qr-corner.tr { top: -1.5mm; right: -1.5mm; }
-        .qr-corner.bl { bottom: -1.5mm; left: -1.5mm; }
-        .qr-corner.br { bottom: -1.5mm; right: -1.5mm; }
-        /* Cross-hatch lines behind QR to break up the pattern */
-        .qr-hatch {
-            position: absolute;
-            inset: 0;
-            background-image:
-                repeating-linear-gradient(45deg, transparent, transparent 1.2mm, rgba(0,0,0,0.04) 1.2mm, rgba(0,0,0,0.04) 1.3mm),
-                repeating-linear-gradient(-45deg, transparent, transparent 1.2mm, rgba(0,0,0,0.04) 1.2mm, rgba(0,0,0,0.04) 1.3mm);
-            pointer-events: none;
-            z-index: 1;
-        }
-        .qr-wrap {
-            width: 20mm;
-            height: 20mm;
-            position: relative;
-            z-index: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .qr-wrap img {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        /* Small "seal" or "stamp" text below each QR */
-        .qr-label {
-            font-size: 4px;
-            color: #bbb;
-            text-align: center;
-            margin-top: 1mm;
-            letter-spacing: 0.5px;
-        }
-
-        /* ── Cut indicators ── */
         .scissor-l {
             position: absolute; left: -5px; top: calc(50% - 6px);
             font-size: 10px; color: #555; z-index: 3;
@@ -129,18 +48,131 @@
             font-size: 10px; color: #555; z-index: 3;
         }
 
-        /* ── Info bar ── */
-        .info-bar {
-            position: fixed; bottom: 0; left: 0; right: 0; background: #111;
-            color: #fff; text-align: center; padding: 6px; font-size: 12px; z-index: 9999;
+        /* ── PAGE 2: BACK (artistic) ── */
+        .back .card {
+            border: 1.5px solid #ccc;
+            background: #fafaf8;
         }
-        .info-bar button {
-            background: #555; color: #fff; border: none; padding: 6px 18px;
-            border-radius: 6px; cursor: pointer; font-size: 13px; margin: 0 6px;
+        .back .half {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .back .half-top { border-bottom: 1.5px dashed #000; }
+
+        /* Decorative art frame */
+        .art-frame {
+            position: relative;
+            width: 26mm;
+            height: 26mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Outer decorative ring */
+        .art-ring {
+            position: absolute;
+            inset: -1.5mm;
+            border: 0.3mm solid #bbb;
+            border-radius: 2mm;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .art-ring-inner {
+            position: absolute;
+            inset: -0.5mm;
+            border: 0.2mm solid #ddd;
+            border-radius: 1.5mm;
+            pointer-events: none;
+            z-index: 1;
+        }
+        /* Corner ornaments — small diamond shapes */
+        .art-corner {
+            position: absolute;
+            width: 3mm;
+            height: 3mm;
+            background: #bbb;
+            transform: rotate(45deg);
+            z-index: 2;
+            border: 0.3mm solid #999;
+        }
+        .art-corner.tl { top: -2mm; left: -2mm; }
+        .art-corner.tr { top: -2mm; right: -2mm; }
+        .art-corner.bl { bottom: -2mm; left: -2mm; }
+        .art-corner.br { bottom: -2mm; right: -2mm; }
+
+        /* Fine dot pattern overlay — looks like handmade paper texture */
+        .art-dots {
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle, rgba(0,0,0,0.06) 0.15mm, transparent 0.15mm);
+            background-size: 1.8mm 1.8mm;
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* Subtle star/snowflake marks around the edges */
+        .art-stars {
+            position: absolute;
+            inset: -1mm;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                radial-gradient(circle at 20% 15%, rgba(0,0,0,0.08) 0.3mm, transparent 0.3mm),
+                radial-gradient(circle at 80% 15%, rgba(0,0,0,0.08) 0.3mm, transparent 0.3mm),
+                radial-gradient(circle at 20% 85%, rgba(0,0,0,0.08) 0.3mm, transparent 0.3mm),
+                radial-gradient(circle at 80% 85%, rgba(0,0,0,0.08) 0.3mm, transparent 0.3mm),
+                radial-gradient(circle at 50% 8%, rgba(0,0,0,0.06) 0.4mm, transparent 0.4mm),
+                radial-gradient(circle at 50% 92%, rgba(0,0,0,0.06) 0.4mm, transparent 0.4mm),
+                radial-gradient(circle at 8% 50%, rgba(0,0,0,0.06) 0.4mm, transparent 0.4mm),
+                radial-gradient(circle at 92% 50%, rgba(0,0,0,0.06) 0.4mm, transparent 0.4mm);
+        }
+        /* Faux filigree / mandala lines */
+        .art-filigree {
+            position: absolute;
+            inset: -0.5mm;
+            border: 0.2mm dotted #ddd;
+            border-radius: 1mm;
+            pointer-events: none;
+            z-index: 1;
         }
 
+        .qr-inner {
+            width: 18mm;
+            height: 18mm;
+            position: relative;
+            z-index: 5;
+        }
+        .qr-inner img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        /* Small "seal" text below QR */
+        .art-label {
+            font-size: 3.5px;
+            color: #ccc;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-top: 0.5mm;
+        }
+
+        /* ── Buttons bar ── */
+        .action-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; background: #111;
+            color: #fff; text-align: center; padding: 7px; font-size: 12px; z-index: 9999;
+        }
+        .action-bar button {
+            background: #555; color: #fff; border: none; padding: 6px 18px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; margin: 0 4px;
+        }
+        .action-bar button.primary { background: #4f9cf7; }
+
         @media print {
-            .info-bar { display: none; }
+            .action-bar { display: none; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .card { page-break-inside: avoid; }
         }
@@ -151,12 +183,16 @@
 </head>
 <body>
 
+    <h2>📝 Page 1 — Front (Passphrases)</h2>
     <div class="page" id="pageFront"></div>
+    <hr style="border:1px dashed #ccc;margin:12px 0;page-break-after:always;">
+    <h2>🎨 Page 2 — Back (Cut & Keep)</h2>
     <div class="page" id="pageBack"></div>
 
-    <div class="info-bar">
-        🖨️ Page 1 = passphrases &nbsp;|&nbsp; Page 2 = back side &nbsp;
-        <button onclick="window.print()">🖨️ Print Both (Duplex)</button>
+    <div class="action-bar">
+        🖨️ <strong>Print both pages (duplex)</strong> — or use browser "Save as PDF" &nbsp;
+        <button class="primary" onclick="window.print()">🖨️ Print / Save PDF</button>
+        <button onclick="window.print()">📄 Download as PDF</button>
     </div>
 
 <script>
@@ -183,27 +219,23 @@ function frontCard() {
 function backCard() {
     var card = document.createElement('div');
     card.className = 'card back';
+    // Each half gets an artistic frame around the QR code
+    var halfHTML = 
+        '<div class="art-frame">' +
+            '<div class="art-ring"></div>' +
+            '<div class="art-ring-inner"></div>' +
+            '<div class="art-filigree"></div>' +
+            '<span class="art-corner tl"></span>' +
+            '<span class="art-corner tr"></span>' +
+            '<span class="art-corner bl"></span>' +
+            '<span class="art-corner br"></span>' +
+            '<div class="art-dots"></div>' +
+            '<div class="art-stars"></div>' +
+            '<div class="qr-inner"><img src="' + qrImg(76) + '" alt=""></div>' +
+        '</div>';
     card.innerHTML =
-        '<div class="half half-top">' +
-            '<div class="qr-frame">' +
-                '<span class="qr-corner tl"></span>' +
-                '<span class="qr-corner tr"></span>' +
-                '<span class="qr-corner bl"></span>' +
-                '<span class="qr-corner br"></span>' +
-                '<div class="qr-hatch"></div>' +
-                '<div class="qr-wrap"><img src="' + qrImg(82) + '" alt=""></div>' +
-            '</div>' +
-        '</div>' +
-        '<div class="half">' +
-            '<div class="qr-frame">' +
-                '<span class="qr-corner tl"></span>' +
-                '<span class="qr-corner tr"></span>' +
-                '<span class="qr-corner bl"></span>' +
-                '<span class="qr-corner br"></span>' +
-                '<div class="qr-hatch"></div>' +
-                '<div class="qr-wrap"><img src="' + qrImg(82) + '" alt=""></div>' +
-            '</div>' +
-        '</div>' +
+        '<div class="half half-top">' + halfHTML + '</div>' +
+        '<div class="half">' + halfHTML + '</div>' +
         '<span class="scissor-l">✂</span>' +
         '<span class="scissor-r">✂</span>';
     return card;
