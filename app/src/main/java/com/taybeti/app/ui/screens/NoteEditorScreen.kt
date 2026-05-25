@@ -2138,16 +2138,6 @@ fun NoteEditorScreen(
                             ) {
                                 Icon(Icons.Default.Edit, "Draw", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                             }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
-                                    .clickable { showDrawingPanel = true },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.CheckBoxOutlineBlank, "Shapes", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                            }
                             Spacer(modifier = Modifier.width(6.dp))
                             Box(modifier = Modifier.width(1.dp).height(24.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)))
                             Spacer(modifier = Modifier.width(6.dp))
@@ -3722,6 +3712,7 @@ private fun DrawingPanelDialog(
     var currentBrush by remember { mutableStateOf(BrushType.PEN) }
     var isEraser by remember { mutableStateOf(false) }
     var eraserSize by remember { mutableStateOf(20f) }
+    var eraserSquare by remember { mutableStateOf(false) }
     var showColorWheel by remember { mutableStateOf(false) }
     var showBrushMenu by remember { mutableStateOf(false) }
     var canvasWidth by remember { mutableStateOf(1200) }
@@ -3849,9 +3840,10 @@ private fun DrawingPanelDialog(
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(strokeColor)
                                 .border(2.dp, if (strokeColor == Color.Black || strokeColor.red + strokeColor.green + strokeColor.blue < 1.5f) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
-                                .clickable { showColorWheel = !showColorWheel }
+                                .clickable { showColorWheel = !showColorWheel },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.ColorLens, "Color", modifier = Modifier.size(22.dp), tint = Color(0xFFE8B88A))
+                            Icon(Icons.Default.ColorLens, "Color", modifier = Modifier.size(24.dp), tint = Color(0xFFE8B88A))
                         }
                         IconButton(onClick = { strokeWidth = (strokeWidth + 1f).coerceAtMost(20f) }) {
                             Icon(Icons.Default.Add, "Thicker")
@@ -3874,7 +3866,7 @@ private fun DrawingPanelDialog(
                 if (showColorWheel) {
                     ColorPresets(
                         selectedColor = strokeColor,
-                        onColorSelected = { strokeColor = it },
+                        onColorSelected = { strokeColor = it; showColorWheel = false },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                     )
                 }
@@ -3900,6 +3892,17 @@ private fun DrawingPanelDialog(
                         Icon(Icons.Default.FormatClear, "Eraser Size", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Size: ${eraserSize.toInt()}px", style = MaterialTheme.typography.bodySmall)
+                        Spacer(modifier = Modifier.weight(1f))
+                        TextButton(onClick = { eraserSquare = !eraserSquare }) {
+                            Icon(
+                                if (eraserSquare) Icons.Default.CheckBoxOutlineBlank else Icons.Default.Adjust,
+                                null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(if (eraserSquare) "Square" else "Circle", style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                     Slider(
                         value = eraserSize,
@@ -4039,12 +4042,22 @@ private fun DrawingPanelDialog(
                         // Eraser outline preview
                         if (isEraser && eraserPos != null) {
                             val pos = eraserPos!!
-                            drawCircle(
-                                color = Color.Gray.copy(alpha = 0.5f),
-                                radius = eraserSize / 2f,
-                                center = pos,
-                                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
-                            )
+                            val halfSize = eraserSize / 2f
+                            if (eraserSquare) {
+                                drawRect(
+                                    color = Color.Gray.copy(alpha = 0.5f),
+                                    topLeft = Offset(pos.x - halfSize, pos.y - halfSize),
+                                    size = androidx.compose.ui.geometry.Size(eraserSize, eraserSize),
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+                                )
+                            } else {
+                                drawCircle(
+                                    color = Color.Gray.copy(alpha = 0.5f),
+                                    radius = halfSize,
+                                    center = pos,
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+                                )
+                            }
                         }
                     }
                 }
