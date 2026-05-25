@@ -40,7 +40,13 @@
     </style>
 </head>
 <body>
-<div class="lang-bar" id="langBar"></div>
+<div class="lang-bar">
+    <button onclick="setLang('en')" class="active" id="btn-en">🌐 English</button>
+    <button onclick="setLang('de')" id="btn-de">🇩🇪 Deutsch</button>
+    <button onclick="setLang('tr')" id="btn-tr">🇹🇷 Türkçe</button>
+    <button onclick="setLang('ckb')" id="btn-ckb">کوردیی ناوەندی</button>
+    <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
+</div>
 <div class="nav-bar">
     <a href="index.html" class="inactive">🏠 Home</a>
     <a href="why.html" class="active">❓ Why</a>
@@ -81,12 +87,21 @@
 </div>
 <script>
 var t={
-en:{why:"Why this app?",compare:"Feature comparison",kb:"Custom keyboard",enc:"Per‑note encryption",off:"Offline by design",login:"Self‑verifying login"},
-de:{why:"Warum diese App?",compare:"Funktionsvergleich",kb:"Eigene Tastatur",enc:"Pro‑Notiz‑Verschlüsselung",off:"Offline per Design",login:"Selbst‑verifizierende Anmeldung"},
-tr:{why:"Neden bu uygulama?",compare:"Özellik karşılaştırması",kb:"Özel klavye",enc:"Not‑başına şifreleme",off:"Tasarım gereği çevrimdışı",login:"Kendini doğrulayan giriş"},
-ckb:{why:"بۆچی ئەم ئەپە؟",compare:"بەراوردی تایبەتمەندییەکان",kb:"کیبۆردی تایبەت",enc:"شفرەکردنی هەر تێبینییەک",off:"ئۆفلاین بە دیزاین",login:"چوونەژوورەوەی خۆپشتڕاستکەرەوە"},
-kmr:{why:"Çima ev sepan?",compare:"Berawirdkirina taybetmendiyan",kb:"Klavyeya taybet",enc:"Şîfrekirina her‑notî",off:"Offline bi sêwiran",login:"Têketina xwe‑rastdiker"}
+en:{why:"Why this app?"},
+de:{why:"Warum diese App?"},
+tr:{why:"Neden bu uygulama?"},
+ckb:{why:"بۆچی ئەم ئەپە؟"},
+kmr:{why:"Çima ev sepan?"}
 };
+function setLang(l){
+    document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
+    var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+        var k=el.getAttribute('data-i18n');
+        if(t[l]&&t[l][k]){el.textContent=t[l][k];}
+    });
+}
+setLang('en');
 </script>
 </body>
 </html>

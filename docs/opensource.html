@@ -36,7 +36,13 @@
     </style>
 </head>
 <body>
-<div class="lang-bar" id="langBar"></div>
+<div class="lang-bar">
+    <button onclick="setLang('en')" class="active" id="btn-en">🌐 English</button>
+    <button onclick="setLang('de')" id="btn-de">🇩🇪 Deutsch</button>
+    <button onclick="setLang('tr')" id="btn-tr">🇹🇷 Türkçe</button>
+    <button onclick="setLang('ckb')" id="btn-ckb">کوردیی ناوەندی</button>
+    <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
+</div>
 <div class="nav-bar">
     <a href="index.html" class="inactive">🏠 Home</a>
     <a href="why.html" class="inactive">❓ Why</a>
@@ -66,5 +72,13 @@
 
 <div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="why.html">Why this app?</a> · <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a></p></div>
 </div>
+<script>
+var t={en:{},de:{},tr:{},ckb:{},kmr:{}};
+function setLang(l){
+    document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
+    var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
+}
+setLang('en');
+</script>
 </body>
 </html>
