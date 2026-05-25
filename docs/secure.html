@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Be Secure Online — Taybeti Notesharing</title>
+    <style>
+        :root {
+            --bg: #0a0a0c; --surface: #141418; --surface2: #1e1e24;
+            --text: #e0e0e0; --text-secondary: #a0a0b0;
+            --accent: #4f9cf7; --border: #2a2a35; --radius: 12px;
+        }
+        * { margin:0;padding:0;box-sizing:border-box; }
+        body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:90px 16px 40px; display:flex;flex-direction:column;align-items:center; }
+        .container { max-width:760px;width:100%; }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:1.2rem; text-align:center;
+            background:linear-gradient(135deg,var(--accent),#a78bfa);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+        h2 { font-size:1.2rem; color:#fff; margin:1.8rem 0 0.6rem; }
+        p { color:var(--text-secondary); margin-bottom:0.8rem; font-size:0.95rem; }
+        ul { color:var(--text-secondary); margin:0.5rem 0 1rem 1.5rem; font-size:0.93rem; }
+        li { margin-bottom:0.4rem; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem 1.5rem; margin-bottom:0.8rem; }
+        .card h3 { color:#fff; font-size:1.05rem; margin-bottom:0.3rem; }
+        .card p { font-size:0.9rem; }
+        .warning { border-color:#e05555; background:#1a1010; }
+        .warning h3 { color:#e05555; }
+        .tip-num { display:inline-block; width:26px;height:26px; background:var(--accent); border-radius:50%; text-align:center; line-height:26px; font-weight:700; font-size:0.85rem; color:#fff; margin-right:8px; }
+        .footer { text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem; }
+        .footer a { color:var(--accent);text-decoration:none; }
+        .lang-bar,.nav-bar { position:fixed;left:0;width:100%;display:flex;justify-content:center;gap:8px;z-index:999;flex-wrap:wrap; }
+        .lang-bar { top:0;background:var(--surface2);border-bottom:1px solid var(--border);padding:6px 16px; }
+        .lang-bar button { background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.8rem; }
+        .lang-bar button:hover,.lang-bar button.active { background:var(--accent);border-color:var(--accent);color:#fff; }
+        .nav-bar { top:38px;background:var(--surface);border-bottom:1px solid var(--border);padding:6px 20px;gap:10px; }
+        .nav-bar a { padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem; }
+        .nav-bar a.active { background:var(--accent);border:1px solid var(--accent);color:#fff;font-weight:600; }
+        .nav-bar a.inactive { background:var(--surface);border:1px solid var(--border);color:var(--text-secondary); }
+        @media(max-width:600px){ h1{font-size:1.5rem;} }
+    </style>
+</head>
+<body>
+<div class="lang-bar" id="langBar"></div>
+<div class="nav-bar">
+    <a href="index.html" class="inactive">🏠 Home</a>
+    <a href="why.html" class="inactive">❓ Why</a>
+    <a href="opensource.html" class="inactive">📖 Open Source</a>
+    <a href="secure.html" class="active">🛡️ Secure</a>
+    <a href="print-cards.html" class="inactive">🖨️ Cards</a>
+    <a href="invited.html" class="inactive">📩 Invited</a>
+</div>
+<div class="container">
+<h1>🛡️ How to Be Secure Online</h1>
+<p style="text-align:center;margin-bottom:2rem;">Practical tips that actually protect you — not just theory.</p>
+
+<div class="card warning">
+<h3>⚠️ The Keyboard Problem</h3>
+<p><strong>It's not always about the app.</strong> Even if an app itself is secure and encrypted, your phone's system keyboard records everything you type. Google Keyboard (Gboard), Apple Keyboard, SwiftKey, and most third‑party keyboards all collect your keystrokes — for "predictive text improvement," "personalization," or just plain data harvesting. If the app you're using doesn't have its <strong>own built‑in keyboard</strong>, whatever you type passes through the system keyboard first. That keyboard can — and often does — send what you typed to its servers. The app's encryption means nothing if your passphrase was already captured by the keyboard before the app even received it.</p>
+<p><strong>Taybeti Notesharing includes its own keyboard for this exact reason.</strong> Your keystrokes never touch the system keyboard. They go directly from your finger to the encrypted note. No middleman. No keylogger. No keyboard telemetry.</p>
+</div>
+
+<h2>🔟 10 Rules for Staying Secure</h2>
+
+<div class="card"><h3><span class="tip-num">1</span> Use apps with their own keyboard</h3><p>If the app doesn't have a custom keyboard, assume the system keyboard is reading everything you type. This includes passwords, passphrases, private messages, and anything else. Use apps like Taybeti that isolate input from the system.</p></div>
+
+<div class="card"><h3><span class="tip-num">2</span> Never reuse passphrases</h3><p>Every note, every account, every service — unique passphrase. If one gets compromised, the others stay safe. Write them down on paper (like our passphrase cards), not in a password manager on the same device.</p></div>
+
+<div class="card"><h3><span class="tip-num">3</span> Prefer offline‑first apps</h3><p>An app with no internet permission cannot leak your data — not through a bug, not through a backdoor, not through a compromised server. Offline is the ultimate firewall. Taybeti has zero internet permission.</p></div>
+
+<div class="card"><h3><span class="tip-num">4</span> Verify, don't trust</h3><p>Use open source software whenever possible. If you can't read the code yourself, look for independent security audits. A closed‑source app saying "we're secure" is meaningless — you're just taking their word.</p></div>
+
+<div class="card"><h3><span class="tip-num">5</span> Encrypt before you share</h3><p>Never send sensitive information in plain text over any channel — not email, not messaging apps, not SMS. Encrypt the message first, share the passphrase through a separate channel (in person, on paper, via a different app).</p></div>
+
+<div class="card"><h3><span class="tip-num">6</span> Disable cloud sync for sensitive data</h3><p>Cloud sync is convenient but every sync is a copy sent to someone else's server. For truly sensitive information, keep it local. If it must be backed up, encrypt it first with a key only you control.</p></div>
+
+<div class="card"><h3><span class="tip-num">7</span> Be aware of your surroundings</h3><p>Shoulder surfing — someone looking at your screen — is one of the oldest and most effective attacks. Don't type passphrases in public. Don't read sensitive messages where others can see. Physical security is digital security.</p></div>
+
+<div class="card"><h3><span class="tip-num">8</span> Keep software updated</h3><p>Security patches fix known vulnerabilities. Delaying updates leaves you exposed to attacks that the developers already fixed. Enable automatic updates for your OS, browser, and security‑critical apps.</p></div>
+
+<div class="card"><h3><span class="tip-num">9</span> Use two‑factor authentication everywhere</h3><p>A passphrase alone is not enough for online accounts. Use 2FA — preferably hardware keys or authenticator apps, not SMS. SMS can be intercepted through SIM swapping attacks.</p></div>
+
+<div class="card"><h3><span class="tip-num">10</span> Trust your instincts</h3><p>If something feels off — a suspicious link, an unexpected message, an app asking for permissions it shouldn't need — stop. The most sophisticated security system in the world can be bypassed by a moment of doubt ignored. When in doubt, don't.</p></div>
+
+<h2>🔑 The Golden Rule</h2>
+<div class="card"><p><strong>You are the weakest link — and the strongest one.</strong> No amount of encryption can protect you if you hand over your passphrase. And no surveillance system can defeat you if you simply don't give them anything to collect. Be deliberate. Be aware. Be private.</p></div>
+
+<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="why.html">Why</a> · <a href="opensource.html">Open Source</a></p></div>
+</div>
+</body>
+</html>
