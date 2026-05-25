@@ -3,68 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taybeti Notesharing – Passphrase Cards</title>
+    <title>Taybeti Notesharing – Passphrase Cards (Print Duplex)</title>
     <style>
         @page { size: A4; margin: 5mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier New', Courier, monospace; background: #fff; color: #111; }
+
         .page {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            gap: 2mm;
+            gap: 2.5mm;
             width: 100%;
             min-height: 100vh;
         }
+
         .card {
             position: relative;
-            border: 1.5px dashed #999;
+            border: 1.5px solid #bbb;
             display: flex;
             flex-direction: column;
-            background: #fdfdfd;
-            padding: 4px;
+            background: #fff;
         }
-        .half {
+
+        /* ── FRONT SIDE ── */
+        .front .half {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 3px 2px;
-            position: relative;
+            padding: 4px 6px;
+            gap: 2px;
         }
-        .half-top { border-bottom: 2px dashed #ff6600; }
-        .half-label {
-            font-size: 6px;
+        .front .half-top {
+            border-bottom: 2px dashed #ff6600;
+        }
+        .front .person-label {
+            font-size: 7px;
             font-weight: 700;
-            color: #ff6600;
+            color: #555;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 2px;
+            letter-spacing: 1px;
         }
-        .qr-wrap { width: 22mm; height: 22mm; margin: 2px 0; }
-        .qr-wrap img { width: 100%; height: 100%; display: block; }
-        .field { width: 100%; text-align: center; }
-        .field label {
-            font-size: 5.5px; font-weight: 600; color: #333;
-            display: block; margin-bottom: 1px;
+        .front .write-line {
+            width: 85%;
+            border-bottom: 1px solid #999;
+            min-height: 11px;
         }
-        .field .write-line {
-            width: 100%; border-bottom: 1px solid #888; min-height: 9px; margin-bottom: 1px;
+
+        /* ── BACK SIDE ── */
+        .back .half {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .cut-label {
-            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-            font-size: 5px; font-weight: 700; color: #fff; background: #ff6600;
-            padding: 1px 6px; border-radius: 2px; white-space: nowrap; z-index: 3;
+        .back .half-top {
+            border-bottom: 2px dashed #ff6600;
         }
+        .back .qr-wrap { width: 22mm; height: 22mm; }
+        .back .qr-wrap img { width: 100%; height: 100%; display: block; }
+
+        /* ── Cut indicators on sides ── */
         .scissor-l {
-            position: absolute; left: 3px; top: calc(50% - 7px);
+            position: absolute; left: -4px; top: calc(50% - 6px);
             font-size: 10px; color: #ff6600; z-index: 3;
         }
         .scissor-r {
-            position: absolute; right: 3px; top: calc(50% - 7px);
+            position: absolute; right: -4px; top: calc(50% - 6px);
             font-size: 10px; color: #ff6600; z-index: 3;
         }
+
+        /* ── Info bar ── */
         .info-bar {
             position: fixed; bottom: 0; left: 0; right: 0; background: #111;
             color: #fff; text-align: center; padding: 6px; font-size: 12px; z-index: 9999;
@@ -73,6 +84,7 @@
             background: #ff6600; color: #fff; border: none; padding: 6px 18px;
             border-radius: 6px; cursor: pointer; font-size: 13px; margin: 0 6px;
         }
+
         @media print {
             .info-bar { display: none; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -81,56 +93,87 @@
         @media screen and (max-width: 600px) {
             .page { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto; }
         }
+
+        /* Tab bar to switch between front/back view */
+        .tab-bar {
+            text-align: center; margin-bottom: 8px;
+        }
+        .tab-bar button {
+            background: #eee; border: 1px solid #ccc; padding: 6px 16px;
+            margin: 0 4px; border-radius: 4px; cursor: pointer; font-size: 12px;
+        }
+        .tab-bar button.active { background: #ff6600; color: #fff; border-color: #ff6600; }
     </style>
 </head>
 <body>
-    <div class="page" id="cardGrid"></div>
-    <div class="info-bar">
-        🖨️ <strong>Print this page</strong> &mdash; cut cards on the orange line, each person keeps their half &nbsp;
-        <button onclick="window.print()">🖨️ Print Now</button>
-        <button onclick="location.href='index.html'">🏠 Website</button>
+    <div class="tab-bar" id="tabBar" style="display:none">
+        <button id="tabFront" class="active" onclick="showPage('front')">📝 Front (Passphrases)</button>
+        <button id="tabBack" onclick="showPage('back')">📱 Back (QR Codes)</button>
+        <button onclick="window.print()" style="background:#ff6600;color:#fff;border-color:#ff6600;">🖨️ Print Both</button>
     </div>
+
+    <div class="page" id="pageFront"></div>
+    <div class="page" id="pageBack"></div>
+
+    <div class="info-bar">
+        🖨️ Print duplex: first page = passphrases, second page = QR codes (on back) &nbsp;
+        <button onclick="window.print()">🖨️ Print Now</button>
+        <button onclick="showPage('front')">📝 Front</button>
+        <button onclick="showPage('back')">📱 Back</button>
+    </div>
+
 <script>
 var URL = "https://cyberboy161.github.io/Taybeti/";
-
-// QR code image URL (reliable, no JS library needed)
 function qrImg(size) {
     return "https://api.qrserver.com/v1/create-qr-code/?size=" + size + "x" + size + "&data=" + encodeURIComponent(URL);
 }
 
-function createCard() {
+function frontCard() {
     var card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card front';
     card.innerHTML =
-        // --- Top half: Person 1 ---
         '<div class="half half-top">' +
-            '<div class="half-label">👤 Person 1</div>' +
-            '<div class="qr-wrap"><img src="' + qrImg(90) + '" alt="QR"></div>' +
-            '<div class="field">' +
-                '<label>🔑 Your Passphrase</label>' +
-                '<div class="write-line"></div>' +
-            '</div>' +
+            '<span class="person-label">👤 Person 1</span>' +
+            '<div class="write-line"></div>' +
         '</div>' +
-        // --- Bottom half: Person 2 ---
         '<div class="half">' +
-            '<div class="half-label">👤 Person 2</div>' +
-            '<div class="qr-wrap"><img src="' + qrImg(90) + '" alt="QR"></div>' +
-            '<div class="field">' +
-                '<label>🔑 Your Passphrase</label>' +
-                '<div class="write-line"></div>' +
-            '</div>' +
+            '<span class="person-label">👤 Person 2</span>' +
+            '<div class="write-line"></div>' +
         '</div>' +
-        // --- Cut indicators ---
-        '<span class="cut-label">✂ cut</span>' +
         '<span class="scissor-l">✂</span>' +
         '<span class="scissor-r">✂</span>';
     return card;
 }
 
-var grid = document.getElementById('cardGrid');
-for (var i = 0; i < 8; i++) {
-    grid.appendChild(createCard());
+function backCard() {
+    var card = document.createElement('div');
+    card.className = 'card back';
+    card.innerHTML =
+        '<div class="half half-top">' +
+            '<div class="qr-wrap"><img src="' + qrImg(90) + '" alt="QR"></div>' +
+        '</div>' +
+        '<div class="half">' +
+            '<div class="qr-wrap"><img src="' + qrImg(90) + '" alt="QR"></div>' +
+        '</div>' +
+        '<span class="scissor-l">✂</span>' +
+        '<span class="scissor-r">✂</span>';
+    return card;
 }
+
+var pf = document.getElementById('pageFront');
+var pb = document.getElementById('pageBack');
+for (var i = 0; i < 8; i++) {
+    pf.appendChild(frontCard());
+    pb.appendChild(backCard());
+}
+
+function showPage(side) {
+    pf.style.display = (side === 'front') ? 'grid' : 'none';
+    pb.style.display = (side === 'back') ? 'grid' : 'none';
+    document.getElementById('tabFront').classList.toggle('active', side === 'front');
+    document.getElementById('tabBack').classList.toggle('active', side === 'back');
+}
+showPage('front');
 </script>
 </body>
 </html>
