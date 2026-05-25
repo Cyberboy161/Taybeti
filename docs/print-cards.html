@@ -13,9 +13,9 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr 1fr 1fr;
-            gap: 2mm;
+            gap: 1.5mm;
             width: 210mm;
-            height: 297mm;
+            height: 285mm;
             margin: 0 auto;
         }
         .card {
@@ -99,11 +99,12 @@
         }
 
         @media print {
-            @page { size: A4; margin: 5mm; }
+            @page { size: A4 portrait; margin: 3mm; }
             .action-bar { display: none; }
-            .page { min-height: 0; }
+            .page { min-height: 0; max-height: 100%; }
             .card { page-break-inside: avoid; }
             .break { page-break-after: always; }
+            h2 { font-size: 10px; margin: 2px 0; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
 
