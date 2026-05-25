@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taybeti Notesharing – Passphrase Cards</title>
     <style>
+        @page { size: A4 portrait; margin: 3mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Georgia', serif; background: #fff; color: #111; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding-top: 44px; }
+        body { font-family: 'Georgia', serif; background: #f5f5f0; color: #111; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding-top: 44px; }
         h2 { text-align: center; font-size: 11px; margin: 2px 0; color: #aaa; font-weight: 400; }
 
         .page {
@@ -21,7 +22,6 @@
         .card {
             position: relative;
             border: 1px solid #999;
-            background: #fff;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -33,145 +33,247 @@
             overflow: hidden;
             min-height: 0;
         }
-        .half-top { border-bottom: 1.5px dashed #000; }
-        .scissor-l {
-            position: absolute; left: -5px; top: 50%; transform: translateY(-50%);
-            font-size: 10px; color: #555; z-index: 5;
-        }
-        .scissor-r {
-            position: absolute; right: -5px; top: 50%; transform: translateY(-50%);
-            font-size: 10px; color: #555; z-index: 5;
-        }
+        .half-cut { border-bottom: 1.5px dashed #000; }
+        .third { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+        .third-cut { border-bottom: 1.5px dashed #000; }
+        .scissor-l { position: absolute; left: -5px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #555; z-index: 5; }
+        .scissor-r { position: absolute; right: -5px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #555; z-index: 5; }
 
-        /* Front */
         .front .card { background: #fff; border-color: #999; }
-        .front .half {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 4px 8px 6px;
+        .front .half, .front .third {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: flex-end; padding: 4px 8px 6px;
         }
-        .front .write-line {
-            width: 80%;
-            border-bottom: 1px solid #333;
-            min-height: 14px;
-        }
+        .front .write-line { width: 80%; border-bottom: 1px solid #333; min-height: 14px; }
 
-        /* Back */
         .back .card { background: #111; border-color: #bbb; }
-        .back .half {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 2mm;
+        .back .half, .back .third {
+            display: flex; align-items: center; justify-content: center; padding: 2mm; position: relative; overflow: hidden;
         }
-        .back .half-top { border-bottom-color: #fff8; }
+        .back .cut-dash { border-bottom-color: #fff8; }
         .back .scissor-l, .back .scissor-r { color: #fff; }
-        .back .bg-img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .back .bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
         .back .qr-box {
-            position: relative;
-            z-index: 1;
-            width: 16mm;
-            height: 16mm;
-            background: #fff;
-            border-radius: 1mm;
-            padding: 1mm;
-            box-shadow: 0 0 2mm rgba(0,0,0,0.5);
+            position: relative; z-index: 1; width: 15mm; height: 15mm;
+            background: #fff; border-radius: 1mm; padding: 1mm;
+            box-shadow: 0 0 2mm rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
         }
         .back .qr-box img { width: 100%; height: 100%; display: block; }
 
-        .break { page-break-after: always; margin: 0; border: none; }
+        /* Selector dropdown */
+        .selector-bar {
+            position: fixed; top: 0; left: 0; width: 100%; background: #111;
+            border-bottom: 1px solid #333; padding: 4px 10px;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            z-index: 9998; flex-wrap: wrap; color: #ccc; font-size: 12px;
+        }
+        .selector-bar select {
+            background: #333; color: #fff; border: 1px solid #555;
+            padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+        }
+        .selector-bar button {
+            background: #4f9cf7; color: #fff; border: none; padding: 4px 12px;
+            border-radius: 6px; cursor: pointer; font-size: 12px;
+        }
+        .selector-bar a { color: #aaa; text-decoration: none; font-size: 11px; margin: 0 4px; }
 
         .action-bar {
             position: fixed; bottom: 0; left: 0; right: 0; background: #111;
             color: #fff; text-align: center; padding: 7px; font-size: 12px; z-index: 9999;
         }
-        .action-bar button {
-            background: #444; color: #fff; border: none; padding: 6px 18px;
-            border-radius: 6px; cursor: pointer; font-size: 13px; margin: 0 4px;
-        }
+        .action-bar button { background: #4f9cf7; color: #fff; border: none; padding: 6px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; }
 
-            @media print {
-            @page { size: A4 portrait; margin: 3mm; }
-            .top-bar, .action-bar { display: none !important; }
+        @media print {
+            .selector-bar, .action-bar, .top-bar { display: none !important; }
             body { padding-top: 0 !important; }
             .page { min-height: 0; }
             .card { page-break-inside: avoid; }
-            .break { page-break-after: always; }
-            h2 { font-size: 10px; margin: 2px 0; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        }
-
-        @media screen {
-            .page { min-height: 0; }
-            .action-bar button.primary { background: #4f9cf7; font-weight: 600; }
         }
         @media screen and (max-width: 600px) {
-            .page { width: 100%; height: auto; grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+            .page { width: 100%; height: auto; grid-template-rows: auto; }
         }
     </style>
 </head>
 <body>
 
-    <div class="top-bar" style="position:fixed;top:0;left:0;width:100%;background:#111;border-bottom:1px solid #333;padding:6px 20px;display:flex;justify-content:center;gap:10px;z-index:9998;flex-wrap:wrap;">
-        <a href="index.html" style="background:#333;border:1px solid #555;color:#ccc;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem;">🏠 Home</a>
-        <a href="why.html" style="background:#333;border:1px solid #555;color:#ccc;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem;">❓ Why</a>
-        <a href="opensource.html" style="background:#333;border:1px solid #555;color:#ccc;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem;">📖 Open Source</a>
-        <a href="secure.html" style="background:#333;border:1px solid #555;color:#ccc;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem;">🛡️ Secure</a>
-        <a href="print-cards.html" style="background:#4f9cf7;border:1px solid #4f9cf7;color:#fff;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem;font-weight:600;">🖨️ Cards</a>
-        <a href="invited.html" style="background:#333;border:1px solid #555;color:#ccc;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem;">📩 Invited</a>
-    </div>
+<div class="selector-bar">
+    <span>Card Type:</span>
+    <select id="cardType" onchange="buildCards()">
+        <option value="2h">2 Persons — Horizontal Split</option>
+        <option value="2v">2 Persons — Vertical Split</option>
+        <option value="3h">3 Persons — 3 Strips</option>
+        <option value="4h">4 Persons — 4 Strips</option>
+        <option value="1">1 Person — No Split</option>
+        <option value="2h-mid">2 Persons — QR in Middle</option>
+    </select>
+    <span>Back Design:</span>
+    <select id="cardBg" onchange="buildCards()">
+        <option value="card-bg.png">Cybersecurity</option>
+        <option value="bg-dark">Dark Minimal</option>
+        <option value="bg-grid">Geometric Grid</option>
+        <option value="bg-gold">Gold Pattern</option>
+    </select>
+    <button onclick="window.print()">🖨️ Print / PDF</button>
+    <a href="index.html">🏠 Home</a>
+</div>
 
-    <h2>Page 1 — Front</h2>
-    <div class="page" id="pageFront"></div>
-    <div class="break"></div>
-    <h2>Page 2 — Back</h2>
-    <div class="page" id="pageBack"></div>
+<h2>📝 Page 1 — Front</h2>
+<div class="page" id="pageFront"></div>
+<hr style="border:1px dashed #ccc;margin:16px 0;page-break-after:always;">
+<h2>🖼️ Page 2 — Back</h2>
+<div class="page" id="pageBack"></div>
 
-    <div class="action-bar">
-        🖨️ Print duplex or Save as PDF &nbsp;
-        <button class="primary" onclick="window.print()">🖨️ Print / PDF</button>
-    </div>
+<div class="action-bar">
+    🖨️ Print duplex (both pages) or Save as PDF &nbsp;
+    <button onclick="window.print()">🖨️ Print / PDF</button>
+</div>
 
 <script>
 var U="https://cyberboy161.github.io/Taybeti/invited.html";
 function Q(s){return"https://api.qrserver.com/v1/create-qr-code/?size="+s+"x"+s+"&data="+encodeURIComponent(U);}
 
-function frontCard(){
-    var labels = '<div style="font-size:4.2px;color:#444;text-align:center;line-height:1.4;margin-bottom:2px">'+
+var bgStyles = {
+    "card-bg.png": 'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="card-bg.png"',
+    "bg-dark": 'style="position:absolute;inset:0;background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)"',
+    "bg-grid": 'style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px),repeating-linear-gradient(90deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px)"',
+    "bg-gold": 'style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a);border:0.3mm solid #c9a96e55"'
+};
+
+function bgEl(key){
+    var s = bgStyles[key] || bgStyles["card-bg.png"];
+    return '<div '+s+'></div>';
+}
+
+function qrBox(){ return '<div class="qr-box"><img src="'+Q(58)+'" alt="QR"></div>'; }
+
+function labels(){
+    return '<div style="font-size:4.2px;color:#444;text-align:center;line-height:1.4;margin-bottom:2px">'+
         'وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە. بە پارێزراوی بیھێڵەرەوە.<br>'+
         'Wêneyê megre. Bi kesî mebêje. Bi dengê bilind mexwîne. Bi parastî bihêle.<br>'+
         'Do not photograph. Do not share. Do not read aloud. Keep safe.<br>'+
         'Nicht fotografieren. Nicht teilen. Nicht laut vorlesen. Sicher aufbewahren.<br>'+
-        'Fotoğraf çekme. Kimseyle paylaşma. Yüksek sesle okuma. Güvende tut.'+
-        '</div>';
-    var c=document.createElement('div');c.className='card front';
-    c.innerHTML='<div class="half half-top">'+labels+'<div class="write-line"></div></div>'+
-        '<div class="half">'+labels+'<div class="write-line"></div></div>'+
-        '<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
-    return c;
-}
-function backHalf(cls){
-    return '<div class="half'+cls+'">'+
-        '<img class="bg-img" src="https://cyberboy161.github.io/Taybeti/card-bg.png" alt="">'+
-        '<div class="qr-box"><img src="'+Q(60)+'" alt="QR"></div></div>';
-}
-function backCard(){
-    var c=document.createElement('div');c.className='card back';
-    c.innerHTML=backHalf(' half-top')+backHalf('')+
-        '<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
-    return c;
+        'Fotoğraf çekme. Kimseyle paylaşma. Yüksek sesle okuma. Güvende tut.</div>';
 }
 
-var F=document.getElementById('pageFront'),B=document.getElementById('pageBack');
-for(var i=0;i<8;i++){F.appendChild(frontCard());B.appendChild(backCard());}
+function halfHTML(cls, bg){
+    return '<div class="half'+cls+'">'+bgEl(bg)+qrBox()+'</div>';
+}
+function thirdHTML(cls, bg){
+    return '<div class="third'+cls+'">'+bgEl(bg)+qrBox()+'</div>';
+}
+
+// Front half/third
+function fHalf(cls){ return '<div class="half'+cls+'">'+labels()+'<div class="write-line"></div></div>'; }
+function fThird(cls){ return '<div class="third'+cls+'">'+labels()+'<div class="write-line"></div></div>'; }
+
+function buildCards(){
+    var type = document.getElementById('cardType').value;
+    var bg = document.getElementById('cardBg').value;
+    var pf = document.getElementById('pageFront');
+    var pb = document.getElementById('pageBack');
+    pf.innerHTML = ''; pb.innerHTML = '';
+    var cardsPerPage = 8;
+
+    if(type === '2h'){
+        // 2 persons, horizontal split (original)
+        for(var i=0;i<cardsPerPage;i++){
+            var fc = document.createElement('div'); fc.className='card front';
+            fc.innerHTML = fHalf(' half-cut')+fHalf('')+'<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
+            pf.appendChild(fc);
+            var bc = document.createElement('div'); bc.className='card back';
+            bc.innerHTML = halfHTML(' half-cut',bg)+halfHTML('',bg)+'<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
+            pb.appendChild(bc);
+        }
+        // Use 4x2 grid for horizontal split (taller cards)
+        document.querySelectorAll('.page').forEach(function(p){
+            p.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+            p.style.gridTemplateRows = '1fr 1fr';
+        });
+    } else if(type === '2v'){
+        // 2 persons, vertical split
+        var style = document.createElement('style');
+        style.textContent = '.card.vert{flex-direction:row!important}.vert .half-cut{border-bottom:none!important;border-right:1.5px dashed #000}.back .vert .half-cut{border-right-color:#fff8}';
+        document.head.appendChild(style);
+        for(var i=0;i<cardsPerPage;i++){
+            var fc = document.createElement('div'); fc.className='card front vert';
+            fc.innerHTML = fHalf(' half-cut')+fHalf('');
+            pf.appendChild(fc);
+            var bc = document.createElement('div'); bc.className='card back vert';
+            bc.innerHTML = halfHTML(' half-cut',bg)+halfHTML('',bg);
+            pb.appendChild(bc);
+        }
+        document.querySelectorAll('.page').forEach(function(p){
+            p.style.gridTemplateColumns = '1fr 1fr';
+            p.style.gridTemplateRows = '1fr 1fr 1fr 1fr';
+        });
+    } else if(type === '3h'){
+        // 3 persons, 3 horizontal strips
+        for(var i=0;i<6;i++){
+            var fc = document.createElement('div'); fc.className='card front'; fc.style.flexDirection='column';
+            fc.innerHTML = fThird(' third-cut')+fThird(' third-cut')+fThird('');
+            pf.appendChild(fc);
+            var bc = document.createElement('div'); bc.className='card back'; bc.style.flexDirection='column';
+            bc.innerHTML = thirdHTML(' third-cut',bg)+thirdHTML(' third-cut',bg)+thirdHTML('',bg);
+            pb.appendChild(bc);
+        }
+        document.querySelectorAll('.page').forEach(function(p){
+            p.style.gridTemplateColumns = '1fr 1fr';
+            p.style.gridTemplateRows = '1fr 1fr 1fr';
+        });
+    } else if(type === '4h'){
+        // 4 persons, 4 horizontal strips
+        for(var i=0;i<4;i++){
+            var fc = document.createElement('div'); fc.className='card front'; fc.style.flexDirection='column';
+            fc.innerHTML = fThird(' third-cut')+fThird(' third-cut')+fThird(' third-cut')+fThird('');
+            pf.appendChild(fc);
+            var bc = document.createElement('div'); bc.className='card back'; bc.style.flexDirection='column';
+            bc.innerHTML = thirdHTML(' third-cut',bg)+thirdHTML(' third-cut',bg)+thirdHTML(' third-cut',bg)+thirdHTML('',bg);
+            pb.appendChild(bc);
+        }
+        document.querySelectorAll('.page').forEach(function(p){
+            p.style.gridTemplateColumns = '1fr 1fr';
+            p.style.gridTemplateRows = '1fr 1fr';
+        });
+    } else if(type === '1'){
+        // 1 person, no split
+        for(var i=0;i<cardsPerPage;i++){
+            var fc = document.createElement('div'); fc.className='card front';
+            fc.innerHTML = '<div class="half" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 8px 6px">'+labels()+'<div class="write-line"></div></div>';
+            pf.appendChild(fc);
+            var bc = document.createElement('div'); bc.className='card back';
+            bc.innerHTML = '<div class="half" style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">'+bgEl(bg)+qrBox()+'</div>';
+            pb.appendChild(bc);
+        }
+        document.querySelectorAll('.page').forEach(function(p){
+            p.style.gridTemplateColumns = '1fr 1fr';
+            p.style.gridTemplateRows = '1fr 1fr 1fr 1fr';
+        });
+    } else if(type === '2h-mid'){
+        // 2 persons, QR in middle (shared)
+        for(var i=0;i<cardsPerPage;i++){
+            var fc = document.createElement('div'); fc.className='card front';
+            fc.innerHTML = fHalf(' half-cut')+fHalf('')+'<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
+            pf.appendChild(fc);
+            var bc = document.createElement('div'); bc.className='card back';
+            bc.innerHTML = halfHTML(' half-cut',bg)+halfHTML('',bg)+'<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
+            // Put QR in center overlay
+            var midQR = document.createElement('div');
+            midQR.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;display:flex;align-items:center;justify-content:center';
+            midQR.innerHTML = '<div style="width:20mm;height:20mm;background:#fff;border-radius:1.5mm;padding:1.5mm;box-shadow:0 0 3mm rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center"><img src="'+Q(80)+'" alt="QR" style="width:100%;height:100%"></div>';
+            bc.appendChild(midQR);
+            pb.appendChild(bc);
+        }
+        document.querySelectorAll('.page').forEach(function(p){
+            p.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+            p.style.gridTemplateRows = '1fr 1fr';
+        });
+    }
+
+    document.getElementById('pageFront').style.display = 'grid';
+    document.getElementById('pageBack').style.display = 'grid';
+}
+
+buildCards();
 </script>
 </body>
 </html>
