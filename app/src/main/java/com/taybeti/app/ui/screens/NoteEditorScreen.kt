@@ -39,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Adjust
 import androidx.compose.material.icons.filled.ArrowBack
@@ -3829,7 +3830,7 @@ private fun DrawingPanelDialog(
                         }
                         IconButton(onClick = { isEraser = !isEraser }) {
                             Icon(
-                                Icons.Default.FormatClear,
+                                Icons.AutoMirrored.Filled.Backspace,
                                 "Eraser",
                                 tint = if (isEraser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                             )
@@ -3883,13 +3884,13 @@ private fun DrawingPanelDialog(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     if (isEraser) {
-                        Icon(Icons.Default.FormatClear, "Eraser", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
+                        Icon(Icons.AutoMirrored.Filled.Backspace, "Eraser", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                     }
                 }
 
                 if (isEraser) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.FormatClear, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
+                        Icon(Icons.AutoMirrored.Filled.Backspace, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("${eraserSize.toInt()}px", style = MaterialTheme.typography.bodyMedium)
                         Spacer(modifier = Modifier.weight(1f))
@@ -3903,8 +3904,8 @@ private fun DrawingPanelDialog(
                                 .clickable { eraserSquare = false },
                             contentAlignment = Alignment.Center
                         ) {
-                            Canvas(modifier = Modifier.size(18.dp)) {
-                                drawCircle(Color.White, radius = 7f, center = Offset(size.width / 2f, size.height / 2f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f))
+                            Canvas(modifier = Modifier.size(24.dp)) {
+                                drawCircle(Color.White, radius = 9f, center = Offset(size.width / 2f, size.height / 2f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f))
                             }
                         }
                         Spacer(modifier = Modifier.width(6.dp))
@@ -3918,8 +3919,8 @@ private fun DrawingPanelDialog(
                                 .clickable { eraserSquare = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Canvas(modifier = Modifier.size(18.dp)) {
-                                drawRect(Color.White, topLeft = Offset(3f, 3f), size = androidx.compose.ui.geometry.Size(12f, 12f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f))
+                            Canvas(modifier = Modifier.size(24.dp)) {
+                                drawRect(Color.White, topLeft = Offset(3f, 3f), size = androidx.compose.ui.geometry.Size(18f, 18f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f))
                             }
                         }
                     }
@@ -3927,7 +3928,7 @@ private fun DrawingPanelDialog(
                     Slider(
                         value = eraserSize,
                         onValueChange = { eraserSize = it },
-                        valueRange = 5f..50f,
+                        valueRange = 5f..100f,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
