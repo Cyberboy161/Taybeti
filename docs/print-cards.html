@@ -109,6 +109,10 @@
     <span>Back Design:</span>
     <select id="cardBg" onchange="buildCards()">
         <option value="card-bg.png">Cybersecurity</option>
+        <option value="bg-matrix">Matrix Green</option>
+        <option value="bg-red">Red Threat</option>
+        <option value="bg-blue">Deep Blue</option>
+        <option value="bg-circuit">Circuit Board</option>
         <option value="bg-dark">Dark Minimal</option>
         <option value="bg-grid">Geometric Grid</option>
         <option value="bg-gold">Gold Pattern</option>
@@ -133,10 +137,14 @@ var U="https://cyberboy161.github.io/Taybeti/invited.html";
 function Q(s){return"https://api.qrserver.com/v1/create-qr-code/?size="+s+"x"+s+"&data="+encodeURIComponent(U);}
 
 var bgStyles = {
-    "card-bg.png": 'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="card-bg.png"',
+    "card-bg.png": 'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="https://cyberboy161.github.io/Taybeti/card-bg.png"',
     "bg-dark": 'style="position:absolute;inset:0;background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)"',
     "bg-grid": 'style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px),repeating-linear-gradient(90deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px)"',
-    "bg-gold": 'style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a);border:0.3mm solid #c9a96e55"'
+    "bg-gold": 'style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a);border:0.3mm solid #c9a96e55"',
+    "bg-matrix": 'style="position:absolute;inset:0;background:#000;background-image:linear-gradient(rgba(0,255,0,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,0,.07) 1px,transparent 1px);background-size:3px 3px"',
+    "bg-red": 'style="position:absolute;inset:0;background:linear-gradient(135deg,#1a0000,#2d0000,#1a0000);border:0.3mm solid #ff333355"',
+    "bg-blue": 'style="position:absolute;inset:0;background:radial-gradient(ellipse at center,#0a1628,#020810);border:0.3mm solid #3399ff44"',
+    "bg-circuit": 'style="position:absolute;inset:0;background:#0a0f0a;background-image:linear-gradient(#0f0 1px,transparent 1px),linear-gradient(90deg,#0f0 1px,transparent 1px),radial-gradient(circle,#0f01a 1px,transparent 1px);background-size:8px 8px,8px 8px,16px 16px;background-position:0 0,0 0,4px 4px"'
 };
 
 function bgEl(key){
