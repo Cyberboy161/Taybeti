@@ -28,26 +28,39 @@
         .tip-num { display:inline-block; width:26px;height:26px; background:var(--accent); border-radius:50%; text-align:center; line-height:26px; font-weight:700; font-size:0.85rem; color:#fff; margin-right:8px; }
         .footer { text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem; }
         .footer a { color:var(--accent);text-decoration:none; }
-        .lang-bar,.nav-bar { position:fixed;left:0;width:100%;display:flex;justify-content:center;gap:8px;z-index:999;flex-wrap:wrap; }
-        .lang-bar { top:0;background:var(--surface2);border-bottom:1px solid var(--border);padding:6px 16px; }
-        .lang-bar button { background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.8rem; }
-        .lang-bar button:hover,.lang-bar button.active { background:var(--accent);border-color:var(--accent);color:#fff; }
-        .nav-bar { top:38px;background:var(--surface);border-bottom:1px solid var(--border);padding:6px 20px;gap:10px; }
-        .nav-bar a { padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem; }
-        .nav-bar a.active { background:var(--accent);border:1px solid var(--accent);color:#fff;font-weight:600; }
-        .nav-bar a.inactive { background:var(--surface);border:1px solid var(--border);color:var(--text-secondary); }
+        .lang-bar { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .lang-bar button {
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text-secondary); padding: 4px 10px; border-radius: 20px;
+            cursor: pointer; font-size: 0.78rem;
+        }
+        .lang-bar button:hover, .lang-bar button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .nav-bar { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; padding: 2px 10px 4px; }
+        .nav-bar a { padding: 4px 10px; border-radius: 20px; text-decoration: none; font-size: 0.78rem; }
+        .nav-bar a.active { background: var(--accent); border: 1px solid var(--accent); color: #fff; font-weight: 600; }
+        .nav-bar a.inactive { background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); }
+        body { padding-top: 70px; }
         @media(max-width:600px){ h1{font-size:1.5rem;} }
-    </style>
+    @media print { [style*="position:fixed"] { display: none !important; } body { padding-top: 0 !important; } }
+</style>
 </head>
 <body>
-<div class="lang-bar" id="langBar"></div>
-<div class="nav-bar">
-    <a href="index.html" class="inactive">🏠 Home</a>
-    <a href="why.html" class="inactive">❓ Why</a>
-    <a href="opensource.html" class="inactive">📖 Open Source</a>
-    <a href="secure.html" class="active">🛡️ Secure</a>
-    <a href="print-cards.html" class="inactive">🖨️ Cards</a>
-    <a href="invited.html" class="inactive">📩 Invited</a>
+<div style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border);">
+    <div class="lang-bar" style="padding:4px 10px;">
+        <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
+        <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
+        <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
+        <button onclick="setLang('ckb')" id="btn-ckb">کوردی</button>
+        <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
+    </div>
+    <div class="nav-bar">
+        <a href="index.html" class="inactive">🏠 Home</a>
+        <a href="why.html" class="inactive">❓ Why</a>
+        <a href="opensource.html" class="inactive">📖 Open Source</a>
+        <a href="secure.html" class="active">🛡️ Secure</a>
+        <a href="print-cards.html" class="inactive">🖨️ Cards</a>
+        <a href="invited.html" class="inactive">📩 Invited</a>
+    </div>
 </div>
 <div class="container">
 <h1>🛡️ How to Be Secure Online</h1>
