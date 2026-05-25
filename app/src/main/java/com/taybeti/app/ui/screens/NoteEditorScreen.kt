@@ -3889,21 +3889,41 @@ private fun DrawingPanelDialog(
 
                 if (isEraser) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.FormatClear, "Eraser Size", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Size: ${eraserSize.toInt()}px", style = MaterialTheme.typography.bodySmall)
+                        Icon(Icons.Default.FormatClear, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("${eraserSize.toInt()}px", style = MaterialTheme.typography.bodyMedium)
                         Spacer(modifier = Modifier.weight(1f))
-                        TextButton(onClick = { eraserSquare = !eraserSquare }) {
-                            Icon(
-                                if (eraserSquare) Icons.Default.CheckBoxOutlineBlank else Icons.Default.Adjust,
-                                null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(if (eraserSquare) "Square" else "Circle", style = MaterialTheme.typography.bodySmall)
+                        // Circle shape button
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(if (!eraserSquare) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
+                                .border(1.5.dp, if (!eraserSquare) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                .clickable { eraserSquare = false },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Canvas(modifier = Modifier.size(18.dp)) {
+                                drawCircle(Color.White, radius = 7f, center = Offset(size.width / 2f, size.height / 2f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f))
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        // Square shape button
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(if (eraserSquare) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
+                                .border(1.5.dp, if (eraserSquare) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                .clickable { eraserSquare = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Canvas(modifier = Modifier.size(18.dp)) {
+                                drawRect(Color.White, topLeft = Offset(3f, 3f), size = androidx.compose.ui.geometry.Size(12f, 12f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f))
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
                     Slider(
                         value = eraserSize,
                         onValueChange = { eraserSize = it },
@@ -4039,23 +4059,23 @@ private fun DrawingPanelDialog(
                                 )
                             )
                         }
-                        // Eraser outline preview
+                        // Eraser outline preview — thick, visible in real-time
                         if (isEraser && eraserPos != null) {
                             val pos = eraserPos!!
                             val halfSize = eraserSize / 2f
                             if (eraserSquare) {
                                 drawRect(
-                                    color = Color.Gray.copy(alpha = 0.5f),
+                                    color = Color(0xFFFF4444).copy(alpha = 0.7f),
                                     topLeft = Offset(pos.x - halfSize, pos.y - halfSize),
                                     size = androidx.compose.ui.geometry.Size(eraserSize, eraserSize),
-                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f)
                                 )
                             } else {
                                 drawCircle(
-                                    color = Color.Gray.copy(alpha = 0.5f),
+                                    color = Color(0xFFFF4444).copy(alpha = 0.7f),
                                     radius = halfSize,
                                     center = pos,
-                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f)
                                 )
                             }
                         }
