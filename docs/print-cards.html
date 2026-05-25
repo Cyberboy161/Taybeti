@@ -19,97 +19,70 @@
         }
         .card {
             position: relative;
-            overflow: hidden;
-        }
-
-        /* ── FRONT ── */
-        .front .card {
             border: 1px solid #999;
             background: #fff;
-        }
-        .front .card-inner {
-            width: 100%;
-            height: 100%;
             display: flex;
             flex-direction: column;
-            position: relative;
+            overflow: hidden;
         }
-        .front .half {
+        .half {
             flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .half-top { border-bottom: 1.5px dashed #000; }
+        .scissor-l {
+            position: absolute; left: -5px; top: calc(50% - 6px);
+            font-size: 10px; color: #555; z-index: 5;
+        }
+        .scissor-r {
+            position: absolute; right: -5px; top: calc(50% - 6px);
+            font-size: 10px; color: #555; z-index: 5;
+        }
+
+        /* Front half content */
+        .front .half {
             display: flex;
             align-items: flex-end;
             justify-content: center;
             padding: 6px 10px 8px;
-            position: relative;
         }
-        .front .half-top { border-bottom: 1.5px dashed #000; }
         .front .write-line {
             width: 80%;
             border-bottom: 1px solid #666;
             min-height: 13px;
         }
-        .front .scissor-l {
-            position: absolute; left: -5px; top: calc(50% - 6px);
-            font-size: 10px; color: #555; z-index: 3;
-        }
-        .front .scissor-r {
-            position: absolute; right: -5px; top: calc(50% - 6px);
-            font-size: 10px; color: #555; z-index: 3;
-        }
 
-        /* ── BACK ── */
-        .back .card {
-            border: 1px solid #bbb;
-            background: #111;
-            display: flex;
-            flex-direction: column;
-        }
+        /* Back half content */
+        .back .card { background: #111; border-color: #bbb; }
         .back .half {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             padding: 2mm;
         }
-        .back .half-top { border-bottom: 1.5px dashed #fff8; }
+        .back .half-top { border-bottom-color: #fff8; }
+        .back .scissor-l,
+        .back .scissor-r { color: #fff; }
         .back .bg-img {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: 0;
         }
         .back .qr-box {
             position: relative;
             z-index: 1;
-            width: 18mm;
-            height: 18mm;
+            width: 16mm;
+            height: 16mm;
             background: #fff;
-            border-radius: 1.2mm;
-            padding: 1.2mm;
+            border-radius: 1mm;
+            padding: 1mm;
             box-shadow: 0 0 2mm rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        .back .qr-box img {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        .back .scissor-l {
-            position: absolute; left: 2px; top: calc(50% - 6px);
-            font-size: 9px; color: #fff; z-index: 3;
-        }
-        .back .scissor-r {
-            position: absolute; right: 2px; top: calc(50% - 6px);
-            font-size: 9px; color: #fff; z-index: 3;
-        }
+        .back .qr-box img { width: 100%; height: 100%; display: block; }
 
-        /* ── Buttons bar ── */
         .action-bar {
             position: fixed; bottom: 0; left: 0; right: 0; background: #111;
             color: #fff; text-align: center; padding: 7px; font-size: 12px; z-index: 9999;
@@ -132,10 +105,10 @@
 </head>
 <body>
 
-    <h2>📝 Page 1 — Front</h2>
+    <h2>Page 1 — Front</h2>
     <div class="page" id="pageFront"></div>
     <hr style="border:1px dashed #ccc;margin:16px 0;page-break-after:always;">
-    <h2>🖼️ Page 2 — Back</h2>
+    <h2>Page 2 — Back</h2>
     <div class="page" id="pageBack"></div>
 
     <div class="action-bar">
@@ -144,41 +117,32 @@
     </div>
 
 <script>
-var URL = "https://cyberboy161.github.io/Taybeti/";
-function qrImg(s){return"https://api.qrserver.com/v1/create-qr-code/?size="+s+"x"+s+"&data="+encodeURIComponent(URL);}
+var U="https://cyberboy161.github.io/Taybeti/";
+function Q(s){return"https://api.qrserver.com/v1/create-qr-code/?size="+s+"x"+s+"&data="+encodeURIComponent(U);}
 
 function frontCard(){
     var c=document.createElement('div');c.className='card front';
-    c.innerHTML='<div class="card-inner"><div class="half half-top"><div class="write-line"></div></div><div class="half"><div class="write-line"></div></div><span class="scissor-l">✂</span><span class="scissor-r">✂</span></div>';
+    c.innerHTML=
+        '<div class="half half-top"><div class="write-line"></div></div>'+
+        '<div class="half"><div class="write-line"></div></div>'+
+        '<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
     return c;
 }
-
-function halfHTML(){
-    return '<div class="half">' +
-        '<img class="bg-img" src="card-bg.png" alt="">' +
-        '<div class="qr-box"><img src="'+qrImg(76)+'" alt="QR"></div>' +
+function backHalf(cls){
+    return '<div class="half'+cls+'">'+
+        '<img class="bg-img" src="card-bg.png" alt="">'+
+        '<div class="qr-box"><img src="'+Q(60)+'" alt="QR"></div>'+
         '</div>';
 }
-
 function backCard(){
     var c=document.createElement('div');c.className='card back';
-    // Each half gets its own background image and QR code
-    var h1 = '<div class="half half-top">' +
-        '<img class="bg-img" src="card-bg.png" alt="">' +
-        '<div class="qr-box"><img src="'+qrImg(76)+'" alt="QR"></div>' +
-        '</div>';
-    var h2 = '<div class="half">' +
-        '<img class="bg-img" src="card-bg.png" alt="">' +
-        '<div class="qr-box"><img src="'+qrImg(76)+'" alt="QR"></div>' +
-        '</div>';
-    c.innerHTML = h1 + h2 +
-        '<span class="scissor-l">✂</span>' +
-        '<span class="scissor-r">✂</span>';
+    c.innerHTML=backHalf(' half-top')+backHalf('')+
+        '<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
     return c;
 }
 
-var pf=document.getElementById('pageFront'),pb=document.getElementById('pageBack');
-for(var i=0;i<8;i++){pf.appendChild(frontCard());pb.appendChild(backCard());}
+var F=document.getElementById('pageFront'),B=document.getElementById('pageBack');
+for(var i=0;i<8;i++){F.appendChild(frontCard());B.appendChild(backCard());}
 </script>
 </body>
 </html>
