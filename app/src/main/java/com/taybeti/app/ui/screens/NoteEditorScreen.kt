@@ -3776,7 +3776,7 @@ private fun DrawingPanelDialog(
                                 Icon(
                                     when (currentBrush) {
                                         BrushType.PEN -> Icons.Default.Edit
-                                        BrushType.MARKER -> Icons.Default.FormatBold
+                                        BrushType.MARKER -> Icons.Default.FormatColorText
                                         BrushType.HIGHLIGHTER -> Icons.Default.FormatColorFill
                                         BrushType.CALLIGRAPHY -> Icons.Default.FormatItalic
                                         else -> Icons.Default.Edit
@@ -3793,7 +3793,7 @@ private fun DrawingPanelDialog(
                                 )
                                 DropdownMenuItem(
                                     text = { Text("Marker") },
-                                    leadingIcon = { Icon(Icons.Default.FormatBold, null) },
+                                    leadingIcon = { Icon(Icons.Default.FormatColorText, null) },
                                     onClick = { currentBrush = BrushType.MARKER; isEraser = false; showBrushMenu = false }
                                 )
                                 DropdownMenuItem(
@@ -3897,30 +3897,30 @@ private fun DrawingPanelDialog(
                         // Circle shape button
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(6.dp))
+                                .size(52.dp)
+                                .clip(RoundedCornerShape(8.dp))
                                 .background(if (!eraserSquare) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
-                                .border(1.5.dp, if (!eraserSquare) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                .border(1.5.dp, if (!eraserSquare) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
                                 .clickable { eraserSquare = false },
                             contentAlignment = Alignment.Center
                         ) {
-                            Canvas(modifier = Modifier.size(24.dp)) {
-                                drawCircle(Color.White, radius = 9f, center = Offset(size.width / 2f, size.height / 2f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f))
+                            Canvas(modifier = Modifier.size(34.dp)) {
+                                drawCircle(Color.White, radius = 13f, center = Offset(size.width / 2f, size.height / 2f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f))
                             }
                         }
                         Spacer(modifier = Modifier.width(6.dp))
                         // Square shape button
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(6.dp))
+                                .size(52.dp)
+                                .clip(RoundedCornerShape(8.dp))
                                 .background(if (eraserSquare) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
-                                .border(1.5.dp, if (eraserSquare) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                .border(1.5.dp, if (eraserSquare) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
                                 .clickable { eraserSquare = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Canvas(modifier = Modifier.size(24.dp)) {
-                                drawRect(Color.White, topLeft = Offset(3f, 3f), size = androidx.compose.ui.geometry.Size(18f, 18f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f))
+                            Canvas(modifier = Modifier.size(34.dp)) {
+                                drawRect(Color.White, topLeft = Offset(5f, 5f), size = androidx.compose.ui.geometry.Size(24f, 24f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f))
                             }
                         }
                     }
@@ -3928,7 +3928,7 @@ private fun DrawingPanelDialog(
                     Slider(
                         value = eraserSize,
                         onValueChange = { eraserSize = it },
-                        valueRange = 5f..100f,
+                        valueRange = 5f..150f,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
