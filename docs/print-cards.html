@@ -62,34 +62,35 @@
             border: 1px solid #bbb;
             background: #111;
             display: flex;
-            position: relative;
+            flex-direction: column;
         }
+        .back .half {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 2mm;
+        }
+        .back .half-top { border-bottom: 1.5px dashed #fff8; }
         .back .bg-img {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.55;
             z-index: 0;
         }
-        .back .overlay {
+        .back .qr-box {
             position: relative;
             z-index: 1;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 3mm;
-        }
-        .back .qr-box {
-            width: 24mm;
-            height: 24mm;
+            width: 18mm;
+            height: 18mm;
             background: #fff;
-            border-radius: 1.5mm;
-            padding: 1.5mm;
-            box-shadow: 0 0 3mm rgba(0,0,0,0.4);
+            border-radius: 1.2mm;
+            padding: 1.2mm;
+            box-shadow: 0 0 2mm rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -99,26 +100,13 @@
             height: 100%;
             display: block;
         }
-        .back .half-top {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            z-index: 2;
-            pointer-events: none;
-        }
-        .back .cut-dash {
-            position: absolute;
-            left: 0; right: 0; top: 50%;
-            border-top: 1px dashed #fff8;
-            z-index: 2;
-            pointer-events: none;
-        }
         .back .scissor-l {
             position: absolute; left: 2px; top: calc(50% - 6px);
-            font-size: 9px; color: #fff; z-index: 3; opacity: 0.7;
+            font-size: 9px; color: #fff; z-index: 3;
         }
         .back .scissor-r {
             position: absolute; right: 2px; top: calc(50% - 6px);
-            font-size: 9px; color: #fff; z-index: 3; opacity: 0.7;
+            font-size: 9px; color: #fff; z-index: 3;
         }
 
         /* ── Buttons bar ── */
@@ -144,7 +132,7 @@
 </head>
 <body>
 
-    <h2>📝 Page 1 — Front (Write Passphrases)</h2>
+    <h2>📝 Page 1 — Front</h2>
     <div class="page" id="pageFront"></div>
     <hr style="border:1px dashed #ccc;margin:16px 0;page-break-after:always;">
     <h2>🖼️ Page 2 — Back</h2>
@@ -165,14 +153,25 @@ function frontCard(){
     return c;
 }
 
+function halfHTML(){
+    return '<div class="half">' +
+        '<img class="bg-img" src="card-bg.png" alt="">' +
+        '<div class="qr-box"><img src="'+qrImg(76)+'" alt="QR"></div>' +
+        '</div>';
+}
+
 function backCard(){
     var c=document.createElement('div');c.className='card back';
-    c.innerHTML=
+    // Each half gets its own background image and QR code
+    var h1 = '<div class="half half-top">' +
         '<img class="bg-img" src="card-bg.png" alt="">' +
-        '<div class="overlay">' +
-            '<div class="qr-box"><img src="'+qrImg(88)+'" alt="QR"></div>' +
-        '</div>' +
-        '<div class="cut-dash"></div>' +
+        '<div class="qr-box"><img src="'+qrImg(76)+'" alt="QR"></div>' +
+        '</div>';
+    var h2 = '<div class="half">' +
+        '<img class="bg-img" src="card-bg.png" alt="">' +
+        '<div class="qr-box"><img src="'+qrImg(76)+'" alt="QR"></div>' +
+        '</div>';
+    c.innerHTML = h1 + h2 +
         '<span class="scissor-l">✂</span>' +
         '<span class="scissor-r">✂</span>';
     return c;
