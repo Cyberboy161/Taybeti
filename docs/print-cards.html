@@ -7,7 +7,7 @@
     <style>
         @page { size: A4; margin: 5mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Georgia', 'Times New Roman', serif; background: #f5f5f0; color: #111; }
+        body { font-family: 'Georgia', serif; background: #f5f5f0; color: #111; }
         h2 { text-align: center; font-size: 13px; margin: 8px 0 4px; color: #999; font-weight: 400; }
         .page {
             display: grid;
@@ -19,9 +19,6 @@
         }
         .card {
             position: relative;
-            border: none;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
         }
 
@@ -30,12 +27,20 @@
             border: 1px solid #999;
             background: #fff;
         }
+        .front .card-inner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
         .front .half {
             flex: 1;
             display: flex;
             align-items: flex-end;
             justify-content: center;
             padding: 6px 10px 8px;
+            position: relative;
         }
         .front .half-top { border-bottom: 1.5px dashed #000; }
         .front .write-line {
@@ -43,203 +48,78 @@
             border-bottom: 1px solid #666;
             min-height: 13px;
         }
-        .scissor-l {
+        .front .scissor-l {
             position: absolute; left: -5px; top: calc(50% - 6px);
             font-size: 10px; color: #555; z-index: 3;
         }
-        .scissor-r {
+        .front .scissor-r {
             position: absolute; right: -5px; top: calc(50% - 6px);
             font-size: 10px; color: #555; z-index: 3;
         }
 
-        /* ── BACK — Ornate Art Card ── */
+        /* ── BACK ── */
         .back .card {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #1a1a2e 100%);
-            border: 0.5mm solid #c9a96e;
-            border-radius: 1.5mm;
-            box-shadow: inset 0 0 6mm rgba(201,169,110,0.15);
+            border: 1px solid #bbb;
+            background: #111;
             display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .back .half {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
-            padding: 3mm;
         }
-        .back .half-top { border-bottom: 1.5px dashed #c9a96e80; }
-
-        /* Main art card container */
-        .art-card {
-            position: relative;
-            width: 62mm;
-            height: 62mm;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(ellipse at center, #1e2a3a 0%, #0f1923 100%);
-            border: 0.6mm solid #c9a96e;
-            border-radius: 2mm;
-            box-shadow:
-                inset 0 0 5mm rgba(201,169,110,0.2),
-                0 0 3mm rgba(201,169,110,0.1);
-            overflow: hidden;
-        }
-
-        /* Gold filigree border — outer */
-        .art-border-outer {
+        .back .bg-img {
             position: absolute;
-            inset: 1.5mm;
-            border: 0.3mm solid #c9a96e55;
-            border-radius: 1.5mm;
-            pointer-events: none;
-            z-index: 2;
-        }
-        /* Gold filigree border — inner */
-        .art-border-inner {
-            position: absolute;
-            inset: 2.5mm;
-            border: 0.2mm solid #c9a96e44;
-            border-radius: 1mm;
-            pointer-events: none;
-            z-index: 2;
-        }
-        /* Corner fleurons */
-        .art-fleuron {
-            position: absolute;
-            pointer-events: none;
-            z-index: 3;
-        }
-        .art-fleuron::before, .art-fleuron::after {
-            content: '✦';
-            position: absolute;
-            font-size: 3mm;
-            color: #c9a96e;
-        }
-        .art-fleuron.tl { top: 1mm; left: 1.5mm; }
-        .art-fleuron.tr { top: 1mm; right: 1.5mm; }
-        .art-fleuron.bl { bottom: 1mm; left: 1.5mm; }
-        .art-fleuron.br { bottom: 1mm; right: 1.5mm; }
-
-        /* Concentric decorative circles behind QR */
-        .art-circle {
-            position: absolute;
-            border-radius: 50%;
-            border: 0.15mm solid #c9a96e33;
-            pointer-events: none;
-            z-index: 1;
-        }
-        .art-circle.c1 { width: 42mm; height: 42mm; border-width: 0.1mm; }
-        .art-circle.c2 { width: 38mm; height: 38mm; border-width: 0.15mm; border-color: #c9a96e44; }
-        .art-circle.c3 { width: 34mm; height: 34mm; border-width: 0.1mm; border-style: dashed; border-color: #c9a96e33; }
-        .art-circle.c4 { width: 30mm; height: 30mm; border-width: 0.2mm; border-color: #c9a96e55; }
-
-        /* Radiating lines — mandala style */
-        .art-rays {
-            position: absolute;
-            width: 44mm;
-            height: 44mm;
-            pointer-events: none;
-            z-index: 1;
-        }
-        /* Star burst in background */
-        .art-starburst {
-            position: absolute;
-            width: 46mm;
-            height: 46mm;
-            background:
-                conic-gradient(from 0deg,
-                    transparent 0deg, #c9a96e0a 3deg, transparent 6deg,
-                    transparent 15deg, #c9a96e0a 18deg, transparent 21deg,
-                    transparent 30deg, #c9a96e0a 33deg, transparent 36deg,
-                    transparent 45deg, #c9a96e0a 48deg, transparent 51deg,
-                    transparent 60deg, #c9a96e0a 63deg, transparent 66deg,
-                    transparent 75deg, #c9a96e0a 78deg, transparent 81deg,
-                    transparent 90deg, #c9a96e0a 93deg, transparent 96deg,
-                    transparent 105deg, #c9a96e0a 108deg, transparent 111deg,
-                    transparent 120deg, #c9a96e0a 123deg, transparent 126deg,
-                    transparent 135deg, #c9a96e0a 138deg, transparent 141deg,
-                    transparent 150deg, #c9a96e0a 153deg, transparent 156deg,
-                    transparent 165deg, #c9a96e0a 168deg, transparent 171deg,
-                    transparent 180deg, #c9a96e0a 183deg, transparent 186deg,
-                    transparent 195deg, #c9a96e0a 198deg, transparent 201deg,
-                    transparent 210deg, #c9a96e0a 213deg, transparent 216deg,
-                    transparent 225deg, #c9a96e0a 228deg, transparent 231deg,
-                    transparent 240deg, #c9a96e0a 243deg, transparent 246deg,
-                    transparent 255deg, #c9a96e0a 258deg, transparent 261deg,
-                    transparent 270deg, #c9a96e0a 273deg, transparent 276deg,
-                    transparent 285deg, #c9a96e0a 288deg, transparent 291deg,
-                    transparent 300deg, #c9a96e0a 303deg, transparent 306deg,
-                    transparent 315deg, #c9a96e0a 318deg, transparent 321deg,
-                    transparent 330deg, #c9a96e0a 333deg, transparent 336deg,
-                    transparent 345deg, #c9a96e0a 348deg, transparent 351deg);
-            border-radius: 50%;
-            pointer-events: none;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.55;
             z-index: 0;
         }
-
-        /* QR code container — sits in the center */
-        .art-qr {
+        .back .overlay {
             position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 3mm;
+        }
+        .back .qr-box {
             width: 24mm;
             height: 24mm;
             background: #fff;
-            border-radius: 0.8mm;
-            padding: 1.2mm;
-            z-index: 10;
-            box-shadow:
-                0 0 2mm rgba(201,169,110,0.3),
-                0 0 4mm rgba(201,169,110,0.15);
+            border-radius: 1.5mm;
+            padding: 1.5mm;
+            box-shadow: 0 0 3mm rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .art-qr img {
+        .back .qr-box img {
             width: 100%;
             height: 100%;
             display: block;
         }
-
-        /* Ornamental text bands */
-        .art-band {
+        .back .half-top {
             position: absolute;
-            width: 40mm;
-            pointer-events: none;
+            top: 0; left: 0; right: 0;
             z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2mm;
-        }
-        .art-band.top { top: 2mm; }
-        .art-band.bottom { bottom: 2mm; }
-        .art-band-dot {
-            width: 2mm;
-            height: 2mm;
-            border: 0.2mm solid #c9a96e66;
-            transform: rotate(45deg);
-        }
-        .art-band-line {
-            height: 0.1mm;
-            background: #c9a96e44;
-            flex: 1;
-        }
-
-        /* Subtle mandala dots at 12, 3, 6, 9 positions */
-        .art-dot-compass {
-            position: absolute;
-            width: 1.5mm;
-            height: 1.5mm;
-            background: #c9a96e;
-            border-radius: 50%;
             pointer-events: none;
-            z-index: 3;
-            opacity: 0.6;
         }
-        .art-dot-compass.top { top: 0.8mm; left: 50%; transform: translateX(-50%); }
-        .art-dot-compass.bottom { bottom: 0.8mm; left: 50%; transform: translateX(-50%); }
-        .art-dot-compass.left { left: 0.8mm; top: 50%; transform: translateY(-50%); }
-        .art-dot-compass.right { right: 0.8mm; top: 50%; transform: translateY(-50%); }
+        .back .cut-dash {
+            position: absolute;
+            left: 0; right: 0; top: 50%;
+            border-top: 1px dashed #fff8;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .back .scissor-l {
+            position: absolute; left: 2px; top: calc(50% - 6px);
+            font-size: 9px; color: #fff; z-index: 3; opacity: 0.7;
+        }
+        .back .scissor-r {
+            position: absolute; right: 2px; top: calc(50% - 6px);
+            font-size: 9px; color: #fff; z-index: 3; opacity: 0.7;
+        }
 
         /* ── Buttons bar ── */
         .action-bar {
@@ -250,7 +130,7 @@
             background: #444; color: #fff; border: none; padding: 6px 18px;
             border-radius: 6px; cursor: pointer; font-size: 13px; margin: 0 4px;
         }
-        .action-bar button.primary { background: #c9a96e; color: #111; font-weight: 600; }
+        .action-bar button.primary { background: #4f9cf7; font-weight: 600; }
 
         @media print {
             .action-bar { display: none; }
@@ -264,10 +144,10 @@
 </head>
 <body>
 
-    <h2>📝 Page 1 — Front (Passphrases)</h2>
+    <h2>📝 Page 1 — Front (Write Passphrases)</h2>
     <div class="page" id="pageFront"></div>
     <hr style="border:1px dashed #ccc;margin:16px 0;page-break-after:always;">
-    <h2>🎨 Page 2 — Back</h2>
+    <h2>🖼️ Page 2 — Back</h2>
     <div class="page" id="pageBack"></div>
 
     <div class="action-bar">
@@ -281,33 +161,20 @@ function qrImg(s){return"https://api.qrserver.com/v1/create-qr-code/?size="+s+"x
 
 function frontCard(){
     var c=document.createElement('div');c.className='card front';
-    c.innerHTML='<div class="half half-top"><div class="write-line"></div></div><div class="half"><div class="write-line"></div></div><span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
+    c.innerHTML='<div class="card-inner"><div class="half half-top"><div class="write-line"></div></div><div class="half"><div class="write-line"></div></div><span class="scissor-l">✂</span><span class="scissor-r">✂</span></div>';
     return c;
 }
 
 function backCard(){
     var c=document.createElement('div');c.className='card back';
     c.innerHTML=
-        '<div class="art-card">' +
-            '<div class="art-border-outer"></div>' +
-            '<div class="art-border-inner"></div>' +
-            '<span class="art-fleuron tl"></span>' +
-            '<span class="art-fleuron tr"></span>' +
-            '<span class="art-fleuron bl"></span>' +
-            '<span class="art-fleuron br"></span>' +
-            '<div class="art-circle c1"></div>' +
-            '<div class="art-circle c2"></div>' +
-            '<div class="art-circle c3"></div>' +
-            '<div class="art-circle c4"></div>' +
-            '<div class="art-starburst"></div>' +
-            '<div class="art-band top"><span class="art-band-line"></span><span class="art-band-dot"></span><span class="art-band-line"></span><span class="art-band-dot"></span><span class="art-band-line"></span></div>' +
-            '<div class="art-band bottom"><span class="art-band-line"></span><span class="art-band-dot"></span><span class="art-band-line"></span><span class="art-band-dot"></span><span class="art-band-line"></span></div>' +
-            '<span class="art-dot-compass top"></span>' +
-            '<span class="art-dot-compass bottom"></span>' +
-            '<span class="art-dot-compass left"></span>' +
-            '<span class="art-dot-compass right"></span>' +
-            '<div class="art-qr"><img src="'+qrImg(84)+'" alt=""></div>' +
-        '</div>';
+        '<img class="bg-img" src="card-bg.png" alt="">' +
+        '<div class="overlay">' +
+            '<div class="qr-box"><img src="'+qrImg(88)+'" alt="QR"></div>' +
+        '</div>' +
+        '<div class="cut-dash"></div>' +
+        '<span class="scissor-l">✂</span>' +
+        '<span class="scissor-r">✂</span>';
     return c;
 }
 
