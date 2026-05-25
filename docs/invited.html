@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="You've been invited to Taybeti Notesharing — the most private encrypted note app.">
+    <title>Taybeti Notesharing — You're Invited</title>
+    <style>
+        :root {
+            --bg: #0a0a0c; --surface: #141418; --surface2: #1e1e24;
+            --text: #e0e0e0; --text-secondary: #a0a0b0;
+            --accent: #4f9cf7; --accent-hover: #3b82f6; --border: #2a2a35;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height: 1.6; display: flex; flex-direction: column; align-items: center;
+            padding: 40px 16px 80px;
+        }
+        .container { max-width: 680px; width: 100%; }
+        .hero { text-align: center; margin-bottom: 2.5rem; }
+        .hero h1 {
+            font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 0.5rem;
+        }
+        .hero .invited-by {
+            color: var(--accent); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;
+        }
+        .hero p { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 2rem; line-height: 1.7; }
+
+        .download-btn {
+            display: inline-block; padding: 14px 36px; background: var(--accent);
+            color: #fff; text-decoration: none; border-radius: 50px;
+            font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 20px rgba(79,156,247,0.35);
+            margin-bottom: 0.5rem;
+        }
+        .download-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .version { display: inline-block; margin-left: 8px; padding: 3px 10px;
+            background: var(--surface2); border-radius: 20px; font-size: 0.8rem; color: var(--text-secondary); }
+
+        .steps { margin: 2.5rem 0; }
+        .steps h2 { font-size: 1.3rem; margin-bottom: 1.2rem; color: #fff; text-align: center; }
+        .step {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 0.8rem;
+            display: flex; align-items: flex-start; gap: 1rem;
+        }
+        .step-num {
+            width: 32px; height: 32px; background: var(--accent);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.9rem; color: #fff; flex-shrink: 0;
+        }
+        .step h3 { font-size: 1.05rem; color: #fff; margin-bottom: 0.2rem; }
+        .step p { color: var(--text-secondary); font-size: 0.92rem; }
+
+        .what-is {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.5rem; margin: 2rem 0;
+        }
+        .what-is h2 { font-size: 1.2rem; margin-bottom: 0.8rem; color: #fff; }
+        .what-is p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .footer { text-align: center; margin-top: 3rem; color: var(--text-secondary); font-size: 0.85rem; }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+
+        .lang-bar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: var(--surface2); border-bottom: 1px solid var(--border);
+            padding: 6px 16px; display: flex; align-items: center; justify-content: center;
+            gap: 8px; z-index: 999; flex-wrap: wrap;
+        }
+        .lang-bar button {
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text-secondary); padding: 4px 12px; border-radius: 20px;
+            cursor: pointer; font-size: 0.8rem; transition: all 0.2s;
+        }
+        .lang-bar button:hover, .lang-bar button.active {
+            background: var(--accent); border-color: var(--accent); color: #fff;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            body { padding-top: 60px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="lang-bar">
+        <button onclick="setLang('en')" class="active" id="lang-en">🌐 English</button>
+        <button onclick="setLang('de')" id="lang-de">🇩🇪 Deutsch</button>
+        <button onclick="setLang('tr')" id="lang-tr">🇹🇷 Türkçe</button>
+        <button onclick="setLang('ckb')" id="lang-ckb">کوردیی ناوەندی</button>
+        <button onclick="setLang('kmr')" id="lang-kmr">Kurmancî</button>
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h1>🔐 You've Been Invited</h1>
+            <p class="invited-by" data-i18n="invited">Someone trusts you with a secret. This card is your key.</p>
+            <p data-i18n="hero-text">Taybeti Notesharing is a private, encrypted note-taking app. The passphrase written on this card lets you unlock a shared note — securely, offline, with no middleman. Follow the steps below to get started.</p>
+            <a class="download-btn" href="https://github.com/Cyberboy161/Taybeti/releases/download/v1.0.56/app-release.apk">
+                ⬇ Download App
+            </a>
+            <span class="version">v1.0.56</span>
+        </div>
+
+        <div class="steps">
+            <h2 data-i18n="how-to">How to Use This Card</h2>
+            <div class="step">
+                <div class="step-num">1</div>
+                <div><h3 data-i18n="s1-title">Download the App</h3><p data-i18n="s1-text">Tap the download button above. Install Taybeti Notesharing on your Android device.</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div><h3 data-i18n="s2-title">Open a Shared Note</h3><p data-i18n="s2-text">Inside the app, tap the note that was shared with you. It may appear locked.</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div><h3 data-i18n="s3-title">Enter the Passphrase</h3><p data-i18n="s3-text">Type the passphrase exactly as written on this card. The note will decrypt and open.</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div><h3 data-i18n="s4-title">Keep the Card Safe</h3><p data-i18n="s4-text">Do not photograph this card. Do not share it. Keep your half in a secure place.</p></div>
+            </div>
+        </div>
+
+        <div class="what-is">
+            <h2 data-i18n="about-title">What is Taybeti Notesharing?</h2>
+            <p data-i18n="about-text"><em>Taybeti</em> means private and personal in Kurdish. This app is built for total privacy — every note is encrypted with its own key, nothing is stored in the cloud, and no one can read your messages except the person with the passphrase. Open source, free forever. <a href="index.html">Learn more →</a></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a></p>
+        </div>
+    </div>
+
+<script>
+var t={
+en:{invited:"Someone trusts you with a secret. This card is your key.", "hero-text":"Taybeti Notesharing is a private, encrypted note-taking app. The passphrase written on this card lets you unlock a shared note — securely, offline, with no middleman. Follow the steps below to get started.", "how-to":"How to Use This Card", "s1-title":"Download the App", "s1-text":"Tap the download button above. Install Taybeti Notesharing on your Android device.", "s2-title":"Open a Shared Note", "s2-text":"Inside the app, tap the note that was shared with you. It may appear locked.", "s3-title":"Enter the Passphrase", "s3-text":"Type the passphrase exactly as written on this card. The note will decrypt and open.", "s4-title":"Keep the Card Safe", "s4-text":"Do not photograph this card. Do not share it. Keep your half in a secure place.", "about-title":"What is Taybeti Notesharing?", "about-text":'<em>Taybeti</em> means private and personal in Kurdish. This app is built for total privacy — every note is encrypted with its own key, nothing is stored in the cloud, and no one can read your messages except the person with the passphrase. Open source, free forever. <a href="index.html">Learn more →</a>'},
+de:{invited:"Jemand vertraut dir ein Geheimnis an. Diese Karte ist dein Schlüssel.", "hero-text":"Taybeti Notesharing ist eine private, verschlüsselte Notiz-App. Die auf dieser Karte notierte Passphrase entsperrt eine geteilte Notiz — sicher, offline, ohne Mittelsmann.", "how-to":"So verwendest du diese Karte", "s1-title":"App herunterladen", "s1-text":"Tippe oben auf Herunterladen. Installiere Taybeti Notesharing auf deinem Android-Gerät.", "s2-title":"Geteilte Notiz öffnen", "s2-text":"Öffne in der App die Notiz, die mit dir geteilt wurde. Sie erscheint gesperrt.", "s3-title":"Passphrase eingeben", "s3-text":"Gib die Passphrase genau wie auf der Karte ein. Die Notiz wird entschlüsselt.", "s4-title":"Karte sicher aufbewahren", "s4-text":"Diese Karte nicht fotografieren. Nicht teilen. Deine Hälfte sicher verwahren.", "about-title":"Was ist Taybeti Notesharing?", "about-text":'<em>Taybeti</em> bedeutet privat und persönlich auf Kurdisch. Diese App bietet totale Privatsphäre — jede Notiz mit eigenem Schlüssel verschlüsselt, nichts in der Cloud, niemand kann deine Nachrichten lesen außer der Person mit der Passphrase. Open Source, für immer kostenlos. <a href="index.html">Mehr erfahren →</a>'},
+tr:{invited:"Biri sana bir sır emanet etti. Bu kart senin anahtarın.", "hero-text":"Taybeti Notesharing, özel ve şifreli bir not uygulamasıdır. Bu kartta yazılı parola, paylaşılan bir notu açmanızı sağlar — güvenli, çevrimdışı, aracısız.", "how-to":"Bu Kart Nasıl Kullanılır", "s1-title":"Uygulamayı İndir", "s1-text":"Yukarıdaki indirme düğmesine dokunun. Taybeti Notesharing'i Android cihazınıza yükleyin.", "s2-title":"Paylaşılan Notu Aç", "s2-text":"Uygulamada sizinle paylaşılan notu açın. Kilitli görünebilir.", "s3-title":"Parolayı Girin", "s3-text":"Parolayı tam olarak kartta yazdığı gibi yazın. Not çözülecek ve açılacak.", "s4-title":"Kartı Güvende Tutun", "s4-text":"Bu kartı fotoğraflamayın. Paylaşmayın. Yarısını güvenli bir yerde saklayın.", "about-title":"Taybeti Notesharing Nedir?", "about-text":'<em>Taybeti</em> Kürtçe\'de özel ve kişisel anlamına gelir. Bu uygulama tam gizlilik için üretilmiştir — her not kendi anahtarıyla şifrelenir, bulutta hiçbir şey saklanmaz, sadece parolaya sahip kişi mesajlarınızı okuyabilir. Açık kaynak, sonsuza kadar ücretsiz. <a href="index.html">Daha fazla bilgi →</a>'},
+ckb:{invited:"کەسێک متمانەت پێ دەکات بە نهێنییەک. ئەم کارتە کلیلی تۆیە.", "hero-text":"تایبەتی نۆتشەیرینگ ئەپێکی تایبەتی و شفرەکراوی تێبینییە. ووشەی نهێنی که لەسەر ئەم کارتە نووسراوە ڕێگەت پێدەدات تێبینییەکی هاوبەشکراو بکەیتەوە — بە پارێزراوی، ئۆفلاین، بێ نێوەندگیر.", "how-to":"چۆنیەتی بەکارهێنانی ئەم کارتە", "s1-title":"ئەپەکە دابگرە", "s1-text":"کرتە لە دوگمەی دابەزاندن بکە. تایبەتی نۆتشەیرینگ لەسەر ئامێری ئەندرۆیدەکەت دابمەزرێنە.", "s2-title":"تێبینییەکی هاوبەشکراو بکەرەوە", "s2-text":"لەناو ئەپەکەدا ئەو تێبینییە بکەرەوە کە لەگەڵت هاوبەش کراوە. لەوانەیە قفڵدار دەربکەوێت.", "s3-title":"ووشەی نهێنی بنووسە", "s3-text":"ووشەی نهێنی هەر وەک لەسەر ئەم کارتە نووسراوە تایپ بکە. تێبینییەکە شی دەکرێتەوە.", "s4-title":"کارتەکە بە پارێزراوی بهێڵەرەوە", "s4-text":"ئەم کارتە وێنە مەگرە. هاوبەشی مەکە. نیوەکەی خۆت لە شوێنێکی پارێزراو دابنێ.", "about-title":"تایبەتی نۆتشەیرینگ چییە؟", "about-text":'<em>تایبەتی</em> واتای تایبەت و شەخسی دەدات بە کوردی. ئەم ئەپە بۆ تایبەتمەندێتی تەواو دروستکراوە — هەر تێبینییەک بە کلیلی تایبەتی خۆی شفرە دەکرێت، هیچ شتێک لە هەوردا پاشەکەوت ناکرێت، کەس ناتوانێت پەیامەکانت بخوێنێتەوە جگە لەو کەسەی ووشەی نهێنی پێیە. سەرچاوە کراوە، بۆ هەمیشە خۆڕایی. <a href="index.html">زۆرتر بزانە →</a>'},
+kmr:{invited:"Yekî bi siruştekî bawerî bi te anî. Ev kart mifteya te ye.", "hero-text":"Taybeti Notesharing sepaneke taybet û şîfrekirî ya notan e. Şîfreya li ser vê kartê hatî nivîsandin dihêle tu noteke parvekirî vekî — bi ewlehî, offline, bê navbeynkar.", "how-to":"Çawa Vê Kartê Bi Kar Bînî", "s1-title":"Sepanê Daxîne", "s1-text":"Li bişkoka daxistinê bitikîne. Taybeti Notesharing li ser cîhaza xwe ya Android saz bike.", "s2-title":"Noteke Parvekirî Veke", "s2-text":"Di sepanê de wê nota ku bi te re hatî parvekirin veke. Dibe ku qefilandî xuya bike.", "s3-title":"Şîfreyê Binivîse", "s3-text":"Şîfreyê tam wek ku li ser vê kartê hatî nivîsandin binivîse. Not dê bê deşîfrekirin.", "s4-title":"Kartê Bi Ewlehî Bigire", "s4-text":"Vê kartê wêne negire. Parve neke. Nîvê xwe li cihekî ewle bigire.", "about-title":"Taybeti Notesharing Çi ye?", "about-text":'<em>Taybeti</em> bi kurdî wateya taybet û şexsî dide. Ev sepan ji bo nepeniya tevahî hatiye çêkirin — her not bi mifteya xwe ve tê şîfrekirin, tu tişt li ewr nayê tomarkirin, tu kes nikare peyamên te bixwîne ji bilî kesê ku şîfreyê digire. Çavkanî vekirî, herdem belaş. <a href="index.html">Zêdetir fêr bibe →</a>'}
+};
+function setLang(l){
+    document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
+    var btn=document.getElementById('lang-'+l);if(btn)btn.classList.add('active');
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+        var k=el.getAttribute('data-i18n');
+        if(t[l]&&t[l][k]){if(t[l][k].indexOf('<')>-1)el.innerHTML=t[l][k];else el.textContent=t[l][k];}
+    });
+}
+setLang('en');
+</script>
+</body>
+</html>
