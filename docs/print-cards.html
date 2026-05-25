@@ -14,7 +14,9 @@
             grid-template-columns: 1fr 1fr 1fr 1fr;
             grid-template-rows: 1fr 1fr;
             gap: 2mm;
-            width: 100%;
+            width: 297mm;
+            height: 210mm;
+            margin: 0 auto;
         }
         .card {
             position: relative;
@@ -106,8 +108,11 @@
         }
 
         @media screen {
-            .page { min-height: 95vh; }
+            .page { min-height: 0; }
             .action-bar button.primary { background: #4f9cf7; font-weight: 600; }
+        }
+        @media screen and (max-width: 600px) {
+            .page { width: 100%; height: auto; grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
         }
     </style>
 </head>
