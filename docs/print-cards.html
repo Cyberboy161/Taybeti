@@ -108,14 +108,18 @@
     </select>
     <span>Back Design:</span>
     <select id="cardBg" onchange="buildCards()">
-        <option value="card-bg.png">Cybersecurity</option>
-        <option value="bg-matrix">Matrix Green</option>
-        <option value="bg-red">Red Threat</option>
-        <option value="bg-blue">Deep Blue</option>
-        <option value="bg-circuit">Circuit Board</option>
-        <option value="bg-dark">Dark Minimal</option>
-        <option value="bg-grid">Geometric Grid</option>
-        <option value="bg-gold">Gold Pattern</option>
+        <option value="card-bg.png">🖼️ Cybersecurity</option>
+        <option value="bg-matrix">💚 Matrix Green</option>
+        <option value="bg-red">🔴 Red Threat</option>
+        <option value="bg-blue">🔵 Deep Blue</option>
+        <option value="bg-circuit">🔌 Circuit Board</option>
+        <option value="bg-fire">🔥 Fire</option>
+        <option value="bg-ice">❄️ Ice</option>
+        <option value="bg-void">⚫ Void</option>
+        <option value="bg-neon">💜 Neon</option>
+        <option value="bg-dark">⬛ Dark Minimal</option>
+        <option value="bg-grid">🔷 Geometric Grid</option>
+        <option value="bg-gold">🟡 Gold Pattern</option>
     </select>
     <button onclick="window.print()">🖨️ Print / PDF</button>
     <a href="index.html">🏠 Home</a>
@@ -137,19 +141,22 @@ var U="https://cyberboy161.github.io/Taybeti/invited.html";
 function Q(s){return"https://api.qrserver.com/v1/create-qr-code/?size="+s+"x"+s+"&data="+encodeURIComponent(U);}
 
 var bgStyles = {
-    "card-bg.png": 'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="https://cyberboy161.github.io/Taybeti/card-bg.png"',
-    "bg-dark": 'style="position:absolute;inset:0;background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)"',
-    "bg-grid": 'style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px),repeating-linear-gradient(90deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px)"',
-    "bg-gold": 'style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a);border:0.3mm solid #c9a96e55"',
-    "bg-matrix": 'style="position:absolute;inset:0;background:#000;background-image:linear-gradient(rgba(0,255,0,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,0,.07) 1px,transparent 1px);background-size:3px 3px"',
-    "bg-red": 'style="position:absolute;inset:0;background:linear-gradient(135deg,#1a0000,#2d0000,#1a0000);border:0.3mm solid #ff333355"',
-    "bg-blue": 'style="position:absolute;inset:0;background:radial-gradient(ellipse at center,#0a1628,#020810);border:0.3mm solid #3399ff44"',
-    "bg-circuit": 'style="position:absolute;inset:0;background:#0a0f0a;background-image:linear-gradient(#0f0 1px,transparent 1px),linear-gradient(90deg,#0f0 1px,transparent 1px),radial-gradient(circle,#0f01a 1px,transparent 1px);background-size:8px 8px,8px 8px,16px 16px;background-position:0 0,0 0,4px 4px"'
+    "card-bg.png": '<img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="https://cyberboy161.github.io/Taybeti/card-bg.png" alt="">',
+    "bg-dark": '<div style="position:absolute;inset:0;background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)"></div>',
+    "bg-grid": '<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px),repeating-linear-gradient(90deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px)"></div>',
+    "bg-gold": '<div style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a);border:0.3mm solid #c9a96e55"></div>',
+    "bg-matrix": '<div style="position:absolute;inset:0;background:#000;background-image:linear-gradient(rgba(0,255,0,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,0,.08) 1px,transparent 1px);background-size:3px 3px"></div>',
+    "bg-red": '<div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a0000,#2d0000,#1a0000);border:0.3mm solid #ff333355"></div>',
+    "bg-blue": '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,#0a1628,#020810);border:0.3mm solid #3399ff44"></div>',
+    "bg-circuit": '<div style="position:absolute;inset:0;background:#0a0f0a;background-image:linear-gradient(rgba(0,200,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,0,.06) 1px,transparent 1px),radial-gradient(circle,rgba(0,200,0,.1) 1px,transparent 1px);background-size:6px 6px,6px 6px,12px 12px;background-position:0 0,0 0,3px 3px"></div>',
+    "bg-fire": '<div style="position:absolute;inset:0;background:linear-gradient(180deg,#1a0500,#331100,#1a0500,#330000)"></div>',
+    "bg-ice": '<div style="position:absolute;inset:0;background:linear-gradient(180deg,#001122,#003355,#001122);border:0.3mm solid #66ccff33"></div>',
+    "bg-void": '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,#0a0a14,#000)"></div>',
+    "bg-neon": '<div style="position:absolute;inset:0;background:#0d0d0d;background-image:linear-gradient(rgba(255,0,128,.05) 2px,transparent 2px),linear-gradient(90deg,rgba(0,255,255,.05) 2px,transparent 2px);background-size:6mm 6mm,6mm 6mm"></div>'
 };
 
 function bgEl(key){
-    var s = bgStyles[key] || bgStyles["card-bg.png"];
-    return '<div '+s+'></div>';
+    return bgStyles[key] || bgStyles["card-bg.png"];
 }
 
 function qrBox(){ return '<div class="qr-box"><img src="'+Q(58)+'" alt="QR"></div>'; }
