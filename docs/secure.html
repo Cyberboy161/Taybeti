@@ -41,11 +41,11 @@
         .nav-bar a.inactive { background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); }
         body { padding-top: 70px; }
         @media(max-width:600px){ h1{font-size:1.5rem;} }
-    @media print { [style*="position:fixed"] { display: none !important; } body { padding-top: 0 !important; } }
+    @media print { .top-bar, .action-bar { display: none !important; } body { padding-top: 0 !important; } }
 </style>
 </head>
 <body>
-<div style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border);">
+<div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border);">
     <div class="lang-bar" style="padding:4px 10px;">
         <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
         <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>

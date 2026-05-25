@@ -83,14 +83,14 @@
             body { padding-top: 60px; }
         }
         @media print {
-            [style*="position:fixed"] { display: none !important; }
+            .top-bar, .action-bar { display: none !important; }
             body { padding-top: 0 !important; }
         }
     </style>
 </head>
 <body>
     <!-- Combined top bar -->
-    <div style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border);">
+    <div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border);">
         <div class="lang-bar" style="padding:4px 10px;">
             <button onclick="setLang('en')" class="active" id="lang-en">🌐 EN</button>
             <button onclick="setLang('de')" id="lang-de">🇩🇪 DE</button>

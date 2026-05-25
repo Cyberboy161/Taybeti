@@ -98,10 +98,9 @@
             border-radius: 6px; cursor: pointer; font-size: 13px; margin: 0 4px;
         }
 
-        @media print {
+            @media print {
             @page { size: A4 portrait; margin: 3mm; }
-            .action-bar { display: none; }
-            [style*="position:fixed"] { display: none; }
+            .top-bar, .action-bar { display: none !important; }
             .page { min-height: 0; max-height: 100%; }
             .card { page-break-inside: avoid; }
             .break { page-break-after: always; }
