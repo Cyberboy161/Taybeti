@@ -1,89 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What is Open Source? — Taybeti Notesharing</title>
     <style>
-        :root {
-            --bg: #0a0a0c; --surface: #141418; --surface2: #1e1e24;
-            --text: #e0e0e0; --text-secondary: #a0a0b0;
-            --accent: #4f9cf7; --border: #2a2a35; --radius: 12px;
-        }
-        * { margin:0;padding:0;box-sizing:border-box; }
-        body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:90px 16px 40px; display:flex;flex-direction:column;align-items:center; }
-        .container { max-width:760px;width:100%; }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:1.5rem; text-align:center;
-            background:linear-gradient(135deg,var(--accent),#a78bfa);
-            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
-        h2 { font-size:1.2rem; color:#fff; margin:1.8rem 0 0.6rem; }
-        p { color:var(--text-secondary); margin-bottom:0.8rem; font-size:0.95rem; }
-        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem 1.5rem; margin-bottom:0.8rem; }
-        .card h3 { color:#fff; font-size:1.05rem; margin-bottom:0.3rem; }
-        .card p { font-size:0.9rem; }
-        .gh-link { display:inline-block; padding:12px 28px; background:var(--accent); color:#fff; border-radius:50px; text-decoration:none; font-weight:600; margin:1rem 0; }
-        .footer { text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem; }
-        .footer a { color:var(--accent);text-decoration:none; }
-        .lang-bar { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
-        .lang-bar button {
-            background: var(--surface); border: 1px solid var(--border);
-            color: var(--text-secondary); padding: 4px 10px; border-radius: 20px;
-            cursor: pointer; font-size: 0.78rem;
-        }
-        .lang-bar button:hover, .lang-bar button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .nav-bar { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; padding: 2px 10px 4px; }
-        .nav-bar a { padding: 4px 10px; border-radius: 20px; text-decoration: none; font-size: 0.78rem; }
-        .nav-bar a.active { background: var(--accent); border: 1px solid var(--accent); color: #fff; font-weight: 600; }
-        .nav-bar a.inactive { background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); }
-        body { padding-top: 70px; }
-        @media(max-width:600px){ h1{font-size:1.5rem;} }
-    @media print { .top-bar, .action-bar { display: none !important; } body { padding-top: 0 !important; } }
-</style>
+        :root{--bg:#0a0a0c;--surface:#141418;--surface2:#1e1e24;--text:#e0e0e0;--text-secondary:#a0a0b0;--accent:#4f9cf7;--border:#2a2a35;--radius:12px}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:70px 16px 40px;display:flex;flex-direction:column;align-items:center}
+        .container{max-width:760px;width:100%}
+        h1{font-size:2rem;font-weight:800;margin-bottom:1rem;text-align:center;background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        h2{font-size:1.15rem;color:#fff;margin:1.5rem 0 0.5rem}
+        p{color:var(--text-secondary);margin-bottom:0.7rem;font-size:0.93rem}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.4rem;margin-bottom:0.7rem}
+        .card h3{color:#fff;font-size:1rem;margin-bottom:0.3rem}
+        .card p{font-size:0.88rem}
+        .gh-link{display:inline-block;padding:10px 24px;background:var(--accent);color:#fff;border-radius:50px;text-decoration:none;font-weight:600;margin:0.5rem 0}
+        .footer{text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem}
+        .footer a{color:var(--accent);text-decoration:none}
+        .lang-bar{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+        .lang-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:3px 9px;border-radius:20px;cursor:pointer;font-size:0.76rem}
+        .lang-bar button:hover,.lang-bar button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+        .nav-bar{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;padding:2px 10px 4px}
+        .nav-bar a{padding:3px 9px;border-radius:20px;text-decoration:none;font-size:0.76rem}
+        .nav-bar a.active{background:var(--accent);border:1px solid var(--accent);color:#fff;font-weight:600}
+        .nav-bar a.inactive{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary)}
+        @media(max-width:600px){h1{font-size:1.4rem}}
+        @media print{.top-bar,.action-bar{display:none!important}body{padding-top:0!important}}
+    </style>
 </head>
 <body>
-<div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border);">
-    <div class="lang-bar" style="padding:4px 10px;">
-        <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
-        <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
-        <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
-        <button onclick="setLang('ckb')" id="btn-ckb">کوردی</button>
-        <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
-    </div>
-    <div class="nav-bar">
-        <a href="index.html" class="inactive">🏠 Home</a>
-        <a href="why.html" class="inactive">❓ Why</a>
-        <a href="opensource.html" class="active">📖 Open Source</a>
-        <a href="secure.html" class="inactive">🛡️ Secure</a>
-        <a href="print-cards.html" class="inactive">🖨️ Cards</a>
-        <a href="invited.html" class="inactive">📩 Invited</a>
-    </div>
+<div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border)">
+ <div class="lang-bar" style="padding:4px 10px">
+  <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
+  <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
+  <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
+  <button onclick="setLang('ckb')" id="btn-ckb">کوردی</button>
+  <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
+ </div>
+ <div class="nav-bar">
+  <a href="index.html" class="inactive">🏠 <span data-i18n="n-home">Home</span></a>
+  <a href="why.html" class="inactive">❓ <span data-i18n="n-why">Why</span></a>
+  <a href="opensource.html" class="active">📖 <span data-i18n="nav-os">Open Source</span></a>
+  <a href="secure.html" class="inactive">🛡️ <span data-i18n="n-sec">Secure</span></a>
+  <a href="print-cards.html" class="inactive">🖨️ <span data-i18n="n-card">Cards</span></a>
+  <a href="invited.html" class="inactive">📩 <span data-i18n="n-inv">Invited</span></a>
+ </div>
 </div>
 <div class="container">
-<h1>📖 What Does Open Source Mean?</h1>
-<p style="text-align:center;margin-bottom:2rem;">And why it's the reason you can trust Taybeti with your secrets.</p>
+<h1 data-i18n="h1">📖 What Does Open Source Mean?</h1>
+<p style="text-align:center;margin-bottom:1.5rem" data-i18n="intro">And why it's the reason you can trust Taybeti with your secrets.</p>
 
-<h2>🔍 Open Source — explained simply</h2>
-<div class="card"><p>Open source means the source code — the actual instructions that make the app work — is <strong>publicly available for anyone to read, inspect, and verify</strong>. Think of it like a restaurant where the kitchen is made of glass: you can see exactly how your food is prepared. With closed‑source apps, the kitchen is behind a concrete wall — you have no idea what's happening inside.</p></div>
+<h2 data-i18n="s1-h2">🔍 Open Source — explained simply</h2>
+<div class="card"><p data-i18n="s1-p">Open source means the source code — the actual instructions that make the app work — is publicly available for anyone to read, inspect, and verify. Think of it like a restaurant where the kitchen is made of glass: you can see exactly how your food is prepared. With closed‑source apps, the kitchen is behind a concrete wall.</p></div>
 
-<h2>🐙 What is GitHub?</h2>
-<div class="card"><p><strong>GitHub</strong> is the world's largest platform for hosting open source code. It's where developers share their projects so the whole world can see, review, and contribute. Every change to Taybeti's code is publicly tracked on GitHub — who made it, when, and why. Nothing is hidden. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank" class="gh-link">View Taybeti on GitHub →</a></p></div>
+<h2 data-i18n="s2-h2">🐙 What is GitHub?</h2>
+<div class="card"><p data-i18n="s2-p">GitHub is the world's largest platform for hosting open source code. It's where developers share their projects so the whole world can see, review, and contribute. Every change to Taybeti's code is publicly tracked — who made it, when, and why. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank" class="gh-link">View Taybeti on GitHub →</a></p></div>
 
-<h2>🤝 Why should you trust it?</h2>
-<div class="card"><h3>1. Anyone can audit it</h3><p>Security researchers, privacy activists, and curious developers can all read the code and verify that it does exactly what we say — and nothing else. No hidden backdoors survive public scrutiny.</p></div>
-<div class="card"><h3>2. It can't secretly change</h3><p>Every single code change is publicly logged on GitHub with a timestamp and author. A company can't quietly add spyware in an update — the community would spot it instantly.</p></div>
-<div class="card"><h3>3. You're not locked in</h3><p>If Taybeti ever disappears, anyone can take the code and continue the project. Your data format is documented and open — no vendor lock‑in. Your notes are yours forever.</p></div>
-<div class="card"><h3>4. MIT License = real freedom</h3><p>Taybeti is released under the MIT license — one of the most permissive open source licenses. Anyone can use, modify, and distribute the code for any purpose, even commercially. There are genuinely no strings attached.</p></div>
+<h2 data-i18n="s3-h2">🤝 Why should you trust it?</h2>
+<div class="card"><h3 data-i18n="s3a-h">1. Anyone can audit it</h3><p data-i18n="s3a-p">Security researchers, privacy activists, and developers can all read the code and verify that it does exactly what we say — and nothing else.</p></div>
+<div class="card"><h3 data-i18n="s3b-h">2. It can't secretly change</h3><p data-i18n="s3b-p">Every code change is publicly logged with a timestamp. A company can't quietly add spyware in an update — the community would spot it instantly.</p></div>
+<div class="card"><h3 data-i18n="s3c-h">3. You're not locked in</h3><p data-i18n="s3c-p">If Taybeti ever disappears, anyone can take the code and continue the project. Your data format is documented and open — your notes are yours forever.</p></div>
+<div class="card"><h3 data-i18n="s3d-h">4. MIT License = real freedom</h3><p data-i18n="s3d-p">Taybeti is under the MIT license — anyone can use, modify, and distribute the code for any purpose. There are genuinely no strings attached.</p></div>
 
-<h2>🔐 Why this matters for your privacy</h2>
-<div class="card"><p>When an app is closed‑source, you're taking the developer's word that it's secure. With Taybeti, you don't need to trust us — you can <strong>verify</strong>. Independent experts can confirm that there's no backdoor, no telemetry, and no cloud leak. That's what real trust looks like: not a promise, but proof.</p></div>
+<h2 data-i18n="s4-h2">🔐 Why this matters for your privacy</h2>
+<div class="card"><p data-i18n="s4-p">With Taybeti, you don't need to trust us — you can verify. Independent experts can confirm there's no backdoor, no telemetry, and no cloud leak. That's real trust: not a promise, but proof.</p></div>
 
-<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="why.html">Why this app?</a> · <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a></p></div>
+<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="why.html">Why</a></p></div>
 </div>
 <script>
-var t={en:{},de:{},tr:{},ckb:{},kmr:{}};
+var t={
+en:{"h1":"📖 What Does Open Source Mean?","intro":"And why it's the reason you can trust Taybeti with your secrets.","s1-h2":"🔍 Open Source — explained simply","s1-p":"Open source means the source code is publicly available for anyone to read, inspect, and verify. Think of it like a restaurant where the kitchen is made of glass.","s2-h2":"🐙 What is GitHub?","s2-p":"GitHub is the world's largest platform for hosting open source code. Every change to Taybeti's code is publicly tracked. <a href='https://github.com/Cyberboy161/Taybeti' target='_blank' class='gh-link'>View Taybeti on GitHub →</a>","s3-h2":"🤝 Why should you trust it?","s3a-h":"1. Anyone can audit it","s3a-p":"Security researchers and developers can all read the code and verify it does exactly what we say.","s3b-h":"2. It can't secretly change","s3b-p":"Every code change is publicly logged. A company can't quietly add spyware in an update.","s3c-h":"3. You're not locked in","s3c-p":"Anyone can take the code and continue the project. Your notes are yours forever.","s3d-h":"4. MIT License = real freedom","s3d-p":"Anyone can use, modify, and distribute the code for any purpose. No strings attached.","s4-h2":"🔐 Why this matters for your privacy","s4-p":"You don't need to trust us — you can verify. Independent experts can confirm there's no backdoor. That's real trust: not a promise, but proof.","nav-os":"Open Source","n-home":"Home","n-why":"Why","n-sec":"Secure","n-card":"Cards","n-inv":"Invited"},
+de:{"h1":"📖 Was bedeutet Open Source?","intro":"Und warum du Taybeti deshalb deine Geheimnisse anvertrauen kannst.","s1-h2":"🔍 Open Source — einfach erklärt","s1-p":"Open Source bedeutet, dass der Quellcode öffentlich für jeden lesbar, prüfbar und verifizierbar ist. Wie ein Restaurant mit Glasküche.","s2-h2":"🐙 Was ist GitHub?","s2-p":"GitHub ist die größte Plattform für Open‑Source‑Code. Jede Änderung an Taybetis Code ist öffentlich protokolliert. <a href='https://github.com/Cyberboy161/Taybeti' target='_blank' class='gh-link'>Taybeti auf GitHub →</a>","s3-h2":"🤝 Warum solltest du vertrauen?","s3a-h":"1. Jeder kann prüfen","s3a-p":"Sicherheitsforscher können den Code lesen und bestätigen, dass er genau das tut, was wir sagen.","s3b-h":"2. Keine heimlichen Änderungen","s3b-p":"Jede Code‑Änderung ist öffentlich protokolliert. Niemand kann heimlich Spyware hinzufügen.","s3c-h":"3. Kein Lock‑in","s3c-p":"Falls Taybeti verschwindet, kann jeder das Projekt weiterführen. Deine Notizen gehören dir.","s3d-h":"4. MIT‑Lizenz = echte Freiheit","s3d-p":"Jeder kann den Code nutzen, ändern und verteilen. Keine versteckten Bedingungen.","s4-h2":"🔐 Warum das für deine Privatsphäre zählt","s4-p":"Du musst uns nicht vertrauen — du kannst prüfen. Experten können bestätigen: keine Hintertür, keine Telemetrie.","nav-os":"Open Source","n-home":"Start","n-why":"Warum","n-sec":"Sicher","n-card":"Karten","n-inv":"Eingeladen"},
+tr:{"h1":"📖 Açık Kaynak Ne Demek?","intro":"Ve Taybeti'ye sırlarınızı emanet edebilmenizin nedeni budur.","s1-h2":"🔍 Açık Kaynak — basitçe","s1-p":"Açık kaynak, kaynak kodun herkes tarafından okunabilir ve doğrulanabilir olmasıdır. Mutfağı camdan bir restoran gibi.","s2-h2":"🐙 GitHub Nedir?","s2-p":"GitHub, açık kaynak kod barındırmak için dünyanın en büyük platformudur. Taybeti'nin kodundaki her değişiklik herkese açık olarak kaydedilir. <a href='https://github.com/Cyberboy161/Taybeti' target='_blank' class='gh-link'>GitHub'da Taybeti →</a>","s3-h2":"🤝 Neden güvenmelisiniz?","s3a-h":"1. Herkes denetleyebilir","s3a-p":"Güvenlik araştırmacıları kodu okuyup tam olarak söylediğimiz gibi çalıştığını doğrulayabilir.","s3b-h":"2. Gizlice değişemez","s3b-p":"Her kod değişikliği herkese açık olarak kaydedilir. Kimse gizlice casus yazılım ekleyemez.","s3c-h":"3. Kilitli değilsiniz","s3c-p":"Taybeti yok olsa bile herkes kodu alıp projeye devam edebilir. Notlarınız sonsuza kadar sizin.","s3d-h":"4. MIT Lisansı = gerçek özgürlük","s3d-p":"Herkes kodu kullanabilir, değiştirebilir ve dağıtabilir. Hiçbir gizli koşul yok.","s4-h2":"🔐 Gizliliğiniz için neden önemli","s4-p":"Bize güvenmek zorunda değilsiniz — doğrulayabilirsiniz. Bağımsız uzmanlar arka kapı olmadığını onaylayabilir.","nav-os":"Açık Kaynak","n-home":"Ana Sayfa","n-why":"Neden","n-sec":"Güvenli","n-card":"Kartlar","n-inv":"Davetli"},
+ckb:{"h1":"📖 سەرچاوە کراوە واتای چییە؟","intro":"و بۆچی ئەمە هۆکاری ئەوەیە کە دەتوانیت متمانە بە تایبەتی بکەیت بە نهێنییەکانت.","s1-h2":"🔍 سەرچاوە کراوە — بە سادەیی","s1-p":"سەرچاوە کراوە واتە کۆدی سەرچاوە بە ئاشکرا بۆ هەموو کەسێک بەردەستە بۆ خوێندنەوە و پشتڕاستکردنەوە. وەک چێشتخانەیەک کە چێشتخانەکەی لە شووشە دروستکراوە.","s2-h2":"🐙 گیت‌هەب چییە؟","s2-p":"گیت‌هەب گەورەترین پلاتفۆرمی جیهانە بۆ میوانداریکردنی کۆدی سەرچاوە کراوە. هەموو گۆڕانکارییەک لە کۆدی تایبەتیدا بە ئاشکرا تۆمار دەکرێت. <a href='https://github.com/Cyberboy161/Taybeti' target='_blank' class='gh-link'>تایبەتی لە گیت‌هەب ببینە →</a>","s3-h2":"🤝 بۆچی دەبێت متمانەی پێ بکەیت؟","s3a-h":"١. هەر کەسێک دەتوانێت چاودێری بکات","s3a-p":"توێژەرانی ئاسایش دەتوانن کۆدەکە بخوێننەوە و پشتڕاستی بکەنەوە کە هەر ئەوە دەکات کە دەڵێین.","s3b-h":"٢. ناتوانێت بە نهێنی بگۆڕدرێت","s3b-p":"هەموو گۆڕانکارییەکی کۆد بە ئاشکرا تۆمار دەکرێت. کۆمپانیایەک ناتوانێت بە نهێنی سیخوڕی زیاد بکات.","s3c-h":"٣. تۆ قفڵ نەکراویت","s3c-p":"ئەگەر تایبەتی لەناو بچێت، هەر کەسێک دەتوانێت کۆدەکە ببات و پڕۆژەکە بەردەوام بکات.","s3d-h":"٤. مۆڵەتی MIT = ئازادی ڕاستەقینە","s3d-p":"هەر کەسێک دەتوانێت کۆدەکە بەکاربهێنێت، بیگۆڕێت و دابەشی بکات. هیچ مەرجی شاراوە نییە.","s4-h2":"🔐 بۆچی ئەمە بۆ تایبەتمەندێتی تۆ گرنگە","s4-p":"پێویست ناکات متمانەمان پێ بکەیت — دەتوانیت پشتڕاستی بکەیتەوە. شارەزایان دەتوانن پشتڕاستی بکەنەوە کە دەرگای پشتەوە نییە.","nav-os":"سەرچاوە کراوە","n-home":"سەرەکی","n-why":"بۆچی","n-sec":"پارێزراو","n-card":"کارت","n-inv":"بانگهێشتکراو"},
+kmr:{"h1":"📖 Çavkanî Vekirî Tê Çi Wateyê?","intro":"Û çima ev sedem e ku tu dikarî bi Taybeti bawer bî bi siruştên xwe.","s1-h2":"🔍 Çavkanî Vekirî — bi hêsanî","s1-p":"Çavkanî vekirî tê wateya ku koda çavkaniyê bi eşkere ji her kesî re peyda ye ji bo xwendin û rastkirinê. Mîna restorantek ku metbexa wê ji camê ye.","s2-h2":"🐙 GitHub çi ye?","s2-p":"GitHub mezintirîn platforma cîhanê ye ji bo mazûvankirina koda çavkanî vekirî. Her guhertina koda Taybeti bi eşkere tê tomar kirin. <a href='https://github.com/Cyberboy161/Taybeti' target='_blank' class='gh-link'>Taybeti li GitHub bibîne →</a>","s3-h2":"🤝 Çima divê tu pê bawer bî?","s3a-h":"1. Her kes dikare venêre","s3a-p":"Lêkolînerên ewlehiyê dikarin kodê bixwînin û piştrast bikin ku tam tiştê em dibêjin dike.","s3b-h":"2. Nikare bi dizî were guhertin","s3b-p":"Her guhertina kodê bi eşkere tê tomar kirin. Şîrket nikare bi dizî sîxuriyê zêde bike.","s3c-h":"3. Tu ne girtî yî","s3c-p":"Heger Taybeti winda bibe, her kes dikare kodê bigire û projeyê bidomîne. Notên te herdem ên te ne.","s3d-h":"4. Lîsansa MIT = azadiya rastîn","s3d-p":"Her kes dikare kodê bi kar bîne, biguherîne û belav bike. Tu şertên veşartî nînin.","s4-h2":"🔐 Çima ev ji bo nepeniya te girîng e","s4-p":"Ne hewce ye tu bi me bawer bî — tu dikarî piştrast bikî. Pispor dikarin piştrast bikin ku paşderî tune.","nav-os":"Çavkanî Vekirî","n-home":"Mal","n-why":"Çima","n-sec":"Ewle","n-card":"Kart","n-inv":"Dawetkirî"}
+};
 function setLang(l){
-    document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
-    var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
+ document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
+ var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
+ document.querySelectorAll('[data-i18n]').forEach(function(el){
+  var k=el.getAttribute('data-i18n');if(t[l]&&t[l][k]){if(t[l][k].indexOf('<')>-1)el.innerHTML=t[l][k];else el.textContent=t[l][k];}
+ });
 }
 setLang('en');
 </script>

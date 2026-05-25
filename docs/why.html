@@ -1,113 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Why Taybeti Notesharing?</title>
     <style>
-        :root {
-            --bg: #0a0a0c; --surface: #141418; --surface2: #1e1e24;
-            --text: #e0e0e0; --text-secondary: #a0a0b0;
-            --accent: #4f9cf7; --border: #2a2a35; --radius: 12px;
-        }
-        * { margin:0;padding:0;box-sizing:border-box; }
-        body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:90px 16px 40px; display:flex;flex-direction:column;align-items:center; }
-        .container { max-width:760px;width:100%; }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:1.5rem; text-align:center;
-            background:linear-gradient(135deg,var(--accent),#a78bfa);
-            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
-        h2 { font-size:1.2rem; color:#fff; margin:1.8rem 0 0.6rem; }
-        p { color:var(--text-secondary); margin-bottom:0.8rem; font-size:0.95rem; }
-        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem 1.5rem; margin-bottom:0.8rem; }
-        .card h3 { color:#fff; font-size:1.05rem; margin-bottom:0.3rem; }
-        .card p { font-size:0.9rem; }
-        .compare { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:1rem 0; font-size:0.85rem; }
-        .compare div { padding:8px; text-align:center; border-radius:8px; }
-        .compare .hdr { background:var(--surface); color:#fff; font-weight:700; }
-        .compare .us { background:var(--accent); color:#fff; }
-        .compare .not { background:var(--surface2); color:var(--text-secondary); }
-        .footer { text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem; }
-        .footer a { color:var(--accent);text-decoration:none; }
-        .lang-bar { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
-        .lang-bar button {
-            background: var(--surface); border: 1px solid var(--border);
-            color: var(--text-secondary); padding: 4px 10px; border-radius: 20px;
-            cursor: pointer; font-size: 0.78rem;
-        }
-        .lang-bar button:hover, .lang-bar button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .nav-bar { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; padding: 2px 10px 4px; }
-        .nav-bar a { padding: 4px 10px; border-radius: 20px; text-decoration: none; font-size: 0.78rem; }
-        .nav-bar a.active { background: var(--accent); border: 1px solid var(--accent); color: #fff; font-weight: 600; }
-        .nav-bar a.inactive { background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); }
-        body { padding-top: 70px; }
-        @media(max-width:600px){ .compare{grid-template-columns:1fr;}; h1{font-size:1.5rem;} }
-    @media print { .top-bar, .action-bar { display: none !important; } body { padding-top: 0 !important; } }
-</style>
+        :root{--bg:#0a0a0c;--surface:#141418;--surface2:#1e1e24;--text:#e0e0e0;--text-secondary:#a0a0b0;--accent:#4f9cf7;--border:#2a2a35;--radius:12px}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:70px 16px 40px;display:flex;flex-direction:column;align-items:center}
+        .container{max-width:760px;width:100%}
+        h1{font-size:2rem;font-weight:800;margin-bottom:1rem;text-align:center;background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        h2{font-size:1.15rem;color:#fff;margin:1.5rem 0 0.5rem}
+        p{color:var(--text-secondary);margin-bottom:0.7rem;font-size:0.93rem}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.4rem;margin-bottom:0.7rem}
+        .card h3{color:#fff;font-size:1rem;margin-bottom:0.3rem}
+        .card p{font-size:0.88rem}
+        .compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:1rem 0;font-size:0.82rem}
+        .compare div{padding:7px;text-align:center;border-radius:7px}
+        .compare .hdr{background:var(--surface);color:#fff;font-weight:700}
+        .compare .us{background:var(--accent);color:#fff}
+        .compare .not{background:var(--surface2);color:var(--text-secondary)}
+        .footer{text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem}
+        .footer a{color:var(--accent);text-decoration:none}
+        .lang-bar{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+        .lang-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:3px 9px;border-radius:20px;cursor:pointer;font-size:0.76rem}
+        .lang-bar button:hover,.lang-bar button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+        .nav-bar{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;padding:2px 10px 4px}
+        .nav-bar a{padding:3px 9px;border-radius:20px;text-decoration:none;font-size:0.76rem}
+        .nav-bar a.active{background:var(--accent);border:1px solid var(--accent);color:#fff;font-weight:600}
+        .nav-bar a.inactive{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary)}
+        @media(max-width:600px){h1{font-size:1.4rem}.compare{font-size:0.7rem}}
+        @media print{.top-bar,.action-bar{display:none!important}body{padding-top:0!important}}
+    </style>
 </head>
 <body>
-<div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border);">
-    <div class="lang-bar" style="padding:4px 10px;">
-        <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
-        <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
-        <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
-        <button onclick="setLang('ckb')" id="btn-ckb">کوردی</button>
-        <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
-    </div>
-    <div class="nav-bar">
-        <a href="index.html" class="inactive">🏠 Home</a>
-        <a href="why.html" class="active">❓ Why</a>
-        <a href="opensource.html" class="inactive">📖 Open Source</a>
-        <a href="secure.html" class="inactive">🛡️ Secure</a>
-        <a href="print-cards.html" class="inactive">🖨️ Cards</a>
-        <a href="invited.html" class="inactive">📩 Invited</a>
-    </div>
+<div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border)">
+ <div class="lang-bar" style="padding:4px 10px">
+  <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
+  <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
+  <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
+  <button onclick="setLang('ckb')" id="btn-ckb">کوردی</button>
+  <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
+ </div>
+ <div class="nav-bar">
+  <a href="index.html" class="inactive">🏠 <span data-i18n="nav-home">Home</span></a>
+  <a href="why.html" class="active">❓ <span data-i18n="nav-why">Why</span></a>
+  <a href="opensource.html" class="inactive">📖 <span data-i18n="nav-os">Open Source</span></a>
+  <a href="secure.html" class="inactive">🛡️ <span data-i18n="nav-sec">Secure</span></a>
+  <a href="print-cards.html" class="inactive">🖨️ <span data-i18n="nav-card">Cards</span></a>
+  <a href="invited.html" class="inactive">📩 <span data-i18n="nav-inv">Invited</span></a>
+ </div>
 </div>
 <div class="container">
 <h1 data-i18n="h1">🔐 Why Taybeti Notesharing?</h1>
-<p style="text-align:center;margin-bottom:2rem;"><p style="text-align:center;margin-bottom:2rem;" data-i18n="intro">Most note apps collect your data. We don't see it, can't see it, and never will. Here's why.</p>
+<p style="text-align:center;margin-bottom:1.5rem" data-i18n="intro">Most note apps collect your data. We don't see it, can't see it, and never will. Here's why.</p>
 
 <div class="compare">
-    <div class="hdr">Feature</div><div class="hdr">Taybeti</div><div class="hdr">Other Apps</div>
-    <div>🔒 Encryption</div><div class="us">Per‑note AES‑256‑GCM</div><div class="not">At‑rest only, or none</div>
-    <div>🔑 Keys</div><div class="us">Your passphrase = your key</div><div class="not">Company holds the keys</div>
-    <div>☁️ Cloud</div><div class="us">Nothing. Zero.</div><div class="not">Synced to their servers</div>
-    <div>📵 Offline</div><div class="us">100% — no internet permission</div><div class="not">Requires internet</div>
-    <div>⌨️ Keyboard</div><div class="us">Built‑in, blocks keyloggers</div><div class="not">System keyboard (tracked)</div>
-    <div>👁️ Open Source</div><div class="us">Every line public (MIT)</div><div class="not">Closed, proprietary</div>
-    <div>🕵️ Metadata</div><div class="us">No tracking, no telemetry</div><div class="not">Collected and sold</div>
-    <div>💰 Cost</div><div class="us">Free forever</div><div class="not">Free with ads, or paid</div>
+ <div class="hdr" data-i18n="col-feat">Feature</div><div class="hdr">Taybeti</div><div class="hdr" data-i18n="col-other">Other Apps</div>
+ <div data-i18n="r1-f">Per‑note encryption</div><div class="us" data-i18n="r1-u">AES‑256‑GCM per note</div><div class="not" data-i18n="r1-o">At‑rest only, or none</div>
+ <div data-i18n="r2-f">Keys</div><div class="us" data-i18n="r2-u">Your passphrase = your key</div><div class="not" data-i18n="r2-o">Company holds the keys</div>
+ <div data-i18n="r3-f">Cloud</div><div class="us" data-i18n="r3-u">Nothing. Zero.</div><div class="not" data-i18n="r3-o">Synced to their servers</div>
+ <div data-i18n="r4-f">Offline</div><div class="us" data-i18n="r4-u">100% — no internet</div><div class="not" data-i18n="r4-o">Requires internet</div>
+ <div data-i18n="r5-f">Keyboard</div><div class="us" data-i18n="r5-u">Built‑in, secure</div><div class="not" data-i18n="r5-o">System keyboard tracked</div>
+ <div data-i18n="r6-f">Open Source</div><div class="us" data-i18n="r6-u">Every line public</div><div class="not" data-i18n="r6-o">Closed, proprietary</div>
+ <div data-i18n="r7-f">Cost</div><div class="us" data-i18n="r7-u">Free forever</div><div class="not" data-i18n="r7-o">Ads or paid</div>
 </div>
 
-<h2>🛡️ Why the custom keyboard matters</h2>
-<div class="card"><p>Every other app uses your phone's system keyboard. That keyboard can — and often does — record what you type and send it to Google, Apple, or a third‑party. Taybeti's built‑in keyboard completely isolates your typing from the system. No keylogger can touch it. No predictive text leaks your passphrase. It's the keyboard equivalent of a Faraday cage.</p></div>
+<h2 data-i18n="kb-h2">🛡️ Why the custom keyboard matters</h2>
+<div class="card"><p data-i18n="kb-p">Every other app uses your phone's system keyboard. That keyboard can record what you type and send it to Google, Apple, or a third party. Taybeti's built‑in keyboard completely isolates your typing. No keylogger can touch it. No predictive text leaks your passphrase.</p></div>
 
-<h2>🔒 Per‑note encryption</h2>
-<div class="card"><p>Most apps encrypt your data with one master key — if that key is stolen, everything is exposed. Taybeti encrypts every single note with its own independent AES‑256‑GCM key derived from the passphrase you set. Cracking one note gives an attacker nothing on the others. Each note is its own fortress.</p></div>
+<h2 data-i18n="enc-h2">🔒 Per‑note encryption</h2>
+<div class="card"><p data-i18n="enc-p">Most apps use one master key — if stolen, everything is exposed. Taybeti encrypts every note with its own AES‑256‑GCM key. Cracking one note gives nothing on the others. Each note is its own fortress.</p></div>
 
-<h2>📵 Offline by design</h2>
-<div class="card"><p>Taybeti has no internet permission at all. It cannot connect to the internet. It cannot sync, cannot upload, cannot phone home. Your data literally cannot leave your device — by architecture, not by policy. Most apps say they're private; we made it physically impossible to be otherwise.</p></div>
+<h2 data-i18n="off-h2">📵 Offline by design</h2>
+<div class="card"><p data-i18n="off-p">Taybeti has no internet permission. It cannot connect, cannot sync, cannot upload. Your data cannot leave your device — by architecture, not by policy.</p></div>
 
-<h2>🧪 Self‑verifying login</h2>
-<div class="card"><p>No password hashes are stored — there's nothing to crack. When you log in, the app tries to decrypt a known string with your passphrase. If it succeeds, you're in. If it fails, the vault stays closed. An attacker with access to the raw data gets nothing but random‑looking encrypted bytes.</p></div>
+<h2 data-i18n="login-h2">🧪 Self‑verifying login</h2>
+<div class="card"><p data-i18n="login-p">No password hashes are stored — nothing to crack. The app decrypts a known string with your passphrase. If it works, you're in. If not, the vault stays closed.</p></div>
 
-<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="opensource.html">Open Source</a> · <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a></p></div>
+<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="opensource.html">Open Source</a></p></div>
 </div>
 <script>
 var t={
-en:{why:"Why this app?"},
-de:{why:"Warum diese App?"},
-tr:{why:"Neden bu uygulama?"},
-ckb:{why:"بۆچی ئەم ئەپە؟"},
-kmr:{why:"Çima ev sepan?"}
+en:{r1f:"Per‑note encryption",r1u:"AES‑256‑GCM per note",r1o:"At‑rest only, or none",r2f:"Keys",r2u:"Your passphrase = your key",r2o:"Company holds the keys",r3f:"Cloud",r3u:"Nothing. Zero.",r3o:"Synced to their servers",r4f:"Offline",r4u:"100% — no internet",r4o:"Requires internet",r5f:"Keyboard",r5u:"Built‑in, secure",r5o:"System keyboard tracked",r6f:"Open Source",r6u:"Every line public",r6o:"Closed, proprietary",r7f:"Cost",r7u:"Free forever",r7o:"Ads or paid","col-feat":"Feature","col-other":"Other Apps","h1":"🔐 Why Taybeti Notesharing?","intro":"Most note apps collect your data. We don't see it, can't see it, and never will. Here's why.","kb-h2":"🛡️ Why the custom keyboard matters","kb-p":"Every other app uses your phone's system keyboard. That keyboard can record what you type and send it to Google, Apple, or a third party. Taybeti's built‑in keyboard completely isolates your typing. No keylogger can touch it. No predictive text leaks your passphrase.","enc-h2":"🔒 Per‑note encryption","enc-p":"Most apps use one master key — if stolen, everything is exposed. Taybeti encrypts every note with its own AES‑256‑GCM key. Cracking one note gives nothing on the others. Each note is its own fortress.","off-h2":"📵 Offline by design","off-p":"Taybeti has no internet permission. It cannot connect, cannot sync, cannot upload. Your data cannot leave your device — by architecture, not by policy.","login-h2":"🧪 Self‑verifying login","login-p":"No password hashes are stored — nothing to crack. The app decrypts a known string with your passphrase. If it works, you're in. If not, the vault stays closed.","nav-home":"Home","nav-why":"Why","nav-os":"Open Source","nav-sec":"Secure","nav-card":"Cards","nav-inv":"Invited"},
+de:{"col-feat":"Funktion","col-other":"Andere Apps","h1":"🔐 Warum Taybeti Notesharing?","intro":"Die meisten Notiz‑Apps sammeln deine Daten. Wir sehen sie nicht, können sie nicht sehen, und werden es nie. Hier ist warum.","kb-h2":"🛡️ Warum die eigene Tastatur wichtig ist","kb-p":"Jede andere App nutzt die System‑Tastatur deines Handys. Diese Tastatur kann aufzeichnen, was du tippst, und an Google, Apple oder Dritte senden. Taybetis integrierte Tastatur isoliert deine Eingaben vollständig. Kein Keylogger kann sie erreichen.","enc-h2":"🔒 Pro‑Notiz‑Verschlüsselung","enc-p":"Die meisten Apps nutzen einen Hauptschlüssel — wird er gestohlen, ist alles offen. Taybeti verschlüsselt jede Notiz mit ihrem eigenen AES‑256‑GCM‑Schlüssel. Eine Notiz zu knacken gibt nichts über die anderen preis.","off-h2":"📵 Offline per Design","off-p":"Taybeti hat keine Internetberechtigung. Es kann sich nicht verbinden, nicht synchronisieren, nicht hochladen. Deine Daten können dein Gerät nicht verlassen — per Architektur, nicht per Richtlinie.","login-h2":"🧪 Selbst‑verifizierende Anmeldung","login-p":"Keine Passwort‑Hashes gespeichert — nichts zu knacken. Die App entschlüsselt einen bekannten String mit deiner Passphrase. Funktioniert es, bist du drin. Wenn nicht, bleibt der Tresor zu.","nav-home":"Start","nav-why":"Warum","nav-os":"Open Source","nav-sec":"Sicher","nav-card":"Karten","nav-inv":"Eingeladen"},
+tr:{"col-feat":"Özellik","col-other":"Diğer Uygulamalar","h1":"🔐 Neden Taybeti Notesharing?","intro":"Çoğu not uygulaması verilerinizi toplar. Biz görmüyoruz, göremeyiz ve asla görmeyeceğiz. İşte nedeni.","kb-h2":"🛡️ Özel klavye neden önemli","kb-p":"Diğer tüm uygulamalar telefonunuzun sistem klavyesini kullanır. Bu klavye yazdıklarınızı kaydedebilir ve Google, Apple veya üçüncü taraflara gönderebilir. Taybeti'nin yerleşik klavyesi yazdıklarınızı tamamen izole eder.","enc-h2":"🔒 Not‑başına şifreleme","enc-p":"Çoğu uygulama tek bir ana anahtar kullanır — çalınırsa her şey açığa çıkar. Taybeti her notu kendi AES‑256‑GCM anahtarıyla şifreler. Bir notu kırmak diğerleri hakkında hiçbir şey vermez.","off-h2":"📵 Tasarım gereği çevrimdışı","off-p":"Taybeti'nin internet izni yoktur. Bağlanamaz, senkronize edemez, yükleyemez. Verileriniz mimari olarak cihazınızdan ayrılamaz.","login-h2":"🧪 Kendini doğrulayan giriş","login-p":"Hiçbir parola karması saklanmaz — kırılacak bir şey yok. Uygulama, parolanızla bilinen bir dizgiyi çözer. Çalışırsa içeridesiniz. Çalışmazsa kasa kapalı kalır.","nav-home":"Ana Sayfa","nav-why":"Neden","nav-os":"Açık Kaynak","nav-sec":"Güvenli","nav-card":"Kartlar","nav-inv":"Davetli"},
+ckb:{"col-feat":"تایبەتمەندی","col-other":"ئەپەکانی تر","h1":"🔐 بۆچی تایبەتی نۆتشەیرینگ؟","intro":"زۆربەی ئەپەکانی تێبینی داتاکانت کۆدەکەنەوە. ئێمە نایبینین، ناتوانین بیبینین، و هەرگیز نایبینین. لێرەدا بۆچی.","kb-h2":"🛡️ بۆچی کیبۆردی تایبەت گرنگە","kb-p":"هەموو ئەپێکی تر کیبۆردی سیستەمی مۆبایلەکەت بەکاردەهێنێت. ئەو کیبۆردە دەتوانێت ئەوەی دەینووسیت تۆمار بکات و بۆ گووگڵ، ئەپڵ یان لایەنی سێیەم بینێرێت. کیبۆردی ناوەکی تایبەتی بەتەواوی نوسینەکانت جیا دەکاتەوە.","enc-h2":"🔒 شفرەکردنی هەر تێبینییەک","enc-p":"زۆربەی ئەپەکان یەک کلیلی سەرەکی بەکاردەهێنن — ئەگەر بدزرێت، هەموو شتێک ئاشکرا دەبێت. تایبەتی هەر تێبینییەک بە کلیلی تایبەتی AES‑256‑GCM ی خۆی شفرە دەکات.","off-h2":"📵 ئۆفلاین بە دیزاین","off-p":"تایبەتی هیچ مۆڵەتی ئینتەرنێتی نییە. ناتوانێت پەیوەندی بکات، ناتوانێت هاوکات بکات، ناتوانێت باربکات. داتاکانت بەڕاستی ناتوانن ئامێرەکەت جێبهێڵن.","login-h2":"🧪 چوونەژوورەوەی خۆپشتڕاستکەرەوە","login-p":"هیچ هاشێکی وشەی نهێنی پاشەکەوت ناکرێت — هیچ شتێک نییە بشکێت. ئەپەکە زنجیرەیەکی ناسراو بە ووشەی نهێنییەکەت شی دەکاتەوە. ئەگەر سەرکەوتوو بوو، تۆیت لە ناوەوە.","nav-home":"سەرەکی","nav-why":"بۆچی","nav-os":"سەرچاوە کراوە","nav-sec":"پارێزراو","nav-card":"کارت","nav-inv":"بانگهێشتکراو"},
+kmr:{"col-feat":"Taybetmendî","col-other":"Sepanên din","h1":"🔐 Çima Taybeti Notesharing?","intro":"Piraniya sepanên notan daneyên te berhev dikin. Em nabînin, nikarin bibînin, û qet nabin. Li vir çima.","kb-h2":"🛡️ Çima klavyeya taybet girîng e","kb-p":"Her sepana din klavyeya sîstema telefona te bi kar tîne. Ew klavye dikare tiştên ku tu dinivîsî tomar bike û bişîne Google, Apple an aliyekî sêyemîn. Klavyeya Taybeti ya navxweyî nivîsên te bi temamî îzole dike.","enc-h2":"🔒 Şîfrekirina her‑notî","enc-p":"Piraniya sepanan mifteyeke sereke bi kar tînin — heger bê dizîn, her tişt eşkere dibe. Taybeti her notê bi mifteya xwe ya AES‑256‑GCM şîfre dike.","off-h2":"📵 Offline bi sêwiran","off-p":"Taybeti destûra înternetê nîne. Nikare girê bide, nikare hevdem bike, nikare bar bike. Daneyên te bi rastî nikarin cîhazê terikînin.","login-h2":"🧪 Têketina xwe‑rastdiker","login-p":"Tu hashên şîfreyê nayên tomarkirin — tiştekî were şikandin tine. Sepan rêzeke naskirî bi şîfreya te deşîfre dike. Heger kar kir, tu li hundir î.","nav-home":"Mal","nav-why":"Çima","nav-os":"Çavkanî Vekirî","nav-sec":"Ewle","nav-card":"Kart","nav-inv":"Dawetkirî"}
 };
 function setLang(l){
-    document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
-    var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
-    document.querySelectorAll('[data-i18n]').forEach(function(el){
-        var k=el.getAttribute('data-i18n');
-        if(t[l]&&t[l][k]){el.textContent=t[l][k];}
-    });
+ document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
+ var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
+ document.querySelectorAll('[data-i18n]').forEach(function(el){
+  var k=el.getAttribute('data-i18n');if(t[l]&&t[l][k])el.textContent=t[l][k];
+ });
 }
+setLang('en');
 </script>
 </body>
 </html>

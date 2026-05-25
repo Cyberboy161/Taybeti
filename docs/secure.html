@@ -1,103 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>How to Be Secure Online — Taybeti Notesharing</title>
     <style>
-        :root {
-            --bg: #0a0a0c; --surface: #141418; --surface2: #1e1e24;
-            --text: #e0e0e0; --text-secondary: #a0a0b0;
-            --accent: #4f9cf7; --border: #2a2a35; --radius: 12px;
-        }
-        * { margin:0;padding:0;box-sizing:border-box; }
-        body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:90px 16px 40px; display:flex;flex-direction:column;align-items:center; }
-        .container { max-width:760px;width:100%; }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:1.2rem; text-align:center;
-            background:linear-gradient(135deg,var(--accent),#a78bfa);
-            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
-        h2 { font-size:1.2rem; color:#fff; margin:1.8rem 0 0.6rem; }
-        p { color:var(--text-secondary); margin-bottom:0.8rem; font-size:0.95rem; }
-        ul { color:var(--text-secondary); margin:0.5rem 0 1rem 1.5rem; font-size:0.93rem; }
-        li { margin-bottom:0.4rem; }
-        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem 1.5rem; margin-bottom:0.8rem; }
-        .card h3 { color:#fff; font-size:1.05rem; margin-bottom:0.3rem; }
-        .card p { font-size:0.9rem; }
-        .warning { border-color:#e05555; background:#1a1010; }
-        .warning h3 { color:#e05555; }
-        .tip-num { display:inline-block; width:26px;height:26px; background:var(--accent); border-radius:50%; text-align:center; line-height:26px; font-weight:700; font-size:0.85rem; color:#fff; margin-right:8px; }
-        .footer { text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem; }
-        .footer a { color:var(--accent);text-decoration:none; }
-        .lang-bar { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
-        .lang-bar button {
-            background: var(--surface); border: 1px solid var(--border);
-            color: var(--text-secondary); padding: 4px 10px; border-radius: 20px;
-            cursor: pointer; font-size: 0.78rem;
-        }
-        .lang-bar button:hover, .lang-bar button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .nav-bar { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; padding: 2px 10px 4px; }
-        .nav-bar a { padding: 4px 10px; border-radius: 20px; text-decoration: none; font-size: 0.78rem; }
-        .nav-bar a.active { background: var(--accent); border: 1px solid var(--accent); color: #fff; font-weight: 600; }
-        .nav-bar a.inactive { background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); }
-        body { padding-top: 70px; }
-        @media(max-width:600px){ h1{font-size:1.5rem;} }
-    @media print { .top-bar, .action-bar { display: none !important; } body { padding-top: 0 !important; } }
-</style>
+        :root{--bg:#0a0a0c;--surface:#141418;--surface2:#1e1e24;--text:#e0e0e0;--text-secondary:#a0a0b0;--accent:#4f9cf7;--border:#2a2a35;--radius:12px}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:70px 16px 40px;display:flex;flex-direction:column;align-items:center}
+        .container{max-width:760px;width:100%}
+        h1{font-size:2rem;font-weight:800;margin-bottom:1rem;text-align:center;background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        h2{font-size:1.15rem;color:#fff;margin:1.5rem 0 0.5rem}
+        p{color:var(--text-secondary);margin-bottom:0.7rem;font-size:0.93rem}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.4rem;margin-bottom:0.7rem}
+        .card h3{color:#fff;font-size:1rem;margin-bottom:0.3rem}
+        .card p{font-size:0.88rem}
+        .warning{border-color:#e05555;background:#1a1010}
+        .warning h3{color:#e05555}
+        .tip-num{display:inline-block;width:24px;height:24px;background:var(--accent);border-radius:50%;text-align:center;line-height:24px;font-weight:700;font-size:0.8rem;color:#fff;margin-right:6px}
+        .footer{text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem}
+        .footer a{color:var(--accent);text-decoration:none}
+        .lang-bar{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+        .lang-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:3px 9px;border-radius:20px;cursor:pointer;font-size:0.76rem}
+        .lang-bar button:hover,.lang-bar button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+        .nav-bar{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;padding:2px 10px 4px}
+        .nav-bar a{padding:3px 9px;border-radius:20px;text-decoration:none;font-size:0.76rem}
+        .nav-bar a.active{background:var(--accent);border:1px solid var(--accent);color:#fff;font-weight:600}
+        .nav-bar a.inactive{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary)}
+        @media(max-width:600px){h1{font-size:1.4rem}}
+        @media print{.top-bar,.action-bar{display:none!important}body{padding-top:0!important}}
+    </style>
 </head>
 <body>
-<div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border);">
-    <div class="lang-bar" style="padding:4px 10px;">
-        <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
-        <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
-        <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
-        <button onclick="setLang('ckb')" id="btn-ckb">کوردی</button>
-        <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
-    </div>
-    <div class="nav-bar">
-        <a href="index.html" class="inactive">🏠 Home</a>
-        <a href="why.html" class="inactive">❓ Why</a>
-        <a href="opensource.html" class="inactive">📖 Open Source</a>
-        <a href="secure.html" class="active">🛡️ Secure</a>
-        <a href="print-cards.html" class="inactive">🖨️ Cards</a>
-        <a href="invited.html" class="inactive">📩 Invited</a>
-    </div>
+<div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border)">
+ <div class="lang-bar" style="padding:4px 10px">
+  <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
+  <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
+  <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
+  <button onclick="setLang('ckb')" id="btn-ckb">کوردی</button>
+  <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
+ </div>
+ <div class="nav-bar">
+  <a href="index.html" class="inactive">🏠 <span data-i18n="n-home">Home</span></a>
+  <a href="why.html" class="inactive">❓ <span data-i18n="n-why">Why</span></a>
+  <a href="opensource.html" class="inactive">📖 <span data-i18n="n-os">Open Source</span></a>
+  <a href="secure.html" class="active">🛡️ <span data-i18n="nav-sec">Secure</span></a>
+  <a href="print-cards.html" class="inactive">🖨️ <span data-i18n="n-card">Cards</span></a>
+  <a href="invited.html" class="inactive">📩 <span data-i18n="n-inv">Invited</span></a>
+ </div>
 </div>
 <div class="container">
-<h1>🛡️ How to Be Secure Online</h1>
-<p style="text-align:center;margin-bottom:2rem;">Practical tips that actually protect you — not just theory.</p>
+<h1 data-i18n="h1">🛡️ How to Be Secure Online</h1>
+<p style="text-align:center;margin-bottom:1.5rem" data-i18n="intro">Practical tips that actually protect you — not just theory.</p>
 
-<div class="card warning">
-<h3>⚠️ The Keyboard Problem</h3>
-<p><strong>It's not always about the app.</strong> Even if an app itself is secure and encrypted, your phone's system keyboard records everything you type. Google Keyboard (Gboard), Apple Keyboard, SwiftKey, and most third‑party keyboards all collect your keystrokes — for "predictive text improvement," "personalization," or just plain data harvesting. If the app you're using doesn't have its <strong>own built‑in keyboard</strong>, whatever you type passes through the system keyboard first. That keyboard can — and often does — send what you typed to its servers. The app's encryption means nothing if your passphrase was already captured by the keyboard before the app even received it.</p>
-<p><strong>Taybeti Notesharing includes its own keyboard for this exact reason.</strong> Your keystrokes never touch the system keyboard. They go directly from your finger to the encrypted note. No middleman. No keylogger. No keyboard telemetry.</p>
+<div class="card warning"><h3 data-i18n="kb-h3">⚠️ The Keyboard Problem</h3><p data-i18n="kb-p1"><strong>It's not always about the app.</strong> Even if an app is encrypted, your phone's system keyboard records everything you type. If the app doesn't have its own built‑in keyboard, your passphrase was already captured before the app received it. Taybeti includes its own keyboard for this exact reason.</p></div>
+
+<h2 data-i18n="rules-h2">🔟 10 Rules for Staying Secure</h2>
+<div class="card"><h3><span class="tip-num">1</span> <span data-i18n="r1-h">Use apps with their own keyboard</span></h3><p data-i18n="r1-p">If the app doesn't have a custom keyboard, assume the system keyboard reads everything you type.</p></div>
+<div class="card"><h3><span class="tip-num">2</span> <span data-i18n="r2-h">Never reuse passphrases</span></h3><p data-i18n="r2-p">Every note, every account — unique passphrase. Write them on paper, not in a password manager.</p></div>
+<div class="card"><h3><span class="tip-num">3</span> <span data-i18n="r3-h">Prefer offline‑first apps</span></h3><p data-i18n="r3-p">An app with no internet permission cannot leak your data. Offline is the ultimate firewall.</p></div>
+<div class="card"><h3><span class="tip-num">4</span> <span data-i18n="r4-h">Verify, don't trust</span></h3><p data-i18n="r4-p">Use open source software. A closed‑source app saying 'we're secure' is meaningless.</p></div>
+<div class="card"><h3><span class="tip-num">5</span> <span data-i18n="r5-h">Encrypt before you share</span></h3><p data-i18n="r5-p">Never send sensitive info in plain text. Encrypt first, share passphrase through a separate channel.</p></div>
+<div class="card"><h3><span class="tip-num">6</span> <span data-i18n="r6-h">Disable cloud sync for sensitive data</span></h3><p data-i18n="r6-p">Every sync is a copy sent to someone else's server. Keep sensitive data local.</p></div>
+<div class="card"><h3><span class="tip-num">7</span> <span data-i18n="r7-h">Be aware of your surroundings</span></h3><p data-i18n="r7-p">Shoulder surfing is one of the oldest attacks. Don't type passphrases in public.</p></div>
+<div class="card"><h3><span class="tip-num">8</span> <span data-i18n="r8-h">Keep software updated</span></h3><p data-i18n="r8-p">Security patches fix known vulnerabilities. Enable automatic updates.</p></div>
+<div class="card"><h3><span class="tip-num">9</span> <span data-i18n="r9-h">Use two‑factor authentication</span></h3><p data-i18n="r9-p">A passphrase alone isn't enough. Use authenticator apps, not SMS.</p></div>
+<div class="card"><h3><span class="tip-num">10</span> <span data-i18n="r10-h">Trust your instincts</span></h3><p data-i18n="r10-p">If something feels off — stop. The most sophisticated security can be bypassed by ignoring doubt.</p></div>
+
+<h2 data-i18n="gold-h2">🔑 The Golden Rule</h2>
+<div class="card"><p data-i18n="gold-p">You are the weakest link — and the strongest one. No encryption protects you if you hand over your passphrase. Be deliberate. Be aware. Be private.</p></div>
+
+<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="why.html">Why</a></p></div>
 </div>
-
-<h2>🔟 10 Rules for Staying Secure</h2>
-
-<div class="card"><h3><span class="tip-num">1</span> Use apps with their own keyboard</h3><p>If the app doesn't have a custom keyboard, assume the system keyboard is reading everything you type. This includes passwords, passphrases, private messages, and anything else. Use apps like Taybeti that isolate input from the system.</p></div>
-
-<div class="card"><h3><span class="tip-num">2</span> Never reuse passphrases</h3><p>Every note, every account, every service — unique passphrase. If one gets compromised, the others stay safe. Write them down on paper (like our passphrase cards), not in a password manager on the same device.</p></div>
-
-<div class="card"><h3><span class="tip-num">3</span> Prefer offline‑first apps</h3><p>An app with no internet permission cannot leak your data — not through a bug, not through a backdoor, not through a compromised server. Offline is the ultimate firewall. Taybeti has zero internet permission.</p></div>
-
-<div class="card"><h3><span class="tip-num">4</span> Verify, don't trust</h3><p>Use open source software whenever possible. If you can't read the code yourself, look for independent security audits. A closed‑source app saying "we're secure" is meaningless — you're just taking their word.</p></div>
-
-<div class="card"><h3><span class="tip-num">5</span> Encrypt before you share</h3><p>Never send sensitive information in plain text over any channel — not email, not messaging apps, not SMS. Encrypt the message first, share the passphrase through a separate channel (in person, on paper, via a different app).</p></div>
-
-<div class="card"><h3><span class="tip-num">6</span> Disable cloud sync for sensitive data</h3><p>Cloud sync is convenient but every sync is a copy sent to someone else's server. For truly sensitive information, keep it local. If it must be backed up, encrypt it first with a key only you control.</p></div>
-
-<div class="card"><h3><span class="tip-num">7</span> Be aware of your surroundings</h3><p>Shoulder surfing — someone looking at your screen — is one of the oldest and most effective attacks. Don't type passphrases in public. Don't read sensitive messages where others can see. Physical security is digital security.</p></div>
-
-<div class="card"><h3><span class="tip-num">8</span> Keep software updated</h3><p>Security patches fix known vulnerabilities. Delaying updates leaves you exposed to attacks that the developers already fixed. Enable automatic updates for your OS, browser, and security‑critical apps.</p></div>
-
-<div class="card"><h3><span class="tip-num">9</span> Use two‑factor authentication everywhere</h3><p>A passphrase alone is not enough for online accounts. Use 2FA — preferably hardware keys or authenticator apps, not SMS. SMS can be intercepted through SIM swapping attacks.</p></div>
-
-<div class="card"><h3><span class="tip-num">10</span> Trust your instincts</h3><p>If something feels off — a suspicious link, an unexpected message, an app asking for permissions it shouldn't need — stop. The most sophisticated security system in the world can be bypassed by a moment of doubt ignored. When in doubt, don't.</p></div>
-
-<h2>🔑 The Golden Rule</h2>
-<div class="card"><p><strong>You are the weakest link — and the strongest one.</strong> No amount of encryption can protect you if you hand over your passphrase. And no surveillance system can defeat you if you simply don't give them anything to collect. Be deliberate. Be aware. Be private.</p></div>
-
-<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="why.html">Why</a> · <a href="opensource.html">Open Source</a></p></div>
-</div>
+<script>
+var t={
+en:{"h1":"🛡️ How to Be Secure Online","intro":"Practical tips that actually protect you — not just theory.","kb-h3":"⚠️ The Keyboard Problem","kb-p1":"<strong>It's not always about the app.</strong> Even if an app is encrypted, your phone's system keyboard records everything you type. Taybeti includes its own keyboard for this exact reason.","rules-h2":"🔟 10 Rules for Staying Secure","r1-h":"Use apps with their own keyboard","r1-p":"If the app doesn't have a custom keyboard, assume the system keyboard reads everything you type.","r2-h":"Never reuse passphrases","r2-p":"Every note, every account — unique passphrase. Write them on paper, not in a password manager.","r3-h":"Prefer offline‑first apps","r3-p":"An app with no internet permission cannot leak your data. Offline is the ultimate firewall.","r4-h":"Verify, don't trust","r4-p":"Use open source software. A closed‑source app saying 'we're secure' is meaningless.","r5-h":"Encrypt before you share","r5-p":"Never send sensitive info in plain text. Encrypt first, share passphrase through a separate channel.","r6-h":"Disable cloud sync for sensitive data","r6-p":"Every sync is a copy sent to someone else's server. Keep sensitive data local.","r7-h":"Be aware of your surroundings","r7-p":"Shoulder surfing is one of the oldest attacks. Don't type passphrases in public.","r8-h":"Keep software updated","r8-p":"Security patches fix known vulnerabilities. Enable automatic updates.","r9-h":"Use two‑factor authentication","r9-p":"A passphrase alone isn't enough. Use authenticator apps, not SMS.","r10-h":"Trust your instincts","r10-p":"If something feels off — stop. The most sophisticated security can be bypassed by ignoring doubt.","gold-h2":"🔑 The Golden Rule","gold-p":"You are the weakest link — and the strongest one. No encryption protects you if you hand over your passphrase.","nav-sec":"Secure","n-home":"Home","n-why":"Why","n-os":"Open Source","n-card":"Cards","n-inv":"Invited"},
+de:{"h1":"🛡️ So bleibst du online sicher","intro":"Praktische Tipps, die wirklich schützen — nicht nur Theorie.","kb-h3":"⚠️ Das Tastatur‑Problem","kb-p1":"<strong>Es liegt nicht immer an der App.</strong> Selbst wenn eine App verschlüsselt ist, zeichnet die System‑Tastatur alles auf. Taybeti hat deshalb eine eigene Tastatur.","rules-h2":"🔟 10 Regeln für Sicherheit","r1-h":"Apps mit eigener Tastatur nutzen","r1-p":"Wenn die App keine eigene Tastatur hat, liesst die System‑Tastatur mit.","r2-h":"Passphrasen nie wiederverwenden","r2-p":"Jede Notiz, jedes Konto — eigene Passphrase. Auf Papier schreiben.","r3-h":"Offline‑Apps bevorzugen","r3-p":"Eine App ohne Internet kann keine Daten verlieren. Offline ist die beste Firewall.","r4-h":"Prüfen, nicht vertrauen","r4-p":"Open Source nutzen. 'Wir sind sicher' von einer Closed‑Source‑App ist bedeutungslos.","r5-h":"Vor dem Teilen verschlüsseln","r5-p":"Sensible Daten nie im Klartext senden. Erst verschlüsseln, dann Passphrase separat teilen.","r6-h":"Cloud‑Sync für sensible Daten deaktivieren","r6-p":"Jeder Sync ist eine Kopie auf fremden Servern. Sensible Daten lokal halten.","r7-h":"Auf die Umgebung achten","r7-p":"Schulter‑Surfen ist einer der ältesten Angriffe. Passphrasen nicht öffentlich eintippen.","r8-h":"Software aktuell halten","r8-p":"Sicherheits‑Patches beheben bekannte Lücken. Automatische Updates aktivieren.","r9-h":"Zwei‑Faktor‑Authentifizierung nutzen","r9-p":"Eine Passphrase allein reicht nicht. Authenticator‑Apps, kein SMS.","r10-h":"Dem Instinkt vertrauen","r10-p":"Wenn etwas komisch wirkt — anhalten. Die beste Sicherheit wird durch ignorierte Zweifel umgangen.","gold-h2":"🔑 Die goldene Regel","gold-p":"Du bist das schwächste — und das stärkste Glied. Keine Verschlüsselung schützt, wenn du deine Passphrase weitergibst.","nav-sec":"Sicher","n-home":"Start","n-why":"Warum","n-os":"Open Source","n-card":"Karten","n-inv":"Eingeladen"},
+tr:{"h1":"🛡️ Çevrimiçi Nasıl Güvende Olunur","intro":"Sizi gerçekten koruyan pratik ipuçları — sadece teori değil.","kb-h3":"⚠️ Klavye Sorunu","kb-p1":"<strong>Her zaman uygulama değildir.</strong> Uygulama şifreli olsa bile, telefonun sistem klavyesi yazdığınız her şeyi kaydeder. Taybeti bu yüzden kendi klavyesine sahiptir.","rules-h2":"🔟 Güvende Kalmak için 10 Kural","r1-h":"Kendi klavyesi olan uygulamaları kullanın","r1-p":"Uygulamanın özel klavyesi yoksa, sistem klavyesinin her şeyi okuduğunu varsayın.","r2-h":"Parolaları asla tekrar kullanmayın","r2-p":"Her not, her hesap — benzersiz parola. Kağıda yazın, şifre yöneticisine değil.","r3-h":"Çevrimdışı uygulamaları tercih edin","r3-p":"İnternet izni olmayan bir uygulama veri sızdıramaz. Çevrimdışı en iyi güvenlik duvarıdır.","r4-h":"Doğrulayın, güvenmeyin","r4-p":"Açık kaynak yazılım kullanın. Kapalı kaynak bir uygulamanın 'güvenliyiz' demesi anlamsızdır.","r5-h":"Paylaşmadan önce şifreleyin","r5-p":"Hassas bilgileri asla düz metin olarak göndermeyin. Önce şifreleyin, parolayı ayrı kanaldan paylaşın.","r6-h":"Hassas veriler için bulut senkronizasyonunu kapatın","r6-p":"Her senkronizasyon başkasının sunucusuna gönderilen bir kopyadır. Hassas verileri yerel tutun.","r7-h":"Çevrenizin farkında olun","r7-p":"Omuz sörfü en eski saldırılardan biridir. Parolaları toplum içinde yazmayın.","r8-h":"Yazılımı güncel tutun","r8-p":"Güvenlik yamaları bilinen açıkları kapatır. Otomatik güncellemeleri etkinleştirin.","r9-h":"İki faktörlü kimlik doğrulama kullanın","r9-p":"Tek başına parola yeterli değil. SMS değil, kimlik doğrulayıcı uygulama kullanın.","r10-h":"İçgüdülerinize güvenin","r10-p":"Bir şey tuhaf geliyorsa — durun. En gelişmiş güvenlik, şüpheyi görmezden gelerek aşılır.","gold-h2":"🔑 Altın Kural","gold-p":"En zayıf halka — ve en güçlü olan sizsiniz. Parolanızı verirseniz hiçbir şifreleme sizi korumaz.","nav-sec":"Güvenli","n-home":"Ana Sayfa","n-why":"Neden","n-os":"Açık Kaynak","n-card":"Kartlar","n-inv":"Davetli"},
+ckb:{"h1":"🛡️ چۆن بە پارێزراوی لەسەر هێڵ بمێنیتەوە","intro":"ڕێنماییە پراکتیکییەکان کە بەڕاستی دەتپارێزن — نەک تەنیا تیۆری.","kb-h3":"⚠️ کێشەی کیبۆرد","kb-p1":"<strong>هەموو کات ئەپەکە نییە.</strong> تەنانەت ئەگەر ئەپێک شفرەکراو بێت، کیبۆردی سیستەمی مۆبایلەکەت هەموو ئەوەی دەینووسیت تۆمار دەکات. تایبەتی کیبۆردی تایبەتی خۆی هەیە بۆ هەر ئەم هۆکارە.","rules-h2":"🔟 ١٠ یاسا بۆ پارێزراو ماندن","r1-h":"ئەپانە بەکاربهێنە کە کیبۆردی تایبەتی خۆیان هەیە","r1-p":"ئەگەر ئەپەکە کیبۆردی تایبەتی نییە، وادابنێ کیبۆردی سیستەم هەموو شتێک دەخوێنێتەوە.","r2-h":"هەرگیز ووشەی نهێنی دووبارە بەکارمەهێنە","r2-p":"هەر تێبینییەک، هەر هەژمارێک — ووشەی نهێنی تایبەت. لەسەر کاغەز بینووسە.","r3-h":"ئەپە ئۆفلاینەکان پێشتر بدە","r3-p":"ئەپێک بەبێ مۆڵەتی ئینتەرنێت ناتوانێت داتاکانت لە دەست بدات. ئۆفلاین باشترین دیواری ئاگرینە.","r4-h":"پشتڕاست بکەرەوە، متمانە مەکە","r4-p":"نەرمەکاڵای سەرچاوە کراوە بەکاربهێنە. ئەپێکی سەرچاوە داخراو کە دەڵێت 'ئێمە پارێزراوین' بێمانایە.","r5-h":"پێش هاوبەشکردن شفرە بکە","r5-p":"هەرگیز زانیاری هەستیار بە دەقی ئاسایی مەنێرە. سەرەتا شفرە بکە، پاشان ووشەی نهێنی لە ڕێگەیەکی جیاوە هاوبەش بکە.","r6-h":"هاوکاتکردنی هەوری بۆ داتای هەستیار ناچالاک بکە","r6-p":"هەموو هاوکاتکردنێک کۆپییەکە بۆ سێرڤەری کەسێکی تر دەنێردرێت. داتای هەستیار بە ناوخۆیی بهێڵەرەوە.","r7-h":"ئاگاداری دەوروبەرت بە","r7-p":"سەیرکردنی شان یەکێکە لە کۆنترین هێرشەکان. ووشەی نهێنی لە شوێنی گشتی تایپ مەکە.","r8-h":"نەرمەکاڵا نوێ بکەرەوە","r8-p":"پاچەکانی ئاسایش کونی ناسراو چاک دەکەن. نوێکردنەوەی ئۆتۆماتیکی چالاک بکە.","r9-h":"پشتڕاستکردنەوەی دوو هۆکاری بەکاربهێنە","r9-p":"ووشەی نهێنی بە تەنیا بەس نییە. ئەپی پشتڕاستکەرەوە بەکاربهێنە، نەک SMS.","r10-h":"متمانە بە هەستی ناوەکی خۆت بکە","r10-p":"ئەگەر شتێک نائاسایی بوو — بوەستە. پێشکەوتووترین ئاسایش دەتوانرێت بە پشتگوێخستنی گومان تێپەڕێنرێت.","gold-h2":"🔑 یاسای زێڕین","gold-p":"تۆ لاوازترین بەستەریت — و بەهێزترینیش. هیچ شفرەکردنێک دەتپارێزێت ئەگەر ووشەی نهێنیەکەت بە کەس بدەیت.","nav-sec":"پارێزراو","n-home":"سەرەکی","n-why":"بۆچی","n-os":"سەرچاوە کراوە","n-card":"کارت","n-inv":"بانگهێشتکراو"},
+kmr:{"h1":"🛡️ Çawa Li Ser Hêlê Ewle Bimînî","intro":"Serişteyên pratîkî yên ku bi rastî te diparêzin — ne tenê teorî.","kb-h3":"⚠️ Pirsgirêka Klavyeyê","kb-p1":"<strong>Her car ne sepan e.</strong> Heger sepana şîfrekirî be jî, klavyeya sîstema telefona te her tiştê tu dinivîsî tomar dike. Taybeti ji ber vê yekê klavyeya xwe heye.","rules-h2":"🔟 10 Rêbaz Ji Bo Ewle Bimînî","r1-h":"Sepanên bi klavyeya xwe bi kar bîne","r1-p":"Heger sepanê klavyeya taybet nîne, bihesibîne ku klavyeya sîstemê her tiştî dixwîne.","r2-h":"Qet şîfreyên dubare bi kar neyne","r2-p":"Her not, her hesab — şîfreya taybet. Li ser kaxezê binivîse.","r3-h":"Sepanên offline tercîh bike","r3-p":"Sepana bê destûra înternetê nikare daneyan belav bike. Offline dîwarê agir ê herî baş e.","r4-h":"Piştrast bike, bawer neke","r4-p":"Nivîsbariya çavkanî vekirî bi kar bîne. 'Em ewle ne' ji sepana çavkanî girtî bêwate ye.","r5-h":"Berî parvekirinê şîfre bike","r5-p":"Tu carî agahiyên hesas bi nivîsa sade neşîne. Pêşî şîfre bike, paşê şîfreyê bi kanaleke cuda parve bike.","r6-h":"Hevdengkirina ewr ji bo daneyên hesas neçalak bike","r6-p":"Her hevdengkirin kopiyek e ku ji servera kesekî din re tê şandin. Daneyên hesas li cîh bimîne.","r7-h":"Hay ji derdora xwe hebe","r7-p":"Sêwirandina milî yek ji êrîşên herî kevn e. Şîfreyan li cihên giştî nenivîse.","r8-h":"Nivîsbariyê rojane bike","r8-p":"Patchên ewlehiyê qelsiyên naskirî rast dikin. Rojanekirina otomatîk çalak bike.","r9-h":"Piştrastkirina du‑faktorî bi kar bîne","r9-p":"Tenê şîfre têr nake. Sepanên rastker, ne SMS.","r10-h":"Baweriya xwe bi hesta xwe bîne","r10-p":"Heger tiştekî neasayî bû — raweste. Ewlehiya herî pêşkeftî dikare bi paşguhkirina gumanê were derbas kirin.","gold-h2":"🔑 Rêbaza Zêrîn","gold-p":"Tu girêdana herî lawaz î — û ya herî bihêz. Tu şîfrekarî te naparêze heger tu şîfreya xwe bidî dest.","nav-sec":"Ewle","n-home":"Mal","n-why":"Çima","n-os":"Çavkanî Vekirî","n-card":"Kart","n-inv":"Dawetkirî"}
+};
+function setLang(l){
+ document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
+ var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
+ document.querySelectorAll('[data-i18n]').forEach(function(el){
+  var k=el.getAttribute('data-i18n');if(t[l]&&t[l][k]){if(t[l][k].indexOf('<')>-1)el.innerHTML=t[l][k];else el.textContent=t[l][k];}
+ });
+}
+setLang('en');
+</script>
 </body>
 </html>
