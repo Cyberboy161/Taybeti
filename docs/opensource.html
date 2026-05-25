@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is Open Source? — Taybeti Notesharing</title>
+    <style>
+        :root {
+            --bg: #0a0a0c; --surface: #141418; --surface2: #1e1e24;
+            --text: #e0e0e0; --text-secondary: #a0a0b0;
+            --accent: #4f9cf7; --border: #2a2a35; --radius: 12px;
+        }
+        * { margin:0;padding:0;box-sizing:border-box; }
+        body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:90px 16px 40px; display:flex;flex-direction:column;align-items:center; }
+        .container { max-width:760px;width:100%; }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:1.5rem; text-align:center;
+            background:linear-gradient(135deg,var(--accent),#a78bfa);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+        h2 { font-size:1.2rem; color:#fff; margin:1.8rem 0 0.6rem; }
+        p { color:var(--text-secondary); margin-bottom:0.8rem; font-size:0.95rem; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem 1.5rem; margin-bottom:0.8rem; }
+        .card h3 { color:#fff; font-size:1.05rem; margin-bottom:0.3rem; }
+        .card p { font-size:0.9rem; }
+        .gh-link { display:inline-block; padding:12px 28px; background:var(--accent); color:#fff; border-radius:50px; text-decoration:none; font-weight:600; margin:1rem 0; }
+        .footer { text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem; }
+        .footer a { color:var(--accent);text-decoration:none; }
+        .lang-bar,.nav-bar { position:fixed;left:0;width:100%;display:flex;justify-content:center;gap:8px;z-index:999;flex-wrap:wrap; }
+        .lang-bar { top:0;background:var(--surface2);border-bottom:1px solid var(--border);padding:6px 16px; }
+        .lang-bar button { background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.8rem; }
+        .lang-bar button:hover,.lang-bar button.active { background:var(--accent);border-color:var(--accent);color:#fff; }
+        .nav-bar { top:38px;background:var(--surface);border-bottom:1px solid var(--border);padding:6px 20px;gap:10px; }
+        .nav-bar a { padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem; }
+        .nav-bar a.active { background:var(--accent);border:1px solid var(--accent);color:#fff;font-weight:600; }
+        .nav-bar a.inactive { background:var(--surface);border:1px solid var(--border);color:var(--text-secondary); }
+        @media(max-width:600px){ h1{font-size:1.5rem;} }
+    </style>
+</head>
+<body>
+<div class="lang-bar" id="langBar"></div>
+<div class="nav-bar">
+    <a href="index.html" class="inactive">🏠 Home</a>
+    <a href="why.html" class="inactive">❓ Why</a>
+    <a href="opensource.html" class="active">📖 Open Source</a>
+    <a href="print-cards.html" class="inactive">🖨️ Cards</a>
+    <a href="invited.html" class="inactive">📩 Invited</a>
+</div>
+<div class="container">
+<h1>📖 What Does Open Source Mean?</h1>
+<p style="text-align:center;margin-bottom:2rem;">And why it's the reason you can trust Taybeti with your secrets.</p>
+
+<h2>🔍 Open Source — explained simply</h2>
+<div class="card"><p>Open source means the source code — the actual instructions that make the app work — is <strong>publicly available for anyone to read, inspect, and verify</strong>. Think of it like a restaurant where the kitchen is made of glass: you can see exactly how your food is prepared. With closed‑source apps, the kitchen is behind a concrete wall — you have no idea what's happening inside.</p></div>
+
+<h2>🐙 What is GitHub?</h2>
+<div class="card"><p><strong>GitHub</strong> is the world's largest platform for hosting open source code. It's where developers share their projects so the whole world can see, review, and contribute. Every change to Taybeti's code is publicly tracked on GitHub — who made it, when, and why. Nothing is hidden. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank" class="gh-link">View Taybeti on GitHub →</a></p></div>
+
+<h2>🤝 Why should you trust it?</h2>
+<div class="card"><h3>1. Anyone can audit it</h3><p>Security researchers, privacy activists, and curious developers can all read the code and verify that it does exactly what we say — and nothing else. No hidden backdoors survive public scrutiny.</p></div>
+<div class="card"><h3>2. It can't secretly change</h3><p>Every single code change is publicly logged on GitHub with a timestamp and author. A company can't quietly add spyware in an update — the community would spot it instantly.</p></div>
+<div class="card"><h3>3. You're not locked in</h3><p>If Taybeti ever disappears, anyone can take the code and continue the project. Your data format is documented and open — no vendor lock‑in. Your notes are yours forever.</p></div>
+<div class="card"><h3>4. MIT License = real freedom</h3><p>Taybeti is released under the MIT license — one of the most permissive open source licenses. Anyone can use, modify, and distribute the code for any purpose, even commercially. There are genuinely no strings attached.</p></div>
+
+<h2>🔐 Why this matters for your privacy</h2>
+<div class="card"><p>When an app is closed‑source, you're taking the developer's word that it's secure. With Taybeti, you don't need to trust us — you can <strong>verify</strong>. Independent experts can confirm that there's no backdoor, no telemetry, and no cloud leak. That's what real trust looks like: not a promise, but proof.</p></div>
+
+<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="why.html">Why this app?</a> · <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a></p></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why Taybeti Notesharing?</title>
+    <style>
+        :root {
+            --bg: #0a0a0c; --surface: #141418; --surface2: #1e1e24;
+            --text: #e0e0e0; --text-secondary: #a0a0b0;
+            --accent: #4f9cf7; --border: #2a2a35; --radius: 12px;
+        }
+        * { margin:0;padding:0;box-sizing:border-box; }
+        body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:90px 16px 40px; display:flex;flex-direction:column;align-items:center; }
+        .container { max-width:760px;width:100%; }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:1.5rem; text-align:center;
+            background:linear-gradient(135deg,var(--accent),#a78bfa);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+        h2 { font-size:1.2rem; color:#fff; margin:1.8rem 0 0.6rem; }
+        p { color:var(--text-secondary); margin-bottom:0.8rem; font-size:0.95rem; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem 1.5rem; margin-bottom:0.8rem; }
+        .card h3 { color:#fff; font-size:1.05rem; margin-bottom:0.3rem; }
+        .card p { font-size:0.9rem; }
+        .compare { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:1rem 0; font-size:0.85rem; }
+        .compare div { padding:8px; text-align:center; border-radius:8px; }
+        .compare .hdr { background:var(--surface); color:#fff; font-weight:700; }
+        .compare .us { background:var(--accent); color:#fff; }
+        .compare .not { background:var(--surface2); color:var(--text-secondary); }
+        .footer { text-align:center;margin-top:3rem;color:var(--text-secondary);font-size:0.85rem; }
+        .footer a { color:var(--accent);text-decoration:none; }
+        .lang-bar,.nav-bar { position:fixed;left:0;width:100%;display:flex;justify-content:center;gap:8px;z-index:999;flex-wrap:wrap; }
+        .lang-bar { top:0;background:var(--surface2);border-bottom:1px solid var(--border);padding:6px 16px; }
+        .lang-bar button { background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.8rem; }
+        .lang-bar button:hover,.lang-bar button.active { background:var(--accent);border-color:var(--accent);color:#fff; }
+        .nav-bar { top:38px;background:var(--surface);border-bottom:1px solid var(--border);padding:6px 20px;gap:10px; }
+        .nav-bar a { padding:6px 14px;border-radius:20px;text-decoration:none;font-size:0.85rem; }
+        .nav-bar a.active { background:var(--accent);border:1px solid var(--accent);color:#fff;font-weight:600; }
+        .nav-bar a.inactive { background:var(--surface);border:1px solid var(--border);color:var(--text-secondary); }
+        @media(max-width:600px){ .compare{grid-template-columns:1fr;}; h1{font-size:1.5rem;} }
+    </style>
+</head>
+<body>
+<div class="lang-bar" id="langBar"></div>
+<div class="nav-bar">
+    <a href="index.html" class="inactive">🏠 Home</a>
+    <a href="why.html" class="active">❓ Why</a>
+    <a href="opensource.html" class="inactive">📖 Open Source</a>
+    <a href="print-cards.html" class="inactive">🖨️ Cards</a>
+    <a href="invited.html" class="inactive">📩 Invited</a>
+</div>
+<div class="container">
+<h1>🔐 Why Taybeti Notesharing?</h1>
+<p style="text-align:center;margin-bottom:2rem;">Most note apps collect your data. We don't see it, can't see it, and never will. Here's why.</p>
+
+<div class="compare">
+    <div class="hdr">Feature</div><div class="hdr">Taybeti</div><div class="hdr">Other Apps</div>
+    <div>🔒 Encryption</div><div class="us">Per‑note AES‑256‑GCM</div><div class="not">At‑rest only, or none</div>
+    <div>🔑 Keys</div><div class="us">Your passphrase = your key</div><div class="not">Company holds the keys</div>
+    <div>☁️ Cloud</div><div class="us">Nothing. Zero.</div><div class="not">Synced to their servers</div>
+    <div>📵 Offline</div><div class="us">100% — no internet permission</div><div class="not">Requires internet</div>
+    <div>⌨️ Keyboard</div><div class="us">Built‑in, blocks keyloggers</div><div class="not">System keyboard (tracked)</div>
+    <div>👁️ Open Source</div><div class="us">Every line public (MIT)</div><div class="not">Closed, proprietary</div>
+    <div>🕵️ Metadata</div><div class="us">No tracking, no telemetry</div><div class="not">Collected and sold</div>
+    <div>💰 Cost</div><div class="us">Free forever</div><div class="not">Free with ads, or paid</div>
+</div>
+
+<h2>🛡️ Why the custom keyboard matters</h2>
+<div class="card"><p>Every other app uses your phone's system keyboard. That keyboard can — and often does — record what you type and send it to Google, Apple, or a third‑party. Taybeti's built‑in keyboard completely isolates your typing from the system. No keylogger can touch it. No predictive text leaks your passphrase. It's the keyboard equivalent of a Faraday cage.</p></div>
+
+<h2>🔒 Per‑note encryption</h2>
+<div class="card"><p>Most apps encrypt your data with one master key — if that key is stolen, everything is exposed. Taybeti encrypts every single note with its own independent AES‑256‑GCM key derived from the passphrase you set. Cracking one note gives an attacker nothing on the others. Each note is its own fortress.</p></div>
+
+<h2>📵 Offline by design</h2>
+<div class="card"><p>Taybeti has no internet permission at all. It cannot connect to the internet. It cannot sync, cannot upload, cannot phone home. Your data literally cannot leave your device — by architecture, not by policy. Most apps say they're private; we made it physically impossible to be otherwise.</p></div>
+
+<h2>🧪 Self‑verifying login</h2>
+<div class="card"><p>No password hashes are stored — there's nothing to crack. When you log in, the app tries to decrypt a known string with your passphrase. If it succeeds, you're in. If it fails, the vault stays closed. An attacker with access to the raw data gets nothing but random‑looking encrypted bytes.</p></div>
+
+<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a> · <a href="opensource.html">Open Source</a> · <a href="https://github.com/Cyberboy161/Taybeti">GitHub</a></p></div>
+</div>
+<script>
+var t={
+en:{why:"Why this app?",compare:"Feature comparison",kb:"Custom keyboard",enc:"Per‑note encryption",off:"Offline by design",login:"Self‑verifying login"},
+de:{why:"Warum diese App?",compare:"Funktionsvergleich",kb:"Eigene Tastatur",enc:"Pro‑Notiz‑Verschlüsselung",off:"Offline per Design",login:"Selbst‑verifizierende Anmeldung"},
+tr:{why:"Neden bu uygulama?",compare:"Özellik karşılaştırması",kb:"Özel klavye",enc:"Not‑başına şifreleme",off:"Tasarım gereği çevrimdışı",login:"Kendini doğrulayan giriş"},
+ckb:{why:"بۆچی ئەم ئەپە؟",compare:"بەراوردی تایبەتمەندییەکان",kb:"کیبۆردی تایبەت",enc:"شفرەکردنی هەر تێبینییەک",off:"ئۆفلاین بە دیزاین",login:"چوونەژوورەوەی خۆپشتڕاستکەرەوە"},
+kmr:{why:"Çima ev sepan?",compare:"Berawirdkirina taybetmendiyan",kb:"Klavyeya taybet",enc:"Şîfrekirina her‑notî",off:"Offline bi sêwiran",login:"Têketina xwe‑rastdiker"}
+};
+</script>
+</body>
+</html>
