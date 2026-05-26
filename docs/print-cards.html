@@ -58,7 +58,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
  .bar{display:none}
  .preview{display:none}
  .print-grid{display:grid;height:auto;min-height:0;width:100%}
- .page-break{page-break-after:always;margin:0;border:none;height:0}
+ .page-break{page-break-after:always;margin:0;border:none;height:1px;display:block;visibility:hidden}
  body{background:#fff;padding:0;margin:0}
  @page{size:A4 portrait;margin:3mm}
 }
@@ -106,7 +106,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
 
 <h2 style="display:none">📝 Front</h2>
 <div class="print-grid" id="pf"></div>
-<div class="page-break"></div>
+<div class="page-break">&nbsp;</div>
 <div class="print-grid" id="pb"></div>
 
 <script>
