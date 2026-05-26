@@ -58,9 +58,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
  .bar{display:none}
  .preview{display:none}
  .print-grid{display:grid}
+ .page-break{page-break-after:always;margin:0;border:none;height:0}
 }
 @media screen{
  .print-grid{display:none}
+ .page-break{display:none}
 }
 .cd.vr{flex-direction:row}.cd.vr .h{border-right:1px dashed #000;flex:1}
 .h{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1mm 2mm;position:relative;min-height:0}
@@ -99,6 +101,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
     </div></div>
     <div class="g"><input id="ph" placeholder="Phone" oninput="b()" style="width:80px">
     <input id="em" placeholder="Email" oninput="b()" style="width:80px"></div>
+    <div class="g"><input id="customUrl" placeholder="Custom QR (e.g. Instagram)" oninput="b()" style="width:130px" title="Enter any URL to show as a second QR code"></div>
     <button class="prBtn" onclick="window.print()">🖨️ Print</button>
     <a href="index.html">🏠</a>
 </div>
@@ -115,8 +118,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
 
 <h2 style="display:none">📝 Front</h2>
 <div class="print-grid" id="pf"></div>
-<hr style="border:1px dashed #ccc;margin:6px 0;page-break-after:always;display:none">
-<h2 style="display:none">🖼️ Back</h2>
+<div class="page-break"></div>
 <div class="print-grid" id="pb"></div>
 
 <script>
@@ -177,9 +179,14 @@ function b(){
   }
  }
  function makeBackCard(ps,bg){
+  var cu = document.getElementById('customUrl').value.trim();
+  var custQr = cu ? '<div class="qr" style="width:12mm;height:12mm"><img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data='+encodeURIComponent(cu)+'" style="width:100%;height:100%"></div>' : '';
   var bc=function(){
    return '<div class="im" style="'+bgs(bg)+'"></div>'+(bg==='cyber'?OVERLAY:'')+
-    '<div class="cx" style="'+qrPos(QP)+'"><div class="qr"><img src="'+QRU()+'" style="width:100%;height:100%"></div></div>'+
+    '<div class="cx" style="'+qrPos(QP)+'">'+
+    '<div class="qr" style="width:12mm;height:12mm"><img src="'+QRU()+'" style="width:100%;height:100%"></div>'+
+    custQr+
+    '</div>'+
     '<div class="url">'+SITE()+'</div>'+(ph||em?'<div class="inf">'+(ph?'📞'+ph:'')+(ph&&em?' · ':'')+(em?'📧'+em:'')+'</div>':'');
   };
   if(ps==='2v'){
