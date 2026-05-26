@@ -194,7 +194,7 @@ function buildCards(){
  var pf=document.getElementById('pf'),pb=document.getElementById('pb');
  pf.innerHTML='';pb.innerHTML='';
  var cols=4,rows=2;
- if(lo==='2v'||lo==='2'){cols=4;rows=4;} // 16 cards for 2-strip and 2-vert layouts
+ if(lo==='2v'||lo==='2'){cols=4;rows=6;} // 24 cards per page for split layouts
  pf.style.gridTemplateColumns='repeat('+cols+',1fr)';pf.style.gridTemplateRows='repeat('+rows+',1fr)';
  pb.style.gridTemplateColumns='repeat('+cols+',1fr)';pb.style.gridTemplateRows='repeat('+rows+',1fr)';
  var total=cols*rows;
