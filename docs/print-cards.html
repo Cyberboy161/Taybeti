@@ -50,35 +50,47 @@
 
 <div id="controls">
     <div class="ctrl-group">
-        <h3>Card Layout</h3>
+        <h3>Layout</h3>
         <label>Split type</label>
         <select id="splitType" onchange="build()">
-            <option value="2">2 strips</option>
-            <option value="1">1 (no cut)</option>
-            <option value="3">3 strips</option>
-            <option value="4">4 strips</option>
-            <option value="2v">2 vertical</option>
+            <option value="2">2 horizontal strips</option>
+            <option value="1">1 (no split)</option>
+            <option value="2v">2 vertical halves</option>
         </select>
     </div>
 
     <div class="ctrl-group">
-        <h3>QR Code</h3>
-        <label>Scans to</label>
+        <h3>QR Code — Website</h3>
+        <label>Destination</label>
         <select id="qrDest" onchange="build()">
             <option value="home">🏠 Homepage</option>
             <option value="invited">📩 Invited page</option>
         </select>
         <label>Position</label>
         <div class="row" id="qrPosRow">
-            <button data-pos="left" onclick="setQRPos('left');build()">← Left</button>
-            <button data-pos="center" onclick="setQRPos('center');build()" class="active">↕ Center</button>
-            <button data-pos="right" onclick="setQRPos('right');build()">Right →</button>
+            <button data-pos="left" onclick="setQRPos('left');build()">←</button>
+            <button data-pos="center" onclick="setQRPos('center');build()" class="active">↕</button>
+            <button data-pos="right" onclick="setQRPos('right');build()">→</button>
         </div>
+        <label style="margin-top:6px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="showUrl" checked onchange="build()"> Show website URL on back</label>
+    </div>
+
+    <div class="ctrl-group">
+        <h3>Your Contacts (optional)</h3>
+        <label>Phone number</label>
+        <input type="text" id="contactPhone" oninput="build()" placeholder="+1 234 567 890">
+        <label>Email</label>
+        <input type="text" id="contactEmail" oninput="build()" placeholder="name@example.com">
+        <label>Custom text</label>
+        <input type="text" id="contactText" oninput="build()" placeholder="Your name / organization">
+        <label>Your own QR (link or upload)</label>
+        <input type="text" id="customQrUrl" oninput="build()" placeholder="https://... or leave empty">
+        <input type="file" id="customQrImg" accept="image/*" onchange="handleCustomQr(this)">
     </div>
 
     <div class="ctrl-group">
         <h3>Background</h3>
-        <label>Choose design</label>
+        <label>Design</label>
         <select id="bgSelect" onchange="build()">
             <option value="cyber">Cybersecurity</option>
             <option value="matrix">💚 Matrix</option>
@@ -87,19 +99,17 @@
             <option value="circuit">🔌 Circuit</option>
             <option value="fire">🔥 Fire</option>
             <option value="ice">❄️ Ice</option>
-            <option value="void">⚫ Void</option>
             <option value="neon">💜 Neon</option>
             <option value="dark">⬛ Minimal</option>
-            <option value="grid">🔷 Grid</option>
             <option value="gold">🟡 Gold</option>
         </select>
-        <label>Or upload your own image</label>
+        <label>Or upload your own</label>
         <input type="file" id="bgUpload" accept="image/*" onchange="handleBgUpload(this)">
     </div>
 
     <div class="ctrl-group">
         <h3>Front Text Size</h3>
-        <input type="range" id="fontSize" min="5" max="14" value="7.5" step="0.5" onchange="build()">
+        <input type="range" id="fontSize" min="5" max="14" value="8" step="0.5" onchange="build()">
     </div>
 
     <button class="ctrl-btn" onclick="window.print()">🖨️ Print / PDF</button>
@@ -119,7 +129,7 @@ var panelOpen = true;
 function togglePanel(){ document.getElementById('controls').style.display = panelOpen ? 'none' : 'flex'; panelOpen = !panelOpen; }
 togglePanel();
 
-var uploadedBg = null;
+var uploadedBg = null, customQrData = null;
 var desiredQRPos = 'center';
 
 function setQRPos(p){
@@ -129,18 +139,18 @@ function setQRPos(p){
 }
 
 function handleBgUpload(input){
-    if(input.files && input.files[0]){
-        var r = new FileReader();
-        r.onload = function(e){ uploadedBg = e.target.result; build(); };
-        r.readAsDataURL(input.files[0]);
-    }
+    if(input.files && input.files[0]){ var r = new FileReader();
+    r.onload = function(e){ uploadedBg = e.target.result; build(); };
+    r.readAsDataURL(input.files[0]); }
+}
+function handleCustomQr(input){
+    if(input.files && input.files[0]){ var r = new FileReader();
+    r.onload = function(e){ customQrData = e.target.result; build(); };
+    r.readAsDataURL(input.files[0]); }
 }
 
 function Q(s){ return "https://api.qrserver.com/v1/create-qr-code/?size="+s+"x"+s+"&data="+encodeURIComponent(getQRUrl()); }
-
-function getQRUrl(){
-    return document.getElementById('qrDest').value === 'home' ? "https://cyberboy161.github.io/Taybeti/index.html" : "https://cyberboy161.github.io/Taybeti/invited.html";
-}
+function getQRUrl(){ return document.getElementById('qrDest').value === 'home' ? "https://cyberboy161.github.io/Taybeti/index.html" : "https://cyberboy161.github.io/Taybeti/invited.html"; }
 
 function bgStyle(key){
     var m = {
@@ -151,22 +161,19 @@ function bgStyle(key){
         circuit:'background:#0a0f0a;background-image:linear-gradient(rgba(0,200,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,0,.06) 1px,transparent 1px),radial-gradient(circle,rgba(0,200,0,.1) 1px,transparent 1px);background-size:6px 6px,6px 6px,12px 12px;background-position:0 0,0 0,3px 3px',
         fire:'background:linear-gradient(180deg,#1a0500,#331100,#1a0500,#330000)',
         ice:'background:linear-gradient(180deg,#001122,#003355,#001122)',
-        void:'background:radial-gradient(ellipse at center,#0a0a14,#000)',
         neon:'background:#0d0d0d;background-image:linear-gradient(rgba(255,0,128,.05) 2px,transparent 2px),linear-gradient(90deg,rgba(0,255,255,.05) 2px,transparent 2px);background-size:6mm 6mm,6mm 6mm',
         dark:'background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)',
-        grid:'background:repeating-linear-gradient(0deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px),repeating-linear-gradient(90deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px)',
         gold:'background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a)'
     };
     return m[key] || m.cyber;
 }
 
 function frontLabels(fs){
-    var html = '<div class="warn" style="font-size:'+fs+'px">'+
+    return '<div class="warn" style="font-size:'+fs+'px">'+
         'وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە. بە پارێزراوی بیھێڵەرەوە.<br>'+
         'Do not photograph. Do not share. Do not read aloud. Keep safe.<br>'+
         'Nicht fotografieren. Nicht teilen. Nicht laut vorlesen. Sicher aufbewahren.</div>'+
         '<div class="write-line"></div>';
-    return html;
 }
 
 function makeBgHTML(bgKey){
@@ -176,21 +183,30 @@ function makeBgHTML(bgKey){
 
 function qrHTML(size,pos){
     var align = pos === 'left' ? 'flex-start' : pos === 'right' ? 'flex-end' : 'center';
-    return '<div class="qr-layer" style="justify-content:'+align+'"><div class="qr-wrap" style="width:'+size+'mm;height:'+size+'mm"><img src="'+Q(Math.round(size*3.7))+'" style="width:100%;height:100%;display:block"></div></div>';
-}
-
-function partHTML(n, total, side, bgKey, fs){
-    if(side === 'front'){
-        var cls = n > 0 ? 'part' : 'part';
-        return '<div class="part'+(n>0?'':'')+'">'+frontLabels(fs)+'</div>';
-    } else {
-        var pct = 100 / total;
-        var sz = total <= 2 ? 11 : total <= 3 ? 10 : 9;
-        return '<div class="part" style="flex:'+(1)+'">'+
-            '<div class="bg-layer" '+makeBgHTML(bgKey)+'></div>'+
-            qrHTML(sz, desiredQRPos)+
-            '</div>';
+    var html = '<div class="qr-layer" style="justify-content:'+align+';gap:2mm;flex-wrap:wrap">';
+    html += '<div class="qr-wrap" style="width:'+size+'mm;height:'+size+'mm"><img src="'+Q(Math.round(size*3.7))+'" style="width:100%;height:100%;display:block"></div>';
+    // Custom QR
+    if(customQrData || document.getElementById('customQrUrl').value.trim()){
+        var src = customQrData || document.getElementById('customQrUrl').value.trim();
+        html += '<div class="qr-wrap" style="width:'+size+'mm;height:'+size+'mm"><img src="'+src+'" style="width:100%;height:100%;display:block"></div>';
     }
+    // Contact info
+    var phone = document.getElementById('contactPhone').value.trim();
+    var email = document.getElementById('contactEmail').value.trim();
+    var ctext = document.getElementById('contactText').value.trim();
+    if(phone || email || ctext){
+        html += '<div style="position:absolute;bottom:1mm;left:1mm;right:1mm;z-index:3;font-size:3.8px;color:#fff8;text-align:center;line-height:1.4">';
+        if(ctext) html += ctext + '<br>';
+        if(phone) html += '📞 ' + phone + '<br>';
+        if(email) html += '📧 ' + email;
+        html += '</div>';
+    }
+    // Website URL
+    if(document.getElementById('showUrl').checked){
+        html += '<div style="position:absolute;top:1mm;left:1mm;right:1mm;z-index:3;font-size:3.2px;color:#fff6;text-align:center">'+getQRUrl()+'</div>';
+    }
+    html += '</div>';
+    return html;
 }
 
 function build(){
@@ -202,69 +218,40 @@ function build(){
     var pages = document.querySelectorAll('.page');
     var count = 0;
 
+    pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr 1fr 1fr'; });
+
     if(type === '1'){
         count = 8;
-        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr 1fr 1fr'; });
         for(var i=0;i<count;i++){
-            var fc = document.createElement('div'); fc.className='card';
-            fc.innerHTML = partHTML(0,1,'front',bg,fs);
+            var fc = document.createElement('div'); fc.className = 'card';
+            fc.innerHTML = '<div class="front"><div class="part">'+frontLabels(fs)+'</div></div>';
             pf.appendChild(fc);
             var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb';
-            bc.innerHTML = partHTML(0,1,'back',bg,fs);
-            pb.appendChild(bc);
-        }
-    } else if(type === '2'){
-        count = 8;
-        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr 1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr'; });
-        for(var i=0;i<count;i++){
-            var fc = document.createElement('div'); fc.className='card';
-            fc.innerHTML = partHTML(0,2,'front',bg,fs) + partHTML(1,2,'front',bg,fs);
-            pf.appendChild(fc);
-            var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb';
-            bc.innerHTML = partHTML(0,2,'back',bg,fs) + partHTML(1,2,'back',bg,fs);
+            bc.innerHTML = '<div class="back"><div class="part">'+makeBgHTML(bg)+qrHTML(11,'center')+'</div></div>';
             pb.appendChild(bc);
         }
     } else if(type === '2v'){
         count = 8;
-        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr 1fr 1fr'; });
         for(var i=0;i<count;i++){
-            var fc = document.createElement('div'); fc.className='card vert';
-            fc.style.flexDirection = 'row';
-            var f1 = document.createElement('div'); f1.className='front'; f1.style.borderRight='1.5px dashed #000';
-            f1.innerHTML = frontLabels(fs)+'<div class="write-line"></div>';
-            var f2 = document.createElement('div'); f2.className='front';
-            f2.innerHTML = frontLabels(fs)+'<div class="write-line"></div>';
-            fc.appendChild(f1); fc.appendChild(f2);
+            var fc = document.createElement('div'); fc.className = 'card'; fc.style.flexDirection='row';
+            fc.innerHTML = '<div class="front" style="border-right:1.5px dashed #000">'+frontLabels(fs)+'<div class="write-line"></div></div>'+
+                '<div class="front">'+frontLabels(fs)+'<div class="write-line"></div></div>';
             pf.appendChild(fc);
-            // Back vertical
-            var bc = document.createElement('div'); bc.className='card vert'; bc.style.borderColor='#bbb'; bc.style.flexDirection='row';
-            var b1 = document.createElement('div'); b1.className='back'; b1.style.borderRight='1px dashed #fff8';
-            b1.innerHTML = '<div class="bg-layer" '+makeBgHTML(bg)+'></div>'+qrHTML(11, desiredQRPos);
-            var b2 = document.createElement('div'); b2.className='back';
-            b2.innerHTML = '<div class="bg-layer" '+makeBgHTML(bg)+'></div>'+qrHTML(11, desiredQRPos);
-            bc.appendChild(b1); bc.appendChild(b2);
+            var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb'; bc.style.flexDirection='row';
+            var sz = 9;
+            bc.innerHTML = '<div class="back" style="border-right:1px dashed #fff8"><div class="part">'+makeBgHTML(bg)+qrHTML(sz,'center')+'</div></div>'+
+                '<div class="back"><div class="part">'+makeBgHTML(bg)+qrHTML(sz,'center')+'</div></div>';
             pb.appendChild(bc);
         }
-    } else if(type === '3'){
-        count = 6;
-        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr 1fr'; });
+    } else {
+        count = 8;
         for(var i=0;i<count;i++){
-            var fc = document.createElement('div'); fc.className='card';
-            fc.innerHTML = partHTML(0,3,'front',bg,fs) + partHTML(1,3,'front',bg,fs) + partHTML(2,3,'front',bg,fs);
+            var fc = document.createElement('div'); fc.className = 'card';
+            fc.innerHTML = '<div class="front"><div class="part" style="border-bottom:1.5px dashed #000">'+frontLabels(fs)+'</div><div class="part">'+frontLabels(fs)+'</div></div>';
             pf.appendChild(fc);
             var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb';
-            bc.innerHTML = partHTML(0,3,'back',bg,fs) + partHTML(1,3,'back',bg,fs) + partHTML(2,3,'back',bg,fs);
-            pb.appendChild(bc);
-        }
-    } else if(type === '4'){
-        count = 4;
-        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr'; });
-        for(var i=0;i<count;i++){
-            var fc = document.createElement('div'); fc.className='card';
-            fc.innerHTML = partHTML(0,4,'front',bg,fs) + partHTML(1,4,'front',bg,fs) + partHTML(2,4,'front',bg,fs) + partHTML(3,4,'front',bg,fs);
-            pf.appendChild(fc);
-            var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb';
-            bc.innerHTML = partHTML(0,4,'back',bg,fs) + partHTML(1,4,'back',bg,fs) + partHTML(2,4,'back',bg,fs) + partHTML(3,4,'back',bg,fs);
+            var sz = 9;
+            bc.innerHTML = '<div class="back"><div class="part" style="border-bottom:1px dashed #fff8">'+makeBgHTML(bg)+qrHTML(sz,'center')+'</div><div class="part">'+makeBgHTML(bg)+qrHTML(sz,'center')+'</div></div>';
             pb.appendChild(bc);
         }
     }
