@@ -3,292 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taybeti Notesharing – Passphrase Cards</title>
+    <title>Taybeti – Build Your Passphrase Cards</title>
     <style>
         @page { size: A4 portrait; margin: 3mm; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Georgia', serif; background: #f5f5f0; color: #111; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding-top: 44px; }
-        h2 { text-align: center; font-size: 11px; margin: 2px 0; color: #aaa; font-weight: 400; }
+        * { margin:0; padding:0; box-sizing:border-box }
+        body{font-family:'Inter',system-ui,sans-serif;background:#f5f5f0;padding:0;}
 
-        .page {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr 1fr 1fr;
-            gap: 1.5mm;
-            width: 210mm;
-            height: 285mm;
-            margin: 0 auto;
-        }
-        .card {
-            position: relative;
-            border: 1px solid #999;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-height: 0;
-        }
-        .half {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            min-height: 0;
-        }
-        .half-cut { border-bottom: 1.5px dashed #000; }
-        .third { flex: 1; position: relative; overflow: hidden; min-height: 0; }
-        .third-cut { border-bottom: 1.5px dashed #000; }
-        .scissor-l { position: absolute; left: -5px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #555; z-index: 5; }
-        .scissor-r { position: absolute; right: -5px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #555; z-index: 5; }
+        /* Layout */
+        #controls{position:fixed;top:0;left:0;width:260px;height:100vh;background:#111;overflow-y:auto;padding:16px;z-index:100;color:#ccc;font-size:13px;display:none;flex-direction:column;gap:10px}
+        #controls h3{color:#fff;font-size:15px;margin-bottom:4px;border-bottom:1px solid #333;padding-bottom:6px}
+        #controls label{display:block;color:#999;font-size:12px;margin-bottom:2px}
+        #controls select,#controls input[type=file],#controls input[type=range]{width:100%;background:#222;color:#fff;border:1px solid #444;padding:6px 10px;border-radius:6px;font-size:12px;margin-bottom:6px}
+        #controls select{cursor:pointer}
+        #controls input[type=file]{color:#999;padding:4px}
+        .ctrl-group{background:#1a1a1a;border-radius:8px;padding:10px;margin-bottom:4px}
+        .ctrl-group .row{display:flex;gap:6px;margin-top:4px}
+        .ctrl-group .row button{flex:1;background:#222;color:#ccc;border:1px solid #444;border-radius:5px;padding:5px;font-size:11px;cursor:pointer}
+        .ctrl-group .row button.active{background:#4f9cf7;border-color:#4f9cf7;color:#fff}
+        .ctrl-btn{background:#4f9cf7;color:#fff;border:none;padding:8px;border-radius:6px;cursor:pointer;font-weight:600;width:100%;margin-top:4px}
+        #menuToggle{position:fixed;top:8px;left:8px;z-index:200;background:#111;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px}
 
-        .front .card { background: #fff; border-color: #999; }
-        .front .half, .front .third {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: flex-end; padding: 4px 8px 6px;
-        }
-        .front .write-line { width: 80%; border-bottom: 1px solid #333; min-height: 14px; }
+        /* Cards */
+        .page-wrap{padding:60px 20px 40px;max-width:1200px;margin:0 auto}
+        .page{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr 1fr;gap:3mm;width:210mm;margin:0 auto;min-height:285mm}
+        .card{position:relative;border:1px solid #999;display:flex;background:#fff;overflow:hidden}
+        .card.vert{flex-direction:row!important}
 
-        .back .card { background: #111; border-color: #bbb; }
-        .back .half, .back .third {
-            display: flex; align-items: center; justify-content: center; padding: 2mm; position: relative; overflow: hidden;
-        }
-        .back .cut-dash { border-bottom-color: #fff8; }
-        .back .scissor-l, .back .scissor-r { color: #fff; }
-        .back .bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-        .back .qr-box {
-            position: relative; z-index: 1; width: 15mm; height: 15mm;
-            background: #fff; border-radius: 1mm; padding: 1mm;
-            box-shadow: 0 0 2mm rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
-        }
-        .back .qr-box img { width: 100%; height: 100%; display: block; }
+        .front{flex-direction:column;flex:1}
+        .front .part{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:2mm 2mm}
+        .front .part+.part{border-top:1.5px dashed #000}
+        .front .warn{width:100%;font-size:6.5px;line-height:1.3;color:#333;text-align:center;margin-bottom:1px}
+        .front .write-line{width:80%;border-bottom:1px solid #444;min-height:8mm}
 
-        /* Selector dropdown */
-        .selector-bar {
-            position: fixed; top: 0; left: 0; width: 100%; background: #111;
-            border-bottom: 1px solid #333; padding: 4px 10px;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-            z-index: 9998; flex-wrap: wrap; color: #ccc; font-size: 12px;
-        }
-        .selector-bar select {
-            background: #333; color: #fff; border: 1px solid #555;
-            padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
-        }
-        .selector-bar button {
-            background: #4f9cf7; color: #fff; border: none; padding: 4px 12px;
-            border-radius: 6px; cursor: pointer; font-size: 12px;
-        }
-        .selector-bar a { color: #aaa; text-decoration: none; font-size: 11px; margin: 0 4px; }
+        .back{flex-direction:column;flex:1;background:#111;position:relative}
+        .back .part{flex:1;display:flex;align-items:center;position:relative;overflow:hidden;padding:2mm}
+        .back .part+.part{border-top:1px dashed #fff8}
+        .back .bg-layer{position:absolute;inset:0}
+        .back .qr-layer{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+        .back .qr-wrap{background:#fff;border-radius:1mm;padding:1mm;box-shadow:0 0 2mm rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
 
-        .action-bar {
-            position: fixed; bottom: 0; left: 0; right: 0; background: #111;
-            color: #fff; text-align: center; padding: 7px; font-size: 12px; z-index: 9999;
-        }
-        .action-bar button { background: #4f9cf7; color: #fff; border: none; padding: 6px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-
-        @media print {
-            .selector-bar, .action-bar, .top-bar { display: none !important; }
-            body { padding-top: 0 !important; }
-            .page { min-height: 0; }
-            .card { page-break-inside: avoid; }
-        }
-        @media screen and (max-width: 600px) {
-            .page { width: 100%; height: auto; grid-template-rows: auto; }
-        }
+        @media print{#controls,#menuToggle{display:none!important}.page-wrap{padding:8px 0}}
     </style>
 </head>
 <body>
+<button id="menuToggle" onclick="togglePanel()">⚙️ Customize</button>
 
-<div class="selector-bar">
-    <span>Card Type:</span>
-    <select id="cardType" onchange="buildCards()">
-        <option value="2h">2 Persons — Horizontal Split</option>
-        <option value="2v">2 Persons — Vertical Split</option>
-        <option value="3h">3 Persons — 3 Strips</option>
-        <option value="4h">4 Persons — 4 Strips</option>
-        <option value="1">1 Person — No Split</option>
-        <option value="2h-mid">2 Persons — QR in Middle</option>
-    </select>
-    <span>Back Design:</span>
-    <select id="cardBg" onchange="buildCards()">
-        <option value="card-bg.png">🖼️ Cybersecurity</option>
-        <option value="bg-matrix">💚 Matrix Green</option>
-        <option value="bg-red">🔴 Red Threat</option>
-        <option value="bg-blue">🔵 Deep Blue</option>
-        <option value="bg-circuit">🔌 Circuit Board</option>
-        <option value="bg-fire">🔥 Fire</option>
-        <option value="bg-ice">❄️ Ice</option>
-        <option value="bg-void">⚫ Void</option>
-        <option value="bg-neon">💜 Neon</option>
-        <option value="bg-dark">⬛ Dark Minimal</option>
-        <option value="bg-grid">🔷 Geometric Grid</option>
-        <option value="bg-gold">🟡 Gold Pattern</option>
-    </select>
-    <button onclick="window.print()">🖨️ Print / PDF</button>
-    <a href="index.html">🏠 Home</a>
+<div id="controls">
+    <div class="ctrl-group">
+        <h3>Card Layout</h3>
+        <label>Split type</label>
+        <select id="splitType" onchange="build()">
+            <option value="2">2 strips</option>
+            <option value="1">1 (no cut)</option>
+            <option value="3">3 strips</option>
+            <option value="4">4 strips</option>
+            <option value="2v">2 vertical</option>
+        </select>
+    </div>
+
+    <div class="ctrl-group">
+        <h3>QR Code</h3>
+        <label>Scans to</label>
+        <select id="qrDest" onchange="build()">
+            <option value="home">🏠 Homepage</option>
+            <option value="invited">📩 Invited page</option>
+        </select>
+        <label>Position</label>
+        <div class="row" id="qrPosRow">
+            <button data-pos="left" onclick="setQRPos('left');build()">← Left</button>
+            <button data-pos="center" onclick="setQRPos('center');build()" class="active">↕ Center</button>
+            <button data-pos="right" onclick="setQRPos('right');build()">Right →</button>
+        </div>
+    </div>
+
+    <div class="ctrl-group">
+        <h3>Background</h3>
+        <label>Choose design</label>
+        <select id="bgSelect" onchange="build()">
+            <option value="cyber">Cybersecurity</option>
+            <option value="matrix">💚 Matrix</option>
+            <option value="red">🔴 Red</option>
+            <option value="blue">🔵 Deep Blue</option>
+            <option value="circuit">🔌 Circuit</option>
+            <option value="fire">🔥 Fire</option>
+            <option value="ice">❄️ Ice</option>
+            <option value="void">⚫ Void</option>
+            <option value="neon">💜 Neon</option>
+            <option value="dark">⬛ Minimal</option>
+            <option value="grid">🔷 Grid</option>
+            <option value="gold">🟡 Gold</option>
+        </select>
+        <label>Or upload your own image</label>
+        <input type="file" id="bgUpload" accept="image/*" onchange="handleBgUpload(this)">
+    </div>
+
+    <div class="ctrl-group">
+        <h3>Front Text Size</h3>
+        <input type="range" id="fontSize" min="5" max="14" value="7.5" step="0.5" onchange="build()">
+    </div>
+
+    <button class="ctrl-btn" onclick="window.print()">🖨️ Print / PDF</button>
+    <a href="index.html" style="color:#666;text-align:center;display:block;margin-top:6px;text-decoration:none;font-size:11px">🏠 Home</a>
 </div>
 
-<h2>📝 Page 1 — Front</h2>
-<div class="page" id="pageFront"></div>
-<hr style="border:1px dashed #ccc;margin:16px 0;page-break-after:always;">
-<h2>🖼️ Page 2 — Back</h2>
-<div class="page" id="pageBack"></div>
-
-<div class="action-bar">
-    🖨️ Print duplex (both pages) or Save as PDF &nbsp;
-    <button onclick="window.print()">🖨️ Print / PDF</button>
+<div class="page-wrap">
+    <h2 id="frontTitle" style="text-align:center;font-size:12px;color:#999;font-weight:400;margin:0 0 4px">📝 Front</h2>
+    <div class="page" id="pageFront"></div>
+    <hr style="border:1px dashed #ccc;margin:12px 0;page-break-after:always;">
+    <h2 id="backTitle" style="text-align:center;font-size:12px;color:#999;font-weight:400;margin:4px 0">🖼️ Back</h2>
+    <div class="page" id="pageBack"></div>
 </div>
 
 <script>
-var U="https://cyberboy161.github.io/Taybeti/invited.html";
-function Q(s){return"https://api.qrserver.com/v1/create-qr-code/?size="+s+"x"+s+"&data="+encodeURIComponent(U);}
+var panelOpen = true;
+function togglePanel(){ document.getElementById('controls').style.display = panelOpen ? 'none' : 'flex'; panelOpen = !panelOpen; }
+togglePanel();
 
-var bgStyles = {
-    "card-bg.png": '<img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="https://cyberboy161.github.io/Taybeti/card-bg.png" alt="">',
-    "bg-dark": '<div style="position:absolute;inset:0;background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)"></div>',
-    "bg-grid": '<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px),repeating-linear-gradient(90deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px)"></div>',
-    "bg-gold": '<div style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a);border:0.3mm solid #c9a96e55"></div>',
-    "bg-matrix": '<div style="position:absolute;inset:0;background:#000;background-image:linear-gradient(rgba(0,255,0,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,0,.08) 1px,transparent 1px);background-size:3px 3px"></div>',
-    "bg-red": '<div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a0000,#2d0000,#1a0000);border:0.3mm solid #ff333355"></div>',
-    "bg-blue": '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,#0a1628,#020810);border:0.3mm solid #3399ff44"></div>',
-    "bg-circuit": '<div style="position:absolute;inset:0;background:#0a0f0a;background-image:linear-gradient(rgba(0,200,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,0,.06) 1px,transparent 1px),radial-gradient(circle,rgba(0,200,0,.1) 1px,transparent 1px);background-size:6px 6px,6px 6px,12px 12px;background-position:0 0,0 0,3px 3px"></div>',
-    "bg-fire": '<div style="position:absolute;inset:0;background:linear-gradient(180deg,#1a0500,#331100,#1a0500,#330000)"></div>',
-    "bg-ice": '<div style="position:absolute;inset:0;background:linear-gradient(180deg,#001122,#003355,#001122);border:0.3mm solid #66ccff33"></div>',
-    "bg-void": '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,#0a0a14,#000)"></div>',
-    "bg-neon": '<div style="position:absolute;inset:0;background:#0d0d0d;background-image:linear-gradient(rgba(255,0,128,.05) 2px,transparent 2px),linear-gradient(90deg,rgba(0,255,255,.05) 2px,transparent 2px);background-size:6mm 6mm,6mm 6mm"></div>'
-};
+var uploadedBg = null;
+var desiredQRPos = 'center';
 
-function bgEl(key){
-    return bgStyles[key] || bgStyles["card-bg.png"];
+function setQRPos(p){
+    desiredQRPos = p;
+    document.querySelectorAll('#qrPosRow button').forEach(function(b){b.classList.remove('active')});
+    document.querySelector('#qrPosRow button[data-pos="'+p+'"]').classList.add('active');
 }
 
-function qrBox(){ return '<div class="qr-box"><img src="'+Q(58)+'" alt="QR"></div>'; }
+function handleBgUpload(input){
+    if(input.files && input.files[0]){
+        var r = new FileReader();
+        r.onload = function(e){ uploadedBg = e.target.result; build(); };
+        r.readAsDataURL(input.files[0]);
+    }
+}
 
-function labels(){
-    return '<div style="font-size:4.2px;color:#444;text-align:center;line-height:1.4;margin-bottom:2px">'+
+function Q(s){ return "https://api.qrserver.com/v1/create-qr-code/?size="+s+"x"+s+"&data="+encodeURIComponent(getQRUrl()); }
+
+function getQRUrl(){
+    return document.getElementById('qrDest').value === 'home' ? "https://cyberboy161.github.io/Taybeti/index.html" : "https://cyberboy161.github.io/Taybeti/invited.html";
+}
+
+function bgStyle(key){
+    var m = {
+        cyber:'background:linear-gradient(135deg,#0a1628,#1a2a44,#0a1628)',
+        matrix:'background:#000;background-image:linear-gradient(rgba(0,255,0,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,0,.08) 1px,transparent 1px);background-size:3px 3px',
+        red:'background:linear-gradient(135deg,#1a0000,#2d0000,#1a0000)',
+        blue:'background:radial-gradient(ellipse at center,#0a1628,#020810)',
+        circuit:'background:#0a0f0a;background-image:linear-gradient(rgba(0,200,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,0,.06) 1px,transparent 1px),radial-gradient(circle,rgba(0,200,0,.1) 1px,transparent 1px);background-size:6px 6px,6px 6px,12px 12px;background-position:0 0,0 0,3px 3px',
+        fire:'background:linear-gradient(180deg,#1a0500,#331100,#1a0500,#330000)',
+        ice:'background:linear-gradient(180deg,#001122,#003355,#001122)',
+        void:'background:radial-gradient(ellipse at center,#0a0a14,#000)',
+        neon:'background:#0d0d0d;background-image:linear-gradient(rgba(255,0,128,.05) 2px,transparent 2px),linear-gradient(90deg,rgba(0,255,255,.05) 2px,transparent 2px);background-size:6mm 6mm,6mm 6mm',
+        dark:'background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)',
+        grid:'background:repeating-linear-gradient(0deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px),repeating-linear-gradient(90deg,#1a1a2e,#1a1a2e 2px,#0f0f1a 2px,#0f0f1a 4px)',
+        gold:'background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a)'
+    };
+    return m[key] || m.cyber;
+}
+
+function frontLabels(fs){
+    var html = '<div class="warn" style="font-size:'+fs+'px">'+
         'وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە. بە پارێزراوی بیھێڵەرەوە.<br>'+
-        'Wêneyê megre. Bi kesî mebêje. Bi dengê bilind mexwîne. Bi parastî bihêle.<br>'+
         'Do not photograph. Do not share. Do not read aloud. Keep safe.<br>'+
-        'Nicht fotografieren. Nicht teilen. Nicht laut vorlesen. Sicher aufbewahren.<br>'+
-        'Fotoğraf çekme. Kimseyle paylaşma. Yüksek sesle okuma. Güvende tut.</div>';
+        'Nicht fotografieren. Nicht teilen. Nicht laut vorlesen. Sicher aufbewahren.</div>'+
+        '<div class="write-line"></div>';
+    return html;
 }
 
-function halfHTML(cls, bg){
-    return '<div class="half'+cls+'">'+bgEl(bg)+qrBox()+'</div>';
-}
-function thirdHTML(cls, bg){
-    return '<div class="third'+cls+'">'+bgEl(bg)+qrBox()+'</div>';
+function makeBgHTML(bgKey){
+    if(uploadedBg) return 'style="background:url('+uploadedBg+') center/cover;opacity:0.7"';
+    return 'style="'+bgStyle(bgKey)+'"';
 }
 
-// Front half/third
-function fHalf(cls){ return '<div class="half'+cls+'">'+labels()+'<div class="write-line"></div></div>'; }
-function fThird(cls){ return '<div class="third'+cls+'">'+labels()+'<div class="write-line"></div></div>'; }
+function qrHTML(size,pos){
+    var align = pos === 'left' ? 'flex-start' : pos === 'right' ? 'flex-end' : 'center';
+    return '<div class="qr-layer" style="justify-content:'+align+'"><div class="qr-wrap" style="width:'+size+'mm;height:'+size+'mm"><img src="'+Q(Math.round(size*3.7))+'" style="width:100%;height:100%;display:block"></div></div>';
+}
 
-function buildCards(){
-    var type = document.getElementById('cardType').value;
-    var bg = document.getElementById('cardBg').value;
-    var pf = document.getElementById('pageFront');
-    var pb = document.getElementById('pageBack');
+function partHTML(n, total, side, bgKey, fs){
+    if(side === 'front'){
+        var cls = n > 0 ? 'part' : 'part';
+        return '<div class="part'+(n>0?'':'')+'">'+frontLabels(fs)+'</div>';
+    } else {
+        var pct = 100 / total;
+        var sz = total <= 2 ? 11 : total <= 3 ? 10 : 9;
+        return '<div class="part" style="flex:'+(1)+'">'+
+            '<div class="bg-layer" '+makeBgHTML(bgKey)+'></div>'+
+            qrHTML(sz, desiredQRPos)+
+            '</div>';
+    }
+}
+
+function build(){
+    var pf = document.getElementById('pageFront'), pb = document.getElementById('pageBack');
     pf.innerHTML = ''; pb.innerHTML = '';
-    var cardsPerPage = 8;
+    var type = document.getElementById('splitType').value;
+    var bg = document.getElementById('bgSelect').value;
+    var fs = parseFloat(document.getElementById('fontSize').value);
+    var pages = document.querySelectorAll('.page');
+    var count = 0;
 
-    if(type === '2h'){
-        // 2 persons, horizontal split (original)
-        for(var i=0;i<cardsPerPage;i++){
-            var fc = document.createElement('div'); fc.className='card front';
-            fc.innerHTML = fHalf(' half-cut')+fHalf('')+'<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
+    if(type === '1'){
+        count = 8;
+        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr 1fr 1fr'; });
+        for(var i=0;i<count;i++){
+            var fc = document.createElement('div'); fc.className='card';
+            fc.innerHTML = partHTML(0,1,'front',bg,fs);
             pf.appendChild(fc);
-            var bc = document.createElement('div'); bc.className='card back';
-            bc.innerHTML = halfHTML(' half-cut',bg)+halfHTML('',bg)+'<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
+            var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb';
+            bc.innerHTML = partHTML(0,1,'back',bg,fs);
             pb.appendChild(bc);
         }
-        // Use 4x2 grid for horizontal split (taller cards)
-        document.querySelectorAll('.page').forEach(function(p){
-            p.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
-            p.style.gridTemplateRows = '1fr 1fr';
-        });
+    } else if(type === '2'){
+        count = 8;
+        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr 1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr'; });
+        for(var i=0;i<count;i++){
+            var fc = document.createElement('div'); fc.className='card';
+            fc.innerHTML = partHTML(0,2,'front',bg,fs) + partHTML(1,2,'front',bg,fs);
+            pf.appendChild(fc);
+            var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb';
+            bc.innerHTML = partHTML(0,2,'back',bg,fs) + partHTML(1,2,'back',bg,fs);
+            pb.appendChild(bc);
+        }
     } else if(type === '2v'){
-        // 2 persons, vertical split
-        var style = document.createElement('style');
-        style.textContent = '.card.vert{flex-direction:row!important}.vert .half-cut{border-bottom:none!important;border-right:1.5px dashed #000}.back .vert .half-cut{border-right-color:#fff8}';
-        document.head.appendChild(style);
-        for(var i=0;i<cardsPerPage;i++){
-            var fc = document.createElement('div'); fc.className='card front vert';
-            fc.innerHTML = fHalf(' half-cut')+fHalf('');
+        count = 8;
+        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr 1fr 1fr'; });
+        for(var i=0;i<count;i++){
+            var fc = document.createElement('div'); fc.className='card vert';
+            fc.style.flexDirection = 'row';
+            var f1 = document.createElement('div'); f1.className='front'; f1.style.borderRight='1.5px dashed #000';
+            f1.innerHTML = frontLabels(fs)+'<div class="write-line"></div>';
+            var f2 = document.createElement('div'); f2.className='front';
+            f2.innerHTML = frontLabels(fs)+'<div class="write-line"></div>';
+            fc.appendChild(f1); fc.appendChild(f2);
             pf.appendChild(fc);
-            var bc = document.createElement('div'); bc.className='card back vert';
-            bc.innerHTML = halfHTML(' half-cut',bg)+halfHTML('',bg);
+            // Back vertical
+            var bc = document.createElement('div'); bc.className='card vert'; bc.style.borderColor='#bbb'; bc.style.flexDirection='row';
+            var b1 = document.createElement('div'); b1.className='back'; b1.style.borderRight='1px dashed #fff8';
+            b1.innerHTML = '<div class="bg-layer" '+makeBgHTML(bg)+'></div>'+qrHTML(11, desiredQRPos);
+            var b2 = document.createElement('div'); b2.className='back';
+            b2.innerHTML = '<div class="bg-layer" '+makeBgHTML(bg)+'></div>'+qrHTML(11, desiredQRPos);
+            bc.appendChild(b1); bc.appendChild(b2);
             pb.appendChild(bc);
         }
-        document.querySelectorAll('.page').forEach(function(p){
-            p.style.gridTemplateColumns = '1fr 1fr';
-            p.style.gridTemplateRows = '1fr 1fr 1fr 1fr';
-        });
-    } else if(type === '3h'){
-        // 3 persons, 3 horizontal strips
-        for(var i=0;i<6;i++){
-            var fc = document.createElement('div'); fc.className='card front'; fc.style.flexDirection='column';
-            fc.innerHTML = fThird(' third-cut')+fThird(' third-cut')+fThird('');
+    } else if(type === '3'){
+        count = 6;
+        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr 1fr'; });
+        for(var i=0;i<count;i++){
+            var fc = document.createElement('div'); fc.className='card';
+            fc.innerHTML = partHTML(0,3,'front',bg,fs) + partHTML(1,3,'front',bg,fs) + partHTML(2,3,'front',bg,fs);
             pf.appendChild(fc);
-            var bc = document.createElement('div'); bc.className='card back'; bc.style.flexDirection='column';
-            bc.innerHTML = thirdHTML(' third-cut',bg)+thirdHTML(' third-cut',bg)+thirdHTML('',bg);
+            var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb';
+            bc.innerHTML = partHTML(0,3,'back',bg,fs) + partHTML(1,3,'back',bg,fs) + partHTML(2,3,'back',bg,fs);
             pb.appendChild(bc);
         }
-        document.querySelectorAll('.page').forEach(function(p){
-            p.style.gridTemplateColumns = '1fr 1fr';
-            p.style.gridTemplateRows = '1fr 1fr 1fr';
-        });
-    } else if(type === '4h'){
-        // 4 persons, 4 horizontal strips
-        for(var i=0;i<4;i++){
-            var fc = document.createElement('div'); fc.className='card front'; fc.style.flexDirection='column';
-            fc.innerHTML = fThird(' third-cut')+fThird(' third-cut')+fThird(' third-cut')+fThird('');
+    } else if(type === '4'){
+        count = 4;
+        pages.forEach(function(p){ p.style.gridTemplateColumns = '1fr 1fr'; p.style.gridTemplateRows = '1fr 1fr'; });
+        for(var i=0;i<count;i++){
+            var fc = document.createElement('div'); fc.className='card';
+            fc.innerHTML = partHTML(0,4,'front',bg,fs) + partHTML(1,4,'front',bg,fs) + partHTML(2,4,'front',bg,fs) + partHTML(3,4,'front',bg,fs);
             pf.appendChild(fc);
-            var bc = document.createElement('div'); bc.className='card back'; bc.style.flexDirection='column';
-            bc.innerHTML = thirdHTML(' third-cut',bg)+thirdHTML(' third-cut',bg)+thirdHTML(' third-cut',bg)+thirdHTML('',bg);
+            var bc = document.createElement('div'); bc.className='card'; bc.style.borderColor='#bbb';
+            bc.innerHTML = partHTML(0,4,'back',bg,fs) + partHTML(1,4,'back',bg,fs) + partHTML(2,4,'back',bg,fs) + partHTML(3,4,'back',bg,fs);
             pb.appendChild(bc);
         }
-        document.querySelectorAll('.page').forEach(function(p){
-            p.style.gridTemplateColumns = '1fr 1fr';
-            p.style.gridTemplateRows = '1fr 1fr';
-        });
-    } else if(type === '1'){
-        // 1 person, no split
-        for(var i=0;i<cardsPerPage;i++){
-            var fc = document.createElement('div'); fc.className='card front';
-            fc.innerHTML = '<div class="half" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 8px 6px">'+labels()+'<div class="write-line"></div></div>';
-            pf.appendChild(fc);
-            var bc = document.createElement('div'); bc.className='card back';
-            bc.innerHTML = '<div class="half" style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">'+bgEl(bg)+qrBox()+'</div>';
-            pb.appendChild(bc);
-        }
-        document.querySelectorAll('.page').forEach(function(p){
-            p.style.gridTemplateColumns = '1fr 1fr';
-            p.style.gridTemplateRows = '1fr 1fr 1fr 1fr';
-        });
-    } else if(type === '2h-mid'){
-        // 2 persons, QR in middle (shared)
-        for(var i=0;i<cardsPerPage;i++){
-            var fc = document.createElement('div'); fc.className='card front';
-            fc.innerHTML = fHalf(' half-cut')+fHalf('')+'<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
-            pf.appendChild(fc);
-            var bc = document.createElement('div'); bc.className='card back';
-            bc.innerHTML = halfHTML(' half-cut',bg)+halfHTML('',bg)+'<span class="scissor-l">✂</span><span class="scissor-r">✂</span>';
-            // Put QR in center overlay
-            var midQR = document.createElement('div');
-            midQR.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;display:flex;align-items:center;justify-content:center';
-            midQR.innerHTML = '<div style="width:20mm;height:20mm;background:#fff;border-radius:1.5mm;padding:1.5mm;box-shadow:0 0 3mm rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center"><img src="'+Q(80)+'" alt="QR" style="width:100%;height:100%"></div>';
-            bc.appendChild(midQR);
-            pb.appendChild(bc);
-        }
-        document.querySelectorAll('.page').forEach(function(p){
-            p.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
-            p.style.gridTemplateRows = '1fr 1fr';
-        });
     }
 
-    document.getElementById('pageFront').style.display = 'grid';
-    document.getElementById('pageBack').style.display = 'grid';
+    document.getElementById('frontTitle').textContent = '📝 Front — '+count+' per sheet';
+    document.getElementById('backTitle').textContent = '🖼️ Back — '+count+' per sheet';
 }
-
-buildCards();
+build();
 </script>
 </body>
 </html>
