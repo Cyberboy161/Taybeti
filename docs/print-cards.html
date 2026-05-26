@@ -190,13 +190,15 @@ function buildCards(){
  document.getElementById('previewFront').innerHTML=makeCard(lo);
  document.getElementById('previewBack').innerHTML=makeBackCard(lo,bg);
 
- // Print grid — 8 cards
+ // Print grid — fill with cards
  var pf=document.getElementById('pf'),pb=document.getElementById('pb');
  pf.innerHTML='';pb.innerHTML='';
- // Adjust grid
- pf.style.gridTemplateColumns='repeat(4,1fr)';pf.style.gridTemplateRows='1fr 1fr';
- pb.style.gridTemplateColumns='repeat(4,1fr)';pb.style.gridTemplateRows='1fr 1fr';
- for(var i=0;i<8;i++){
+ var cols=4,rows=2;
+ if(lo==='2v'||lo==='2'){cols=4;rows=4;} // 16 cards for 2-strip and 2-vert layouts
+ pf.style.gridTemplateColumns='repeat('+cols+',1fr)';pf.style.gridTemplateRows='repeat('+rows+',1fr)';
+ pb.style.gridTemplateColumns='repeat('+cols+',1fr)';pb.style.gridTemplateRows='repeat('+rows+',1fr)';
+ var total=cols*rows;
+ for(var i=0;i<total;i++){
   pf.innerHTML+=makeCard(lo);
   pb.innerHTML+=makeBackCard(lo,bg);
  }
