@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Feedback — Taybeti Notesharing</title>
+    <style>
+        :root{--bg:#0a0a0c;--surface:#141418;--surface2:#1e1e24;--text:#e0e0e0;--text-secondary:#a0a0b0;--accent:#4f9cf7;--border:#2a2a35;--radius:12px}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:70px 16px 40px;display:flex;flex-direction:column;align-items:center}
+        .container{max-width:600px;width:100%}
+        h1{font-size:2rem;font-weight:800;margin-bottom:0.5rem;text-align:center;background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        p{color:var(--text-secondary);text-align:center;margin-bottom:1.5rem;font-size:0.95rem}
+        label{color:var(--text-secondary);font-size:0.9rem;display:block;margin-bottom:0.3rem}
+        textarea,input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius);font-family:inherit;font-size:0.95rem;margin-bottom:1rem}
+        textarea:focus,input:focus{outline:none;border-color:var(--accent)}
+        textarea{min-height:140px;resize:vertical}
+        button{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:50px;font-weight:600;font-size:1rem;cursor:pointer;width:100%}
+        button:hover{background:#3b82f6}
+        .footer{text-align:center;margin-top:2rem;color:var(--text-secondary);font-size:0.85rem}
+        .footer a{color:var(--accent);text-decoration:none}
+        .note{text-align:center;font-size:0.8rem;color:var(--text-secondary);margin-bottom:1rem}
+        .success{display:none;background:#0f2a0f;border:1px solid #00aa33;color:#88ff88;padding:1.2rem;border-radius:var(--radius);text-align:center;margin-bottom:1rem}
+        .lang-bar{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+        .lang-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:3px 9px;border-radius:20px;cursor:pointer;font-size:0.76rem}
+        .lang-bar button:hover,.lang-bar button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+        .nav-bar{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;padding:2px 10px 4px}
+        .nav-bar a{padding:3px 9px;border-radius:20px;text-decoration:none;font-size:0.76rem}
+        .nav-bar a.active{background:var(--accent);border:1px solid var(--accent);color:#fff;font-weight:600}
+        .nav-bar a.inactive{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary)}
+        @media(max-width:600px){h1{font-size:1.4rem}}
+        @media print{.top-bar{display:none!important}body{padding-top:0!important}}
+        input::placeholder,textarea::placeholder{color:#555}
+    </style>
+</head>
+<body>
+<div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border)">
+ <div class="lang-bar" style="padding:4px 10px">
+  <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
+  <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
+  <button onclick="setLang('ckb')" id="btn-ckb">کوردی</button>
+  <button onclick="setLang('kmr')" id="btn-kmr">Kurmancî</button>
+  <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
+ </div>
+ <div class="nav-bar">
+  <a href="index.html" class="inactive">🏠 <span data-i18n="n-home">Home</span></a>
+  <a href="why.html" class="inactive">❓ <span data-i18n="n-why">Why</span></a>
+  <a href="opensource.html" class="inactive">📖 <span data-i18n="n-os">Open Source</span></a>
+  <a href="secure.html" class="inactive">🛡️ <span data-i18n="n-sec">Secure</span></a>
+  <a href="invited.html" class="inactive">📩 <span data-i18n="n-inv">Invited</span></a>
+  <a href="feedback.html" class="active">💬 <span data-i18n="n-fb">Feedback</span></a>
+ </div>
+</div>
+<div class="container">
+<h1 data-i18n="h1">💬 Send Feedback</h1>
+<p data-i18n="sub">Anonymous. No account. No email required. Just your thoughts.</p>
+
+<div class="success" id="successMsg" data-i18n="success">✅ Sent! Thank you for your feedback.</div>
+
+<form id="feedbackForm" action="https://formspree.io/f/xrbbkvrv" method="POST">
+    <input type="hidden" name="_subject" value="Taybeti Website Feedback">
+    <input type="text" name="_gotcha" style="display:none">
+    <label for="message" data-i18n="msg-label">Message:</label>
+    <textarea id="message" name="message" required placeholder="Type your feedback here..."></textarea>
+    <p class="note" data-i18n="note">Your email is not collected. This is completely anonymous.</p>
+    <button type="submit" data-i18n="send">📨 Send Feedback</button>
+</form>
+
+<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a></p></div>
+</div>
+
+<script>
+document.getElementById('feedbackForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var form = this;
+    var data = new FormData(form);
+    fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
+    .then(function(r){ return r.json(); })
+    .then(function(r){
+        if(r.ok){
+            document.getElementById('successMsg').style.display = 'block';
+            form.style.display = 'none';
+        } else {
+            alert('Failed to send. Try again later.');
+        }
+    })
+    .catch(function(){ alert('Network error. Try again.'); });
+});
+
+var t={
+en:{"h1":"💬 Send Feedback","sub":"Anonymous. No account. No email required. Just your thoughts.","msg-label":"Message:","note":"Your email is not collected. This is completely anonymous.","send":"📨 Send Feedback","success":"✅ Sent! Thank you for your feedback.","n-home":"Home","n-why":"Why","n-os":"Open Source","n-sec":"Secure","n-inv":"Invited","n-fb":"Feedback"},
+de:{"h1":"💬 Feedback senden","sub":"Anonym. Kein Konto. Keine E-Mail. Nur deine Gedanken.","msg-label":"Nachricht:","note":"Deine E-Mail wird nicht gespeichert. Völlig anonym.","send":"📨 Feedback senden","success":"✅ Gesendet! Danke für dein Feedback.","n-home":"Start","n-why":"Warum","n-os":"Open Source","n-sec":"Sicher","n-inv":"Eingeladen","n-fb":"Feedback"},
+tr:{"h1":"💬 Geri Bildirim Gönder","sub":"Anonim. Hesap gerekmez. E-posta gerekmez. Sadece düşünceleriniz.","msg-label":"Mesaj:","note":"E-postanız toplanmaz. Tamamen anonimdir.","send":"📨 Geri Bildirim Gönder","success":"✅ Gönderildi! Geri bildiriminiz için teşekkürler.","n-home":"Ana Sayfa","n-why":"Neden","n-os":"Açık Kaynak","n-sec":"Güvenli","n-inv":"Davetli","n-fb":"Geri Bildirim"},
+ckb:{"h1":"💬 ڕەخنە و پێشنیار بنێرە","sub":"بە نەناسراوی. هیچ هەژمارێک پێویست نییە. تەنیا بیرۆکەکانت.","msg-label":"پەیام:","note":"ئیمەیلەکەت کۆناکرێتەوە. بە تەواوی نەناسراوە.","send":"📨 ڕەخنە و پێشنیار بنێرە","success":"✅ نێردرا! سوپاس بۆ ڕەخنە و پێشنیارەکانت.","n-home":"سەرەکی","n-why":"بۆچی","n-os":"سەرچاوە کراوە","n-sec":"پارێزراو","n-inv":"بانگهێشتکراو","n-fb":"ڕەخنە"},
+kmr:{"h1":"💬 Şîrove Bişîne","sub":"Bê nasname. Tu hesab pêwîst nîne. Tenê ramanên te.","msg-label":"Peyam:","note":"E-maila te nayê berhevkirin. Bi temamî bê nasname ye.","send":"📨 Şîrove Bişîne","success":"✅ Hate şandin! Spas ji bo şîroveya te.","n-home":"Mal","n-why":"Çima","n-os":"Çavkanî Vekirî","n-sec":"Ewle","n-inv":"Dawetkirî","n-fb":"Şîrove"}
+};
+function setLang(l){
+ document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
+ var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
+ document.querySelectorAll('[data-i18n]').forEach(function(el){
+  var k=el.getAttribute('data-i18n');if(t[l]&&t[l][k]){el.textContent=t[l][k];}
+ });
+}
+setLang('en');
+</script>
+</body>
+</html>
