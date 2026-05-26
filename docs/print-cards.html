@@ -1,135 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taybeti – Passphrase Cards</title>
-    <style>
-        @page { size: A4 portrait; margin: 3mm; }
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',system-ui,sans-serif;background:#eee;padding-top:44px}
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Taybeti – Passphrase Cards</title>
+<style>
+@page{size:A4 portrait;margin:3mm}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Georgia',serif;background:#f5f5f0;padding-top:40px;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bar{position:fixed;top:0;left:0;right:0;background:#111;padding:3px 10px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;z-index:100;font-size:11px}
+.bar label{color:#999;font-size:10px}
+.bar select,.bar input[type=file]{background:#222;color:#fff;border:1px solid #444;padding:3px 6px;border-radius:4px;font-size:10px}
+.bar .g{display:flex;align-items:center;gap:3px;background:#1a1a1a;padding:2px 6px;border-radius:5px}
+.pg{display:inline-grid;grid-template-columns:1fr 1fr 1fr;gap:1px;vertical-align:middle}
+.pg button{background:#222;color:#999;border:1px solid #444;border-radius:2px;padding:1px 3px;font-size:8px;cursor:pointer;line-height:1.2}
+.pg button.sel{background:#4f9cf7;border-color:#4f9cf7;color:#fff}
+.prBtn{background:#4f9cf7;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600;font-size:11px}
+.bar a{color:#555;text-decoration:none;font-size:10px}
+.bar input[type=text]{background:#222;color:#fff;border:1px solid #444;padding:2px 5px;border-radius:3px;font-size:10px;width:70px}
 
-        #topBar{position:fixed;top:0;left:0;right:0;background:#111;padding:4px 14px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;z-index:100;font-size:12px}
-        #topBar select,#topBar input[type=file]{background:#222;color:#fff;border:1px solid #444;padding:4px 8px;border-radius:5px;font-size:11px}
-        #topBar label{color:#aaa;font-size:10px}
-        #topBar .grp{display:flex;align-items:center;gap:4px;background:#1a1a1a;padding:3px 8px;border-radius:6px}
-        .ctrl-btn{background:#4f9cf7;color:#fff;border:none;padding:5px 14px;border-radius:5px;cursor:pointer;font-weight:600;font-size:11px}
-        #topBar a{color:#666;text-decoration:none;font-size:10px}
-        .pos-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px}
-        .pos-grid button{background:#222;color:#999;border:1px solid #444;border-radius:3px;padding:2px 4px;font-size:10px;cursor:pointer}
-        .pos-grid button.active{background:#4f9cf7;border-color:#4f9cf7;color:#fff}
+h2{text-align:center;font-size:11px;color:#aaa;font-weight:400;margin:4px 0 1px}
+.pg-wrap{max-width:1200px;margin:0 auto;padding:0 10px}
+.pg{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:2mm;width:210mm;margin:0 auto}
+.cd{position:relative;border:1px solid #999;display:flex;flex-direction:column;background:#fff;overflow:hidden;min-height:0}
+.cd.vr{flex-direction:row}.cd.vr .h{border-right:1px dashed #000;flex:1}
+.h{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1mm 2mm;position:relative;min-height:0}
+.h+.h{border-top:1.5px dashed #000}
+.ft .w{width:100%;font-size:6.5px;color:#333;text-align:center;line-height:1.3;margin-bottom:1px}
+.ft .l{width:75%;border-bottom:1px solid #444;min-height:6mm}
+.bk .h{background:#111}
+.bk .im{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.bk .cx{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1mm;padding:1mm;width:100%}
+.bk .qr{background:#fff;border-radius:0.8mm;padding:0.8mm;box-shadow:0 0 1.5mm rgba(0,0,0,.5);display:flex}
+.bk .qr img{display:block}
+.bk .inf{position:absolute;bottom:0.5mm;left:1mm;right:1mm;z-index:3;font-size:3.5px;color:#fff;text-align:center;text-shadow:0 0 2px #000;line-height:1.3}
+.bk .url{position:absolute;top:0.5mm;left:1mm;right:1mm;z-index:3;font-size:2.8px;color:#fffd;text-align:center;text-shadow:0 0 2px #000}
 
-        h2{text-align:center;font-size:11px;color:#aaa;font-weight:400;margin:6px 0 2px}
-        .page-wrap{max-width:1200px;margin:0 auto;padding:0 10px}
-        .page{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:2mm;width:210mm;margin:0 auto;min-height:0}
-        .card{position:relative;border:1px solid #999;display:flex;flex-direction:column;background:#fff;overflow:hidden}
-        .card.vert{flex-direction:row}.card.vert .front,.card.vert .back{border-right:1px dashed #000;flex:1}
-        .part{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1mm 2mm;position:relative;min-height:0}
-        .part+.part{border-top:1.5px dashed #000}
-        .front .warn{width:100%;font-size:7px;color:#333;text-align:center;line-height:1.3;margin-bottom:1px}
-        .front .line{width:75%;border-bottom:1px solid #555;min-height:5mm}
-        .back .part{background:#111}
-        .back .img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-        .back .content{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1mm;padding:1mm;width:100%}
-        .back .qr{background:#fff;border-radius:0.8mm;padding:1mm;box-shadow:0 0 1.5mm rgba(0,0,0,.5);display:flex}
-        .back .qr img{display:block}
-        .back .info{position:absolute;bottom:0.5mm;left:1mm;right:1mm;z-index:3;font-size:3.8px;color:#fffe;text-align:center;text-shadow:0 0 1px #000;line-height:1.3}
-        .back .urllabel{position:absolute;top:0.5mm;left:1mm;right:1mm;z-index:3;font-size:3px;color:#fff8;text-align:center;text-shadow:0 0 1px #000}
-
-        @media print{#topBar{display:none}.page-wrap{padding:0}}
-    </style>
+@media print{.bar{display:none}.pg-wrap{padding:0}}
+</style>
 </head>
 <body>
-<div id="topBar">
-    <div class="grp"><label>Layout</label><select id="layout" onchange="build()">
+<div class="bar">
+    <div class="g"><label>Layout</label><select id="lo" onchange="b()">
         <option value="2h">2 strips</option><option value="1">1 (no cut)</option><option value="2v">2 vertical</option>
     </select></div>
-    <div class="grp"><label>Back</label><select id="bgSel" onchange="build()">
-        <option value="cyber">🖼️ Cyber</option><option value="matrix">💚 Matrix</option><option value="red">🔴 Red</option>
-        <option value="blue">🔵 Blue</option><option value="circuit">🔌 Circuit</option><option value="fire">🔥 Fire</option>
-        <option value="ice">❄️ Ice</option><option value="neon">💜 Neon</option><option value="dark">⬛ Dark</option><option value="gold">🟡 Gold</option>
+    <div class="g"><label>Design</label><select id="bg" onchange="b()">
+        <option value="cyber">Cybersecurity</option><option value="matrix">Matrix</option><option value="red">Red</option>
+        <option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option>
+        <option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option>
     </select></div>
-    <div class="grp"><label>Image</label><input type="file" id="bgFile" accept="image/*" onchange="uploadBg(this)"></div>
-    <div class="grp"><label>QR→</label><select id="qrDest" onchange="changeQr();build()">
-        <option value="home">🏠 Home</option><option value="invited">📩 Invited</option>
+    <div class="g"><label>Image</label><input type="file" accept="image/*" onchange="up(this)"></div>
+    <div class="g"><label>QR→</label><select id="qd" onchange="b()">
+        <option value="home">Homepage</option><option value="invited">Invited</option>
     </select></div>
-    <div class="grp"><label>QR pos</label><div class="pos-grid">
-        <button data-p="tl" onclick="setQP('tl')">↖</button><button data-p="tc" onclick="setQP('tc')">↑</button><button data-p="tr" onclick="setQP('tr')">↗</button>
-        <button data-p="ml" onclick="setQP('ml')">←</button><button data-p="mc" class="active" onclick="setQP('mc')">●</button><button data-p="mr" onclick="setQP('mr')">→</button>
-        <button data-p="bl" onclick="setQP('bl')">↙</button><button data-p="bc" onclick="setQP('bc')">↓</button><button data-p="br" onclick="setQP('br')">↘</button>
+    <div class="g"><label>QR pos</label><div class="pg" id="pg">
+        <button data-p="tl">↖</button><button data-p="tc">↑</button><button data-p="tr">↗</button>
+        <button data-p="ml">←</button><button data-p="mc" class="sel">●</button><button data-p="mr">→</button>
+        <button data-p="bl">↙</button><button data-p="bc">↓</button><button data-p="br">↘</button>
     </div></div>
-    <div class="grp"><label>Font</label><input type="range" id="fs" min="5.5" max="13" value="7.5" step="0.5" oninput="build()" style="width:60px"></div>
-    <div class="grp" style="flex-direction:column;align-items:stretch;gap:2px">
-        <input id="ciPhone" placeholder="Your phone" style="background:#222;color:#fff;border:1px solid #444;padding:2px 6px;border-radius:3px;font-size:10px;width:100px" oninput="build()">
-        <input id="ciEmail" placeholder="Your email" style="background:#222;color:#fff;border:1px solid #444;padding:2px 6px;border-radius:3px;font-size:10px;width:100px" oninput="build()">
-    </div>
-    <button class="ctrl-btn" onclick="window.print()">🖨️ Print</button>
+    <div class="g"><input id="ph" placeholder="Phone" oninput="b()" style="width:80px">
+    <input id="em" placeholder="Email" oninput="b()" style="width:80px"></div>
+    <button class="prBtn" onclick="window.print()">🖨️ Print</button>
     <a href="index.html">🏠</a>
 </div>
 
-<div class="page-wrap">
-    <h2>📝 Front</h2>
-    <div class="page" id="pf"></div>
-    <hr style="border:1px dashed #ccc;margin:8px 0;page-break-after:always">
-    <h2>🖼️ Back</h2>
-    <div class="page" id="pb"></div>
+<div class="pg-wrap">
+<h2>📝 Front</h2><div class="pg" id="pf"></div>
+<hr style="border:1px dashed #ccc;margin:6px 0;page-break-after:always">
+<h2>🖼️ Back</h2><div class="pg" id="pb"></div>
 </div>
 
 <script>
-var qrP='mc',uploaded='';
-function Q(){return document.getElementById('qrDest').value==='home'?'https://cyberboy161.github.io/Taybeti/index.html':'https://cyberboy161.github.io/Taybeti/invited.html'}
-function UR(){return "https://api.qrserver.com/v1/create-qr-code/?size=60x60&data="+encodeURIComponent(Q())}
+var U='',QP='mc';
+var IMG="https://cyberboy161.github.io/Taybeti/card-bg.png";
+var QRU=function(){return"https://api.qrserver.com/v1/create-qr-code/?size=60x60&data="+encodeURIComponent(document.getElementById('qd').value==='home'?'https://cyberboy161.github.io/Taybeti/index.html':'https://cyberboy161.github.io/Taybeti/invited.html')};
 
-function setQP(p){qrP=p;document.querySelectorAll('.pos-grid button').forEach(function(b){b.classList.toggle('active',b.dataset.p===p)});build()}
+document.getElementById('pg').onclick=function(e){
+ var b=e.target.closest('button');if(!b)return;
+ document.querySelectorAll('#pg button').forEach(function(x){x.classList.remove('sel')});
+ b.classList.add('sel');QP=b.dataset.p;b();
+};
 
-function uploadBg(i){if(i.files&&i.files[0]){var r=new FileReader();r.onload=function(e){uploaded=e.target.result;build()};r.readAsDataURL(i.files[0])}}
+function up(i){if(!i.files||!i.files[0])return;var r=new FileReader();r.onload=function(e){U=e.target.result;b()};r.readAsDataURL(i.files[0])}
 
-function bgStyle(k){
-    var s={'cyber':'background:#0a1628 url(https://cyberboy161.github.io/Taybeti/card-bg.png) center/cover','matrix':'background:#000;background-image:linear-gradient(rgba(0,255,0,.08)1px,transparent 1px),linear-gradient(90deg,rgba(0,255,0,.08)1px,transparent 1px);background-size:3px 3px',
-    'red':'background:linear-gradient(135deg,#1a0000,#2d0000,#1a0000)','blue':'background:radial-gradient(ellipse at center,#0a1628,#020810)','circuit':'background:#0a0f0a;background-image:linear-gradient(rgba(0,200,0,.06)1px,transparent 1px),linear-gradient(90deg,rgba(0,200,0,.06)1px,transparent 1px),radial-gradient(circle,rgba(0,200,0,.1)1px,transparent 1px);background-size:6px 6px,6px 6px,12px 12px;background-position:0 0,0 0,3px 3px',
-    'fire':'background:linear-gradient(180deg,#1a0500,#331100,#1a0500,#330000)','ice':'background:linear-gradient(180deg,#001122,#003355,#001122)','neon':'background:#0d0d0d;background-image:linear-gradient(rgba(255,0,128,.05)2px,transparent 2px),linear-gradient(90deg,rgba(0,255,255,.05)2px,transparent 2px);background-size:6mm 6mm,6mm 6mm',
-    'dark':'background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)','gold':'background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a)'};
-    return uploaded?'background:url('+uploaded+') center/cover':s[k]||s.cyber;
+function bgs(k){
+ var m={'matrix':'background:#000;background-image:linear-gradient(rgba(0,255,0,.08)1px,transparent 1px),linear-gradient(90deg,rgba(0,255,0,.08)1px,transparent 1px);background-size:3px 3px',
+ 'red':'background:linear-gradient(135deg,#1a0000,#2d0000,#1a0000)','blue':'background:radial-gradient(ellipse at center,#0a1628,#020810)',
+ 'circuit':'background:#0a0f0a;background-image:linear-gradient(rgba(0,200,0,.06)1px,transparent 1px),linear-gradient(90deg,rgba(0,200,0,.06)1px,transparent 1px),radial-gradient(circle,rgba(0,200,0,.1)1px,transparent 1px);background-size:6px 6px,6px 6px,12px 12px;background-position:0 0,0 0,3px 3px',
+ 'fire':'background:linear-gradient(180deg,#1a0500,#331100,#1a0500,#330000)','ice':'background:linear-gradient(180deg,#001122,#003355,#001122)',
+ 'neon':'background:#0d0d0d;background-image:linear-gradient(rgba(255,0,128,.05)2px,transparent 2px),linear-gradient(90deg,rgba(0,255,255,.05)2px,transparent 2px);background-size:6mm 6mm,6mm 6mm',
+ 'dark':'background:linear-gradient(135deg,#0d1117,#161b22,#0d1117)','gold':'background:linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a)'};
+ if(U)return'background:url('+U+') center/cover';
+ if(k==='cyber')return'background:linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url('+IMG+') center/cover;background-size:cover';
+ return m[k]||'#111';
 }
 
-function frontHTML(fs){
-    return '<div class="warn" style="font-size:'+fs+'px">وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە. بە پارێزراوی بیھێڵەرەوە.<br>Do not photograph. Do not share. Do not read aloud. Keep safe.<br>Nicht fotografieren. Nicht teilen. Nicht laut vorlesen. Sicher aufbewahren.</div><div class="line"></div>';
+function ft(){
+ return '<div class="w">وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە. بە پارێزراوی بیھێڵەرەوە.<br>Do not photograph. Do not share. Do not read aloud. Keep safe.<br>Nicht fotografieren. Nicht teilen. Nicht laut vorlesen. Sicher aufbewahren.</div><div class="l"></div>';
 }
 
-function placeQRStyle(p){
-    var m={tl:{a:'flex-start',j:'flex-start'},tc:{a:'flex-start',j:'center'},tr:{a:'flex-start',j:'flex-end'},ml:{a:'center',j:'flex-start'},mc:{a:'center',j:'center'},mr:{a:'center',j:'flex-end'},bl:{a:'flex-end',j:'flex-start'},bc:{a:'flex-end',j:'center'},br:{a:'flex-end',j:'flex-end'}};
-    var s=m[p]||m.mc;return 'align-items:'+s.a+';justify-content:'+s.j;
+function qrPos(p){
+ var a={tl:'flex-start;justify-content:flex-start',tc:'flex-start;justify-content:center',tr:'flex-start;justify-content:flex-end',ml:'center;justify-content:flex-start',mc:'center;justify-content:center',mr:'center;justify-content:flex-end',bl:'flex-end;justify-content:flex-start',bc:'flex-end;justify-content:center',br:'flex-end;justify-content:flex-end'};
+ return 'align-items:'+(a[p]||a.mc);
 }
 
-function backContent(bg){
-    var ph=document.getElementById('ciPhone').value.trim(),em=document.getElementById('ciEmail').value.trim();
-    var ci=ph||em?'<div class="info">'+(ph?'📞'+ph:'')+(ph&&em?' · ':'')+(em?'📧'+em:'')+'</div>':'';
-    return '<div class="img" style="'+bgStyle(bg)+'"></div><div class="content" style="'+placeQRStyle(qrP)+'"><div class="qr" style="width:12mm;height:12mm"><img src="'+UR()+'" style="width:100%;height:100%"></div></div>'+
-        '<div class="urllabel">'+Q()+'</div>'+ci;
+function bk(bg){
+ var ph=document.getElementById('ph').value.trim(),em=document.getElementById('em').value.trim();
+ var ci=ph||em?'<div class="inf">'+(ph?'📞'+ph:'')+(ph&&em?' · ':'')+(em?'📧'+em:'')+'</div>':'';
+ return '<div class="im" style="'+bgs(bg)+'"></div><div class="cx" style="'+qrPos(QP)+'"><div class="qr" style="width:12mm;height:12mm"><img src="'+QRU()+'" style="width:100%;height:100%"></div></div><div class="url">'+QRU()+'</div>'+ci;
 }
 
-function build(){
-    var pf=document.getElementById('pf'),pb=document.getElementById('pb');
-    pf.innerHTML='';pb.innerHTML='';
-    var lo=document.getElementById('layout').value,bg=document.getElementById('bgSel').value,fs=document.getElementById('fs').value;
-
-    if(lo==='1'){
-        for(var i=0;i<8;i++){
-            pf.innerHTML+='<div class="card"><div class="part">'+frontHTML(fs)+'</div></div>';
-            pb.innerHTML+='<div class="card" style="border-color:#bbb">'+backContent(bg)+'</div>';
-        }
-    }else if(lo==='2v'){
-        for(var i=0;i<8;i++){
-            pf.innerHTML+='<div class="card vert"><div class="front">'+frontHTML(fs)+'<div class="line"></div></div><div class="front">'+frontHTML(fs)+'<div class="line"></div></div></div>';
-            pb.innerHTML+='<div class="card vert" style="border-color:#bbb"><div class="back" style="border-right:1px dashed #fff8">'+backContent(bg)+'</div><div class="back">'+backContent(bg)+'</div></div>';
-        }
-    }else{
-        for(var i=0;i<8;i++){
-            pf.innerHTML+='<div class="card"><div class="part" style="border-bottom:1.5px dashed #000">'+frontHTML(fs)+'</div><div class="part">'+frontHTML(fs)+'</div></div>';
-            pb.innerHTML+='<div class="card" style="border-color:#bbb"><div class="part" style="border-bottom:1px dashed #fff8">'+backContent(bg)+'</div><div class="part">'+backContent(bg)+'</div></div>';
-        }
-    }
+function b(){
+ var pf=document.getElementById('pf'),pb=document.getElementById('pb');
+ pf.innerHTML='';pb.innerHTML='';
+ var lo=document.getElementById('lo').value,bg=document.getElementById('bg').value;
+ if(lo==='1'){
+  for(var i=0;i<8;i++){
+   pf.innerHTML+='<div class="cd"><div class="h ft">'+ft()+'</div></div>';
+   pb.innerHTML+='<div class="cd" style="border-color:#bbb"><div class="h bk">'+bk(bg)+'</div></div>';
+  }
+ }else if(lo==='2v'){
+  for(var i=0;i<8;i++){
+   pf.innerHTML+='<div class="cd vr"><div class="h ft" style="border-right:1.5px dashed #000">'+ft()+'</div><div class="h ft">'+ft()+'</div></div>';
+   pb.innerHTML+='<div class="cd vr" style="border-color:#bbb"><div class="h bk" style="border-right:1px dashed #fff8">'+bk(bg)+'</div><div class="h bk">'+bk(bg)+'</div></div>';
+  }
+ }else{
+  for(var i=0;i<8;i++){
+   pf.innerHTML+='<div class="cd"><div class="h ft" style="border-bottom:1.5px dashed #000">'+ft()+'</div><div class="h ft">'+ft()+'</div></div>';
+   pb.innerHTML+='<div class="cd" style="border-color:#bbb"><div class="h bk" style="border-bottom:1px dashed #fff8">'+bk(bg)+'</div><div class="h bk">'+bk(bg)+'</div></div>';
+  }
+ }
+ document.querySelectorAll('h2').forEach(function(h){h.textContent='📝 8 per sheet';});
 }
-build();
+b();
 </script>
 </body>
 </html>
