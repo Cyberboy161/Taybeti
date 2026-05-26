@@ -39,7 +39,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
 
 /* ── Print Grid ── */
 .print-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:2mm;width:100%;max-width:204mm;margin:0 auto}
-.print-grid .card{position:relative;border:1px solid #999;display:flex;flex-direction:column;background:#fff;overflow:hidden}
+@media print{.print-grid{height:100vh}}
+.print-grid .card{position:relative;border:1px solid #999;display:flex;flex-direction:column;background:#fff;overflow:hidden;height:100%}
 .print-grid .card.vert{flex-direction:row}.print-grid .card.vert .h{border-right:1px dashed #000;flex:1}
 .print-grid .h{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1mm 2mm;position:relative;min-height:0}
 .print-grid .h+.h{border-top:1.5px dashed #000}
@@ -57,7 +58,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
 @media print{
  .bar{display:none}
  .preview{display:none}
- .print-grid{display:grid;height:auto;min-height:0;width:100%}
+ .print-grid{display:grid}
  .page-break{page-break-after:always;margin:0;border:none;height:1px;display:block;visibility:hidden}
  body{background:#fff;padding:0;margin:0}
  @page{size:A4 portrait;margin:3mm}
