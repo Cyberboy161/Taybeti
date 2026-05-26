@@ -2,24 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Feedback — Taybeti Notesharing</title>
+    <title>Contact & Feedback — Taybeti Notesharing</title>
     <style>
         :root{--bg:#0a0a0c;--surface:#141418;--surface2:#1e1e24;--text:#e0e0e0;--text-secondary:#a0a0b0;--accent:#4f9cf7;--border:#2a2a35;--radius:12px}
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:70px 16px 40px;display:flex;flex-direction:column;align-items:center}
-        .container{max-width:600px;width:100%}
-        h1{font-size:2rem;font-weight:800;margin-bottom:0.5rem;text-align:center;background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        p{color:var(--text-secondary);text-align:center;margin-bottom:1.5rem;font-size:0.95rem}
-        label{color:var(--text-secondary);font-size:0.9rem;display:block;margin-bottom:0.3rem}
-        textarea,input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius);font-family:inherit;font-size:0.95rem;margin-bottom:1rem}
-        textarea:focus,input:focus{outline:none;border-color:var(--accent)}
-        textarea{min-height:140px;resize:vertical}
-        button{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:50px;font-weight:600;font-size:1rem;cursor:pointer;width:100%}
-        button:hover{background:#3b82f6}
-        .footer{text-align:center;margin-top:2rem;color:var(--text-secondary);font-size:0.85rem}
+        .container{max-width:580px;width:100%}
+        h1{font-size:1.8rem;font-weight:800;margin-bottom:0.3rem;text-align:center;background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .sub{color:var(--text-secondary);text-align:center;margin-bottom:1.5rem;font-size:0.93rem}
+
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem}
+        .form-row{margin-bottom:1rem}
+        .form-row:last-child{margin-bottom:0}
+        label{color:var(--text-secondary);font-size:0.85rem;display:block;margin-bottom:0.25rem;font-weight:500}
+        label .opt{color:#666;font-weight:400;font-size:0.78rem}
+        input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 13px;border-radius:8px;font-family:inherit;font-size:0.92rem;transition:border-color 0.2s}
+        input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+        textarea{min-height:130px;resize:vertical}
+        select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23a0a0b0' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+        .submit-btn{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:50px;font-weight:600;font-size:1rem;cursor:pointer;width:100%;transition:background 0.2s}
+        .submit-btn:hover{background:#3b82f6}
+        .note{text-align:center;font-size:0.78rem;color:#555;margin-top:0.5rem}
+        .success{display:none;background:#0f2a0f;border:1px solid #00aa33;color:#88ff88;padding:1.2rem;border-radius:var(--radius);text-align:center}
+        .footer{text-align:center;margin-top:2rem;color:var(--text-secondary);font-size:0.82rem}
         .footer a{color:var(--accent);text-decoration:none}
-        .note{text-align:center;font-size:0.8rem;color:var(--text-secondary);margin-bottom:1rem}
-        .success{display:none;background:#0f2a0f;border:1px solid #00aa33;color:#88ff88;padding:1.2rem;border-radius:var(--radius);text-align:center;margin-bottom:1rem}
         .lang-bar{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
         .lang-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);padding:3px 9px;border-radius:20px;cursor:pointer;font-size:0.76rem}
         .lang-bar button:hover,.lang-bar button.active{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -29,7 +35,6 @@
         .nav-bar a.inactive{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary)}
         @media(max-width:600px){h1{font-size:1.4rem}}
         @media print{.top-bar{display:none!important}body{padding-top:0!important}}
-        input::placeholder,textarea::placeholder{color:#555}
     </style>
 </head>
 <body>
@@ -47,57 +52,72 @@
   <a href="opensource.html" class="inactive">📖 <span data-i18n="n-os">Open Source</span></a>
   <a href="secure.html" class="inactive">🛡️ <span data-i18n="n-sec">Secure</span></a>
   <a href="invited.html" class="inactive">📩 <span data-i18n="n-inv">Invited</span></a>
-  <a href="feedback.html" class="active">💬 <span data-i18n="n-fb">Feedback</span></a>
+  <a href="feedback.html" class="active">💬 <span data-i18n="n-fb">Contact</span></a>
  </div>
 </div>
 <div class="container">
-<h1 data-i18n="h1">💬 Send Feedback</h1>
-<p data-i18n="sub">Anonymous. No account. No email required. Just your thoughts.</p>
+<h1 data-i18n="h1">💬 Contact & Feedback</h1>
+<p class="sub" data-i18n="sub">All fields are optional unless marked. No data is stored — completely anonymous by default.</p>
 
-<div class="success" id="successMsg" data-i18n="success">✅ Sent! Thank you for your feedback.</div>
+<div class="success" id="successMsg">
+    <span data-i18n="success">✅ Sent! Thank you for reaching out.</span>
+</div>
 
-<form id="feedbackForm" action="https://formspree.io/f/xwvzwody" method="POST">
-    <input type="hidden" name="_subject" value="Taybeti Website Feedback">
-    <input type="text" name="_gotcha" style="display:none">
-    <label for="message" data-i18n="msg-label">Message:</label>
-    <textarea id="message" name="message" required placeholder="Type your feedback here..."></textarea>
-    <p class="note" data-i18n="note">Your email is not collected. This is completely anonymous.</p>
-    <button type="submit" data-i18n="send">📨 Send Feedback</button>
+<form id="fbForm">
+    <div class="card">
+        <div class="form-row">
+            <label for="topic" data-i18n="topic">Topic <span class="opt">(optional)</span></label>
+            <select id="topic" name="topic">
+                <option value="general" data-i18n="opt-general">General feedback</option>
+                <option value="bug" data-i18n="opt-bug">Bug report</option>
+                <option value="feature" data-i18n="opt-feature">Feature request</option>
+                <option value="security" data-i18n="opt-security">Security concern</option>
+                <option value="help" data-i18n="opt-help">Help / Support</option>
+                <option value="other" data-i18n="opt-other">Other</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="name" data-i18n="name">Name <span class="opt">(optional, stays anonymous if blank)</span></label>
+            <input type="text" id="name" name="name" autocomplete="off">
+        </div>
+        <div class="form-row">
+            <label for="email" data-i18n="email">Email <span class="opt">(optional — only if you want a reply)</span></label>
+            <input type="email" id="email" name="email" autocomplete="off">
+        </div>
+        <div class="form-row">
+            <label for="message" data-i18n="msg">Message <span class="opt">(required)</span></label>
+            <textarea id="message" name="message" required></textarea>
+        </div>
+    </div>
+    <p class="note" data-i18n="note">No account needed. No tracking. Your IP is not visible to us.</p>
+    <button class="submit-btn" type="submit" data-i18n="send">📨 Send Message</button>
 </form>
 
-<div class="footer"><p>© 2026 Taybeti Notesharing — <a href="index.html">Home</a></p></div>
+<div class="footer"><p>© 2026 Taybeti Notesharing</p></div>
 </div>
 
 <script>
-document.getElementById('feedbackForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var form = this;
-    var data = new FormData(form);
-    fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
+document.getElementById('fbForm').addEventListener('submit', function(e){
+    e.preventDefault(); var f = this; var d = new FormData(f);
+    d.set('_subject', 'Taybeti Feedback: ' + (d.get('topic') || 'general'));
+    fetch('https://formspree.io/f/xwvzwody', { method: 'POST', body: d, headers: { 'Accept': 'application/json' } })
     .then(function(r){ return r.json(); })
-    .then(function(r){
-        if(r.ok){
-            document.getElementById('successMsg').style.display = 'block';
-            form.style.display = 'none';
-        } else {
-            alert('Failed to send. Try again later.');
-        }
-    })
+    .then(function(r){ if(r.ok){ document.getElementById('successMsg').style.display = 'block'; f.style.display = 'none'; } else { alert('Failed to send. Try later.'); } })
     .catch(function(){ alert('Network error. Try again.'); });
 });
 
 var t={
-en:{"h1":"💬 Send Feedback","sub":"Anonymous. No account. No email required. Just your thoughts.","msg-label":"Message:","note":"Your email is not collected. This is completely anonymous.","send":"📨 Send Feedback","success":"✅ Sent! Thank you for your feedback.","n-home":"Home","n-why":"Why","n-os":"Open Source","n-sec":"Secure","n-inv":"Invited","n-fb":"Feedback"},
-de:{"h1":"💬 Feedback senden","sub":"Anonym. Kein Konto. Keine E-Mail. Nur deine Gedanken.","msg-label":"Nachricht:","note":"Deine E-Mail wird nicht gespeichert. Völlig anonym.","send":"📨 Feedback senden","success":"✅ Gesendet! Danke für dein Feedback.","n-home":"Start","n-why":"Warum","n-os":"Open Source","n-sec":"Sicher","n-inv":"Eingeladen","n-fb":"Feedback"},
-tr:{"h1":"💬 Geri Bildirim Gönder","sub":"Anonim. Hesap gerekmez. E-posta gerekmez. Sadece düşünceleriniz.","msg-label":"Mesaj:","note":"E-postanız toplanmaz. Tamamen anonimdir.","send":"📨 Geri Bildirim Gönder","success":"✅ Gönderildi! Geri bildiriminiz için teşekkürler.","n-home":"Ana Sayfa","n-why":"Neden","n-os":"Açık Kaynak","n-sec":"Güvenli","n-inv":"Davetli","n-fb":"Geri Bildirim"},
-ckb:{"h1":"💬 ڕەخنە و پێشنیار بنێرە","sub":"بە نەناسراوی. هیچ هەژمارێک پێویست نییە. تەنیا بیرۆکەکانت.","msg-label":"پەیام:","note":"ئیمەیلەکەت کۆناکرێتەوە. بە تەواوی نەناسراوە.","send":"📨 ڕەخنە و پێشنیار بنێرە","success":"✅ نێردرا! سوپاس بۆ ڕەخنە و پێشنیارەکانت.","n-home":"سەرەکی","n-why":"بۆچی","n-os":"سەرچاوە کراوە","n-sec":"پارێزراو","n-inv":"بانگهێشتکراو","n-fb":"ڕەخنە"},
-kmr:{"h1":"💬 Şîrove Bişîne","sub":"Bê nasname. Tu hesab pêwîst nîne. Tenê ramanên te.","msg-label":"Peyam:","note":"E-maila te nayê berhevkirin. Bi temamî bê nasname ye.","send":"📨 Şîrove Bişîne","success":"✅ Hate şandin! Spas ji bo şîroveya te.","n-home":"Mal","n-why":"Çima","n-os":"Çavkanî Vekirî","n-sec":"Ewle","n-inv":"Dawetkirî","n-fb":"Şîrove"}
+en:{"h1":"💬 Contact & Feedback","sub":"All fields are optional unless marked. No data is stored — completely anonymous by default.","topic":"Topic","opt-general":"General feedback","opt-bug":"Bug report","opt-feature":"Feature request","opt-security":"Security concern","opt-help":"Help / Support","opt-other":"Other","name":"Name","email":"Email","msg":"Message","note":"No account needed. No tracking. Your IP is not visible to us.","send":"📨 Send Message","success":"✅ Sent! Thank you for reaching out.","n-home":"Home","n-why":"Why","n-os":"Open Source","n-sec":"Secure","n-inv":"Invited","n-fb":"Contact"},
+de:{"h1":"💬 Kontakt & Feedback","sub":"Alle Felder sind optional, außer wo markiert. Keine Speicherung — standardmäßig völlig anonym.","topic":"Thema","opt-general":"Allgemeines Feedback","opt-bug":"Fehler melden","opt-feature":"Funktionswunsch","opt-security":"Sicherheitsbedenken","opt-help":"Hilfe / Support","opt-other":"Sonstiges","name":"Name","email":"E-Mail","msg":"Nachricht","note":"Kein Konto nötig. Kein Tracking. Deine IP ist für uns nicht sichtbar.","send":"📨 Nachricht senden","success":"✅ Gesendet! Danke für deine Kontaktaufnahme.","n-home":"Start","n-why":"Warum","n-os":"Open Source","n-sec":"Sicher","n-inv":"Eingeladen","n-fb":"Kontakt"},
+tr:{"h1":"💬 İletişim & Geri Bildirim","sub":"Tüm alanlar isteğe bağlıdır. Hiçbir veri saklanmaz — varsayılan olarak tamamen anonimdir.","topic":"Konu","opt-general":"Genel geri bildirim","opt-bug":"Hata bildirimi","opt-feature":"Özellik talebi","opt-security":"Güvenlik endişesi","opt-help":"Yardım / Destek","opt-other":"Diğer","name":"Ad","email":"E-posta","msg":"Mesaj","note":"Hesap gerekmez. İzleme yok. IP adresiniz bize görünmez.","send":"📨 Mesaj Gönder","success":"✅ Gönderildi! Ulaştığınız için teşekkürler.","n-home":"Ana Sayfa","n-why":"Neden","n-os":"Açık Kaynak","n-sec":"Güvenli","n-inv":"Davetli","n-fb":"İletişim"},
+ckb:{"h1":"💬 پەیوەندی & ڕەخنە","sub":"هەموو خانەکان بەدڵخوازن. هیچ داتایەک پاشەکەوت ناکرێت — بە تەواوی نەناسراو.","topic":"بابەت","opt-general":"ڕەخنەی گشتی","opt-bug":"ڕاپۆرتی کێشە","opt-feature":"داواکردنی تایبەتمەندی","opt-security":"نیگەرانی ئاسایشی","opt-help":"یارمەتی / پشتیوانی","opt-other":"تری","name":"ناو","email":"ئیمەیل","msg":"پەیام","note":"هیچ هەژمارێک پێویست نییە. هیچ شوێنکەوتنێک نییە. IPەکەت بۆ ئێمە نابینرێت.","send":"📨 پەیام بنێرە","success":"✅ نێردرا! سوپاس بۆ پەیوەندیکردنت.","n-home":"سەرەکی","n-why":"بۆچی","n-os":"سەرچاوە کراوە","n-sec":"پارێزراو","n-inv":"بانگهێشتکراو","n-fb":"پەیوەندی"},
+kmr:{"h1":"💬 Têkilî & Şîrove","sub":"Hemû qad vebijarkî ne. Tu dane nayê tomarkirin — bi temamî bê nav giran e.","topic":"Mijar","opt-general":"Şîroveya giştî","opt-bug":"Raporkirina çewtiyê","opt-feature":"Daxwaza taybetmendiyê","opt-security":"Xema ewlehiyê","opt-help":"Alîkarî / Piştgirî","opt-other":"Yên din","name":"Nav","email":"E-posta","msg":"Peyam","note":"Hesab pêwîst nîne. Şopandin tune. IP ya te ji me re nayê dîtin.","send":"📨 Peyam Bişîne","success":"✅ Hate şandin! Spas ji bo têkiliya te.","n-home":"Mal","n-why":"Çima","n-os":"Çavkanî Vekirî","n-sec":"Ewle","n-inv":"Dawetkirî","n-fb":"Têkilî"}
 };
 function setLang(l){
  document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
  var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
  document.querySelectorAll('[data-i18n]').forEach(function(el){
-  var k=el.getAttribute('data-i18n');if(t[l]&&t[l][k]){el.textContent=t[l][k];}
+  var k=el.getAttribute('data-i18n');if(t[l]&&t[l][k])el.textContent=t[l][k];
  });
 }
 setLang('en');
