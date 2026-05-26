@@ -42,7 +42,8 @@
         .back .qr-layer{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
         .back .qr-wrap{background:#fff;border-radius:1mm;padding:1mm;box-shadow:0 0 2mm rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
 
-        @media print{#controls,#menuToggle{display:none!important}.page-wrap{padding:8px 0}}
+        @media print{#controls,#menuToggle{display:none!important}.page-wrap{padding:8px 0;margin-left:0!important}}
+        .panel-open .page-wrap{margin-left:270px;transition:margin-left .2s}
     </style>
 </head>
 <body>
@@ -126,7 +127,11 @@
 
 <script>
 var panelOpen = true;
-function togglePanel(){ document.getElementById('controls').style.display = panelOpen ? 'none' : 'flex'; panelOpen = !panelOpen; }
+function togglePanel(){
+    document.getElementById('controls').style.display = panelOpen ? 'none' : 'flex';
+    document.body.classList.toggle('panel-open', !panelOpen);
+    panelOpen = !panelOpen;
+}
 togglePanel();
 
 var uploadedBg = null, customQrData = null;
