@@ -38,7 +38,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
 .preview .back .url{position:absolute;top:1mm;left:2mm;right:2mm;z-index:3;font-size:6px;color:#fffd;text-align:center;text-shadow:0 0 3px #000;word-break:break-all}
 
 /* ── Print Grid ── */
-.print-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:2mm;width:210mm;margin:0 auto}
+.print-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:2mm;width:100%;max-width:204mm;margin:0 auto}
 .print-grid .card{position:relative;border:1px solid #999;display:flex;flex-direction:column;background:#fff;overflow:hidden}
 .print-grid .card.vert{flex-direction:row}.print-grid .card.vert .h{border-right:1px dashed #000;flex:1}
 .print-grid .h{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1mm 2mm;position:relative;min-height:0}
@@ -70,16 +70,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
 </head>
 <body>
 <div class="bar">
-    <div class="g"><label>Layout</label><select id="lo" onchange="b()">
+    <div class="g"><label>Layout</label><select id="lo" onchange="buildCards()">
         <option value="2h">2 strips</option><option value="1">1 (no cut)</option><option value="2v">2 vertical</option>
     </select></div>
-    <div class="g"><label>Design</label><select id="bg" onchange="b()">
+    <div class="g"><label>Design</label><select id="bg" onchange="buildCards()">
         <option value="cyber">Cybersecurity</option><option value="matrix">Matrix</option><option value="red">Red</option>
         <option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option>
         <option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option>
     </select></div>
     <div class="g"><label>Image</label><input type="file" accept="image/*" onchange="up(this)"></div>
-    <div class="g"><label>QR→</label><select id="qd" onchange="b()">
+    <div class="g"><label>QR→</label><select id="qd" onchange="buildCards()">
         <option value="home">Homepage</option><option value="invited">Invited</option>
     </select></div>
     <div class="g"><label>QR pos</label><div class="pg" id="pg">
@@ -87,9 +87,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#1a1a1a;padding-top:90p
         <button data-p="ml">←</button><button data-p="mc" class="sel">●</button><button data-p="mr">→</button>
         <button data-p="bl">↙</button><button data-p="bc">↓</button><button data-p="br">↘</button>
     </div></div>
-    <div class="g"><input id="ph" placeholder="Phone" oninput="b()" style="width:80px">
-    <input id="em" placeholder="Email" oninput="b()" style="width:80px"></div>
-    <div class="g"><input id="customUrl" placeholder="Custom QR (e.g. Instagram)" oninput="b()" style="width:130px" title="Enter any URL to show as a second QR code"></div>
+    <div class="g"><input id="ph" placeholder="Phone" oninput="buildCards()" style="width:80px">
+    <input id="em" placeholder="Email" oninput="buildCards()" style="width:80px"></div>
+    <div class="g"><input id="customUrl" placeholder="Custom QR (e.g. Instagram)" oninput="buildCards()" style="width:130px" title="Enter any URL to show as a second QR code"></div>
     <button class="prBtn" onclick="window.print()">🖨️ Print</button>
     <a href="index.html">🏠</a>
 </div>
@@ -117,9 +117,9 @@ var QRU=function(){return"https://api.qrserver.com/v1/create-qr-code/?size=60x60
 var OVERLAY='<div style="position:absolute;inset:0;z-index:1;background:rgba(0,0,0,0.4)"></div>';
 
 document.getElementById('pg').onclick=function(e){
- var b=e.target.closest('button');if(!b)return;
+ var btn=e.target.closest('button');if(!btn)return;
  document.querySelectorAll('#pg button').forEach(function(x){x.classList.remove('sel')});
- b.classList.add('sel');QP=b.dataset.p;b();
+ btn.classList.add('sel');QP=btn.dataset.p;buildCards();
 };
 
 function up(i){if(!i.files||!i.files[0])return;var r=new FileReader();r.onload=function(e){U=e.target.result;b()};r.readAsDataURL(i.files[0])}
@@ -151,7 +151,7 @@ function bk(bg){
  return '<div class="im" style="'+bgs(bg)+'"></div>'+(bg==='cyber'?OVERLAY:'')+'<div class="cx" style="'+qrPos(QP)+'"><div class="qr" style="width:12mm;height:12mm"><img src="'+QRU()+'" style="width:100%;height:100%"></div></div><div class="url">'+SITE()+'</div>'+ci;
 }
 
-function b(){
+function buildCards(){
  var lo=document.getElementById('lo').value,bg=document.getElementById('bg').value;
  var ph=document.getElementById('ph').value.trim(),em=document.getElementById('em').value.trim();
 
@@ -201,7 +201,7 @@ function b(){
   pb.innerHTML+=makeBackCard(lo,bg);
  }
 }
-b();
+buildCards();
 </script>
 </body>
 </html>
