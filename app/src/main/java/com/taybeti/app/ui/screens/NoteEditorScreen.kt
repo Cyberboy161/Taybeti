@@ -71,7 +71,9 @@ import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NightsStay
 
@@ -690,6 +692,7 @@ fun NoteEditorScreen(
     var pageBackgroundColor by remember { mutableStateOf(Color(0xFF1A1A1A)) }
     var showDrawingPanel by remember { mutableStateOf(false) }
     var showSecurityTips by remember { mutableStateOf(false) }
+    var showWhyTaybeti by remember { mutableStateOf(false) }
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
     var zoomScale by remember { mutableStateOf(1f) }
@@ -1774,6 +1777,52 @@ fun NoteEditorScreen(
             )
         }
 
+        if (showWhyTaybeti) {
+            AlertDialog(
+                onDismissRequest = { showWhyTaybeti = false },
+                title = { Text("❓ Why Taybeti?", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column {
+                        val rows = listOf(
+                            Triple("🔒 Encryption", "Per‑note AES‑256‑GCM", "At‑rest only, or none"),
+                            Triple("🔑 Keys", "Your passphrase = your key", "Company holds the keys"),
+                            Triple("☁️ Cloud", "Nothing. Zero.", "Synced to their servers"),
+                            Triple("📵 Offline", "100% — no internet permission", "Requires internet"),
+                            Triple("⌨️ Keyboard", "Built‑in, blocks keyloggers", "System keyboard (tracked)"),
+                            Triple("👁️ Source", "Open Source (MIT license)", "Closed, proprietary"),
+                            Triple("💸 Cost", "Free forever", "Free with ads, or paid")
+                        )
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Feature", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                            Text("Taybeti", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+                            Text("Others", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.weight(1f))
+                        }
+                        rows.forEach { (feat, tay, other) ->
+                            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(feat, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                                Text(tay, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+                                Text(other, style = MaterialTheme.typography.bodySmall, color = Color.Gray, modifier = Modifier.weight(1f))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Custom Keyboard Matters",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            "Your phone's system keyboard (Gboard, SwiftKey) records keystrokes. If the app doesn't have its own keyboard, encryption means nothing.",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showWhyTaybeti = false }) { Text("Close") }
+                }
+            )
+        }
+
         if (showSecurityTips) {
             val scrollState = rememberScrollState()
             AlertDialog(
@@ -1976,7 +2025,10 @@ fun NoteEditorScreen(
                                 Text(strings.encrypt, fontWeight = FontWeight.Bold)
                             }
                             IconButton(onClick = { showSecurityTips = true }) {
-                                Icon(Icons.Default.Shield, "Tips", tint = MaterialTheme.colorScheme.onSurface)
+                                Icon(Icons.Default.Lightbulb, "Security Tips", tint = Color(0xFFFFCC00))
+                            }
+                            IconButton(onClick = { showWhyTaybeti = true }) {
+                                Icon(Icons.Default.LockOpen, "Why Taybeti", tint = MaterialTheme.colorScheme.onSurface)
                             }
                         }
                     },
