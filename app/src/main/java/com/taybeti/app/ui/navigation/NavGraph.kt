@@ -3,6 +3,7 @@ package com.taybeti.app.ui.navigation
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -62,6 +63,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.NavHost
@@ -272,6 +274,9 @@ fun MainDrawerScreen(
 
     var showDecoySetupDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
+    var showSecurityTips by remember { mutableStateOf(false) }
+    var showWhyTaybeti by remember { mutableStateOf(false) }
+    var showPrintCardsInfo by remember { mutableStateOf(false) }
 
     val strings = LocalStrings.current
     val ctx = LocalContext.current
@@ -402,6 +407,90 @@ fun MainDrawerScreen(
         )
     }
 
+    if (showPrintCardsInfo) {
+        AlertDialog(
+            onDismissRequest = { showPrintCardsInfo = false },
+            title = { Text("🖨️ Girê Cards", fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Text("Girê (گرێ) = \"bond\" in Kurdish. A physical token of trust between two people.", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(8.dp))
+                    Text("How:", fontWeight = FontWeight.Bold)
+                    Text("Visit the website → Print Cards → customize design → print A4 → write passphrases on front → cut along the dashed line → each person keeps their half.")
+                    Spacer(Modifier.height(8.dp))
+                    Text("Why use them:", fontWeight = FontWeight.Bold)
+                    Text("Physical passphrase exchange builds trust that digital can't. No server ever sees your secret. Both people hold a unique object — a tangible bond. Healthy relationships grow on shared secrets.", color = Color.Gray)
+                    Spacer(Modifier.height(8.dp))
+                    Text("🔗 cyberboy161.github.io/Taybeti/print-cards.html", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp)
+                }
+            },
+            confirmButton = { TextButton(onClick = { showPrintCardsInfo = false }) { Text("Got it") } }
+        )
+    }
+
+    if (showSecurityTips) {
+        AlertDialog(
+            onDismissRequest = { showSecurityTips = false },
+            title = { Text("🛡️ 10 Rules for Staying Secure", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    listOf(
+                        "1. Use apps with their own keyboard" to "System keyboards log every keystroke.",
+                        "2. Never reuse passphrases" to "Every account — a unique passphrase. Write on paper.",
+                        "3. Prefer offline-first apps" to "No internet = no data leak possible.",
+                        "4. Verify, don't trust" to "Open source means you can check.",
+                        "5. Only share passphrases physically" to "In emergencies only. Prefer paper, in person.",
+                        "6. Disable cloud sync" to "Every sync is a copy on someone else's server.",
+                        "7. Be aware of surroundings" to "Shoulder surfing still works. Don't type in public.",
+                        "8. Keep software updated" to "Patches fix known vulnerabilities.",
+                        "9. Review app permissions" to "Revoke camera, mic, location from apps.",
+                        "10. Trust your instincts" to "If something feels wrong — stop."
+                    ).forEach { (t, d) ->
+                        Text(t, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+                        Text(d, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showSecurityTips = false }) { Text("Got it") } }
+        )
+    }
+
+    if (showWhyTaybeti) {
+        AlertDialog(
+            onDismissRequest = { showWhyTaybeti = false },
+            title = { Text("❓ Why Taybeti?", fontWeight = FontWeight.Bold) },
+            text = {
+                val rows = listOf(
+                    Triple("Encryption", "Per-note AES-256-GCM", "At-rest only/none"),
+                    Triple("Keys", "Your passphrase = key", "Company holds keys"),
+                    Triple("Cloud", "Nothing. Zero.", "Synced to servers"),
+                    Triple("Offline", "100% — no internet", "Requires internet"),
+                    Triple("Keyboard", "Built-in, blocks loggers", "System tracked"),
+                    Triple("Source", "Open Source (MIT)", "Closed, proprietary"),
+                    Triple("Cost", "Free forever", "Ads or paid")
+                )
+                Column {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text("Feature", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        Text("Taybeti", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+                        Text("Others", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.weight(1f))
+                    }
+                    rows.forEach { (feat, tay, other) ->
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+                            Text(feat, fontSize = 12.sp, modifier = Modifier.weight(1f))
+                            Text(tay, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+                            Text(other, fontSize = 12.sp, color = Color.Gray, modifier = Modifier.weight(1f))
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text("⚠️ The Keyboard Problem", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                    Text("Even if an app is encrypted, your phone's system keyboard records everything. Use apps with their own keyboard.", fontSize = 12.sp)
+                }
+            },
+            confirmButton = { TextButton(onClick = { showWhyTaybeti = false }) { Text("Close") } }
+        )
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val isInEditor = navBackStackEntry?.destination?.route?.startsWith("editor/") == true
 
@@ -483,6 +572,17 @@ fun MainDrawerScreen(
                     DrawerItem(Icons.Default.Info, strings.sidebarAbout) {
                         scope.launch { drawerState.close() }
                         navController.navigate(NavRoutes.ABOUT)
+                    }
+                    androidx.compose.material3.HorizontalDivider()
+                    Text("More", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                    DrawerItem(Icons.Default.Warning, "Security Tips") {
+                        scope.launch { drawerState.close(); showSecurityTips = true }
+                    }
+                    DrawerItem(Icons.Default.Star, "Why Taybeti?") {
+                        scope.launch { drawerState.close(); showWhyTaybeti = true }
+                    }
+                    DrawerItem(Icons.Default.Note, "Print Cards (Girê)") {
+                        scope.launch { drawerState.close(); showPrintCardsInfo = true }
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
