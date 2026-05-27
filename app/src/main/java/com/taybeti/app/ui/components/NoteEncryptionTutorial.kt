@@ -82,14 +82,12 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import com.taybeti.app.util.LocalStrings
 
 @Composable
 fun NoteEncryptionTutorialDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val strings = LocalStrings.current
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     var step by remember { mutableIntStateOf(0) }
@@ -225,7 +223,7 @@ fun NoteEncryptionTutorialDialog(
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             TextButton(onClick = onDismiss) {
-                                Text(strings.noteTutSkip, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                Text("Skip", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                             }
                             IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
                                 Icon(Icons.Default.Close, "Close", modifier = Modifier.size(18.dp))
@@ -327,34 +325,16 @@ fun NoteEncryptionTutorialDialog(
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(strings.noteTutBack)
+                                Text("Back")
                             }
-                        } else {
-                            Spacer(modifier = Modifier.width(1.dp))
-                        }
-
-                        if (step < totalSteps - 1) {
-                            val canProceed = when (step) {
-                                0 -> userMessage.isNotBlank()
-                                1 -> userPassphrase.length >= 4 && userPassphrase == confirmPassphrase
-                                2 -> encryptedResult.isNotEmpty()
-                                3 -> true
-                                4 -> true
-                                else -> true
-                            }
-                            Button(
-                                onClick = { step++; activeField = null },
-                                enabled = canProceed
-                            ) {
-                                Text(strings.noteTutNext)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(16.dp))
+                            Button(onClick = {
+                                if (step < totalSteps - 1) step++ else onDismiss()
+                            }, enabled = step < totalSteps - 1 || userPassphrase.isNotEmpty()) {
+                                Text("Next")
                             }
                         } else {
                             Button(onClick = onDismiss) {
-                                Icon(Icons.Default.Check, null, Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(strings.noteTutDone)
+                                Text("Done!")
                             }
                         }
                     }
