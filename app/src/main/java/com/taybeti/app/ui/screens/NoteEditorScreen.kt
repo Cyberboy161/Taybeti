@@ -74,6 +74,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NightsStay
 
@@ -693,6 +694,7 @@ fun NoteEditorScreen(
     var showDrawingPanel by remember { mutableStateOf(false) }
     var showSecurityTips by remember { mutableStateOf(false) }
     var showWhyTaybeti by remember { mutableStateOf(false) }
+    var showPrintCardsInfo by remember { mutableStateOf(false) }
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
     var zoomScale by remember { mutableStateOf(1f) }
@@ -1870,6 +1872,40 @@ fun NoteEditorScreen(
             )
         }
 
+        if (showPrintCardsInfo) {
+            AlertDialog(
+                onDismissRequest = { showPrintCardsInfo = false },
+                title = { Text("🖨️ Girê Cards", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column {
+                        Text(
+                            "Girê (گرێ) means \"bond\" or \"knot\" in Kurdish — a physical token of trust between two people.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text("How it works:", fontWeight = FontWeight.Bold)
+                        Text("1. Visit the Print Cards page on our website")
+                        Text("2. Customize the design, layout, and QR codes")
+                        Text("3. Print on A4 paper (front + back)")
+                        Text("4. Both people write the same passphrase on the front")
+                        Text("5. Cut along the dashed line — each person keeps their half")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Why use Girê cards?", fontWeight = FontWeight.Bold)
+                        Text("Physical passphrase exchange builds trust that digital can't. No server ever sees your passphrase. Both people hold a unique object that proves trust — a tangible bond. Healthy relationships grow on shared secrets kept safely.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "🔗 Visit: cyberboy161.github.io/Taybeti/print-cards.html",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPrintCardsInfo = false }) { Text("Got it") }
+                }
+            )
+        }
+
         if (showDrawingPanel) {
             DrawingPanelDialog(
                 onDismiss = { showDrawingPanel = false; selectedDrawingImagePath = null },
@@ -2024,11 +2060,29 @@ fun NoteEditorScreen(
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(strings.encrypt, fontWeight = FontWeight.Bold)
                             }
-                            IconButton(onClick = { showSecurityTips = true }) {
-                                Icon(Icons.Default.Lightbulb, "Security Tips", tint = Color(0xFFFFCC00))
-                            }
-                            IconButton(onClick = { showWhyTaybeti = true }) {
-                                Icon(Icons.Default.LockOpen, "Why Taybeti", tint = MaterialTheme.colorScheme.onSurface)
+                            // Overflow menu for tips, why, cards
+                            var showMoreMenu by remember { mutableStateOf(false) }
+                            Box {
+                                IconButton(onClick = { showMoreMenu = true }) {
+                                    Icon(Icons.Default.MoreVert, "More")
+                                }
+                                DropdownMenu(
+                                    expanded = showMoreMenu,
+                                    onDismissRequest = { showMoreMenu = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("🛡️ Security Tips") },
+                                        onClick = { showMoreMenu = false; showSecurityTips = true }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("❓ Why Taybeti?") },
+                                        onClick = { showMoreMenu = false; showWhyTaybeti = true }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("🖨️ Print Cards (Girê)") },
+                                        onClick = { showMoreMenu = false; showPrintCardsInfo = true }
+                                    )
+                                }
                             }
                         }
                     },
