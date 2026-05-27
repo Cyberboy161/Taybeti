@@ -16,11 +16,74 @@
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Taybeti">
+        </activity>
+
+        <!-- Taybeti (default) -->
+        <activity-alias
+            android:name=".MainActivityTaybeti"
+            android:targetActivity=".MainActivity"
+            android:enabled="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Taybeti Notesharing"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <!-- Disguise aliases — user can switch between these to hide the app -->
+        <activity-alias
+            android:name=".MainActivityCalc"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Calculator"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityNotes"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Notes"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityClock"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Clock"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivitySettings"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Settings"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <provider
             android:name="androidx.core.content.FileProvider"

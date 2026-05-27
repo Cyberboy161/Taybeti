@@ -410,16 +410,16 @@ fun MainDrawerScreen(
     if (showPrintCardsInfo) {
         AlertDialog(
             onDismissRequest = { showPrintCardsInfo = false },
-            title = { Text("🖨️ Girê Cards", fontWeight = FontWeight.Bold) },
+            title = { Text("🖨️ Girê Cards (Print Cards)", fontWeight = FontWeight.Bold) },
             text = {
                 Column {
-                    Text("Girê (گرێ) = \"bond\" in Kurdish. A physical token of trust between two people.", style = MaterialTheme.typography.bodyMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Text("How:", fontWeight = FontWeight.Bold)
-                    Text("Visit the website → Print Cards → customize design → print A4 → write passphrases on front → cut along the dashed line → each person keeps their half.")
+                    Text("What are they?", fontWeight = FontWeight.Bold)
+                    Text("Printable passphrase cards — 8 or 24 per A4 sheet. Each card has a front side (for writing passphrases) and a back side (with QR codes and designs). After printing, cut along the dashed line so each person keeps their half.")
                     Spacer(Modifier.height(8.dp))
                     Text("Why use them:", fontWeight = FontWeight.Bold)
-                    Text("Physical passphrase exchange builds trust that digital can't. No server ever sees your secret. Both people hold a unique object — a tangible bond. Healthy relationships grow on shared secrets.", color = Color.Gray)
+                    Text("🔒 Passphrases should never be stored digitally. Paper is the most secure way — no server, no cloud, no keyboard logs. A physical card that you both write, cut, and keep ensures no one else ever sees your shared secret.")
+                    Spacer(Modifier.height(4.dp))
+                    Text("🤝 As a bonus: sharing a physical token builds real-world trust. Each person holds a unique object — a tangible bond.")
                     Spacer(Modifier.height(8.dp))
                     Text("🔗 cyberboy161.github.io/Taybeti/print-cards.html", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp)
                 }
@@ -501,7 +501,7 @@ fun MainDrawerScreen(
             ModalDrawerSheet {
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
                         .width(280.dp)
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -581,11 +581,12 @@ fun MainDrawerScreen(
                     DrawerItem(Icons.Default.Star, "Why Taybeti?") {
                         scope.launch { drawerState.close(); showWhyTaybeti = true }
                     }
-                    DrawerItem(Icons.Default.Note, "Print Cards (Girê)") {
-                        scope.launch { drawerState.close(); showPrintCardsInfo = true }
+                    DrawerItem(Icons.Default.Note, "Girê Cards (Print Cards)") {
+                        scope.launch { drawerState.close() }
+                        showPrintCardsInfo = true
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.height(16.dp))
                     androidx.compose.material3.HorizontalDivider()
                     DrawerItem(Icons.Default.Logout, strings.sidebarLockVault) {
                         scope.launch { drawerState.close() }

@@ -1875,11 +1875,11 @@ fun NoteEditorScreen(
         if (showPrintCardsInfo) {
             AlertDialog(
                 onDismissRequest = { showPrintCardsInfo = false },
-                title = { Text("🖨️ Girê Cards", fontWeight = FontWeight.Bold) },
+                title = { Text("🖨️ Girê Cards (Print Cards)", fontWeight = FontWeight.Bold) },
                 text = {
                     Column {
                         Text(
-                            "Girê (گرێ) means \"bond\" or \"knot\" in Kurdish — a physical token of trust between two people.",
+                            "Printable passphrase cards — 8 or 24 per A4 sheet.",
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Spacer(modifier = Modifier.height(12.dp))
@@ -1890,8 +1890,10 @@ fun NoteEditorScreen(
                         Text("4. Both people write the same passphrase on the front")
                         Text("5. Cut along the dashed line — each person keeps their half")
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Why use Girê cards?", fontWeight = FontWeight.Bold)
-                        Text("Physical passphrase exchange builds trust that digital can't. No server ever sees your passphrase. Both people hold a unique object that proves trust — a tangible bond. Healthy relationships grow on shared secrets kept safely.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        Text("Why use them:", fontWeight = FontWeight.Bold)
+                        Text("🔒 Passphrases should never be stored digitally. Paper is the most secure way — no server, no cloud, no keyboard logs. A physical card ensures no one else sees your shared secret.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("🤝 As a bonus: sharing a physical token builds real-world trust. Each person holds a unique object — a tangible bond.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             "🔗 Visit: cyberboy161.github.io/Taybeti/print-cards.html",
@@ -2079,7 +2081,7 @@ fun NoteEditorScreen(
                                         onClick = { showMoreMenu = false; showWhyTaybeti = true }
                                     )
                                     DropdownMenuItem(
-                                        text = { Text("🖨️ Print Cards (Girê)") },
+                                        text = { Text("🖨️ Girê Cards") },
                                         onClick = { showMoreMenu = false; showPrintCardsInfo = true }
                                     )
                                 }

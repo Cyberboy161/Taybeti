@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.taybeti.app.security.SecuritySettingsManager
 import com.taybeti.app.util.LocaleManager
+import com.taybeti.app.util.AppDisguise
 import com.taybeti.app.util.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +61,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val strings = LocalStrings.current
     var showLanguagePicker by remember { mutableStateOf(false) }
+    var showDisguisePicker by remember { mutableStateOf(false) }
     var showLockTimerDropdown by remember { mutableStateOf(false) }
 
     // Memory & Data settings
@@ -151,6 +153,29 @@ fun SettingsScreen(
                 subtitle = strings.selectLanguage
             ) {
                 showLanguagePicker = true
+            }
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            // App Disguise
+            SettingsRow(
+                title = "App Disguise",
+                subtitle = AppDisguise.options.firstOrNull { it.first == AppDisguise.getCurrentDisguise(context) }?.second ?: "Taybeti Notesharing"
+            ) {
+                showDisguisePicker = true
+            }
+            DropdownMenu(
+                expanded = showDisguisePicker,
+                onDismissRequest = { showDisguisePicker = false }
+            ) {
+                AppDisguise.options.forEach { (alias, label) ->
+                    DropdownMenuItem(
+                        text = { Text(label) },
+                        onClick = {
+                            AppDisguise.applyDisguise(context, alias)
+                            showDisguisePicker = false
+                        }
+                    )
+                }
             }
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 

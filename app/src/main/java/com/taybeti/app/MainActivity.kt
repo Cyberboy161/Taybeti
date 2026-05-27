@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.taybeti.app.security.SecurityChecker
 import com.taybeti.app.ui.navigation.AppNavGraph
 import com.taybeti.app.ui.theme.NulldDataTheme
+import com.taybeti.app.util.AppDisguise
 import com.taybeti.app.util.LocaleManager
 
 class MainActivity : ComponentActivity() {
@@ -31,6 +32,10 @@ class MainActivity : ComponentActivity() {
 
         val langCode = LocaleManager.getCurrentLanguage(this)
         LocaleManager.applyLocale(this, langCode)
+
+        // Restore app disguise (icon/name)
+        val currentDisguise = AppDisguise.getCurrentDisguise(this)
+        AppDisguise.applyDisguise(this, currentDisguise)
 
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
