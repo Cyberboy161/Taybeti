@@ -689,6 +689,7 @@ fun NoteEditorScreen(
     var showPageColorPicker by remember { mutableStateOf(false) }
     var pageBackgroundColor by remember { mutableStateOf(Color(0xFF1A1A1A)) }
     var showDrawingPanel by remember { mutableStateOf(false) }
+    var showSecurityTips by remember { mutableStateOf(false) }
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
     var zoomScale by remember { mutableStateOf(1f) }
@@ -1773,6 +1774,53 @@ fun NoteEditorScreen(
             )
         }
 
+        if (showSecurityTips) {
+            val scrollState = rememberScrollState()
+            AlertDialog(
+                onDismissRequest = { showSecurityTips = false },
+                title = { Text("🛡️ 10 Rules for Staying Secure", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(
+                        modifier = Modifier.verticalScroll(scrollState)
+                    ) {
+                        val rules = listOf(
+                            "1. Use apps with their own keyboard — system keyboards record everything" to "If the app doesn't have a custom keyboard, assume every keystroke is logged by Gboard, SwiftKey, or the OS.",
+                            "2. Never reuse passphrases" to "Every note, every account — a unique passphrase. Write them on paper, not in a password manager.",
+                            "3. Prefer offline‑first apps" to "An app with no internet permission cannot leak your data — by architecture.",
+                            "4. Verify, don't trust" to "Use open source software. A closed‑source app claiming security is meaningless.",
+                            "5. Only share passphrases physically" to "In emergencies only, share via a separate channel. Always prefer paper — in person.",
+                            "6. Disable cloud sync for sensitive data" to "Every sync copies your data to someone else's server. Keep sensitive files local.",
+                            "7. Be aware of your surroundings" to "Shoulder surfing is ancient and effective. Never type passphrases in public.",
+                            "8. Keep software updated" to "Patches fix known holes. Enable automatic updates for security‑critical apps.",
+                            "9. Review app permissions regularly" to "Remove camera, mic, location from apps that don't need them.",
+                            "10. Trust your instincts" to "If something feels wrong — stop. The best security is you."
+                        )
+                        rules.forEach { (title, desc) ->
+                            Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                                Text(title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+                                Text(desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "The Keyboard Problem",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            "Even if the app itself is secure, your phone's keyboard sees everything. Taybeti has its own keyboard — your keystrokes never touch the system.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showSecurityTips = false }) { Text("Got it") }
+                }
+            )
+        }
+
         if (showDrawingPanel) {
             DrawingPanelDialog(
                 onDismiss = { showDrawingPanel = false; selectedDrawingImagePath = null },
@@ -1926,6 +1974,9 @@ fun NoteEditorScreen(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(strings.encrypt, fontWeight = FontWeight.Bold)
+                            }
+                            IconButton(onClick = { showSecurityTips = true }) {
+                                Icon(Icons.Default.Shield, "Tips", tint = MaterialTheme.colorScheme.onSurface)
                             }
                         }
                     },

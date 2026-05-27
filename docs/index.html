@@ -348,7 +348,7 @@
             }
         };
 
-        function setLanguage(lang) {
+        function setLanguage(lang) { localStorage.setItem("taybeti_lang",lang);
             document.querySelectorAll('.lang-bar button').forEach(btn => {
                 btn.classList.remove('active');
                 btn.style.background = 'var(--surface)';
@@ -373,7 +373,7 @@
                 }
             });
         }
-        setLanguage('en');
+        setLanguage(localStorage.getItem('taybeti_lang') || 'en');
     </script>
 </body>
 </html>

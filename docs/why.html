@@ -35,7 +35,7 @@
 <body>
 <div class="top-bar" style="position:fixed;top:0;left:0;width:100%;z-index:999;background:var(--surface2);border-bottom:1px solid var(--border)">
  <div class="lang-bar" style="padding:4px 10px">
-  <button onclick="setLang('en')" class="active" id="btn-en">🌐 EN</button>
+  <button onclick="setLang(localStorage.getItem('taybeti_lang')||'en')" class="active" id="btn-en">🌐 EN</button>
   <button onclick="setLang('de')" id="btn-de">🇩🇪 DE</button>
     <button onclick="setLang('kmr')" id="btn-kmr"><img src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 3 2%27 width=%2714%27 height=%2710%27%3E%3Crect width=%273%27 height=%270.666%27 fill=%27%23ED2024%27/%3E%3Crect y=%270.666%27 width=%273%27 height=%270.666%27 fill=%27%23FFFFFF%27/%3E%3Crect y=%271.333%27 width=%273%27 height=%270.667%27 fill=%27%23278E43%27/%3E%3Ccircle cx=%271.5%27 cy=%271%27 r=%270.3%27 fill=%27%23FFCC00%27/%3E%3Cg stroke=%27%23FFCC00%27 stroke-width=%270.03%27%3E%3Cline x1=%271.5%27 y1=%270.5%27 x2=%271.5%27 y2=%270.35%27/%3E%3Cline x1=%271.5%27 y1=%271.5%27 x2=%271.5%27 y2=%271.65%27/%3E%3Cline x1=%271.1%27 y1=%270.77%27 x2=%270.95%27 y2=%270.62%27/%3E%3Cline x1=%271.9%27 y1=%270.77%27 x2=%272.05%27 y2=%270.62%27/%3E%3Cline x1=%271.1%27 y1=%271.23%27 x2=%270.95%27 y2=%271.38%27/%3E%3Cline x1=%271.9%27 y1=%271.23%27 x2=%272.05%27 y2=%271.38%27/%3E%3C/g%3E%3C/svg%3E" style="width:14px;height:10px;vertical-align:middle;margin-right:2px" alt="Kurdistan"> Kurmancî</button>
 <button onclick="setLang('tr')" id="btn-tr">🇹🇷 TR</button>
@@ -88,14 +88,14 @@ tr:{"col-feat":"Özellik","col-other":"Diğer Uygulamalar","h1":"🔐 Neden Tayb
 ckb:{"col-feat":"تایبەتمەندی","col-other":"ئەپەکانی تر","h1":"🔐 بۆچی تایبەتی نۆتشەیرینگ؟","intro":"زۆربەی ئەپەکانی تێبینی داتاکانت کۆدەکەنەوە. ئێمە نایبینین، ناتوانین بیبینین، و هەرگیز نایبینین. لێرەدا بۆچی.","kb-h2":"🛡️ بۆچی کیبۆردی تایبەت گرنگە","kb-p":"هەموو ئەپێکی تر کیبۆردی سیستەمی مۆبایلەکەت بەکاردەهێنێت. ئەو کیبۆردە دەتوانێت ئەوەی دەینووسیت تۆمار بکات و بۆ گووگڵ، ئەپڵ یان لایەنی سێیەم بینێرێت. کیبۆردی ناوەکی تایبەتی بەتەواوی نوسینەکانت جیا دەکاتەوە.","enc-h2":"🔒 شفرەکردنی هەر تێبینییەک","enc-p":"زۆربەی ئەپەکان یەک کلیلی سەرەکی بەکاردەهێنن — ئەگەر بدزرێت، هەموو شتێک ئاشکرا دەبێت. تایبەتی هەر تێبینییەک بە کلیلی تایبەتی AES‑256‑GCM ی خۆی شفرە دەکات.","off-h2":"📵 ئۆفلاین بە دیزاین","off-p":"تایبەتی هیچ مۆڵەتی ئینتەرنێتی نییە. ناتوانێت پەیوەندی بکات، ناتوانێت هاوکات بکات، ناتوانێت باربکات. داتاکانت بەڕاستی ناتوانن ئامێرەکەت جێبهێڵن.","login-h2":"🧪 چوونەژوورەوەی خۆپشتڕاستکەرەوە","login-p":"هیچ هاشێکی وشەی نهێنی پاشەکەوت ناکرێت — هیچ شتێک نییە بشکێت. ئەپەکە زنجیرەیەکی ناسراو بە ووشەی نهێنییەکەت شی دەکاتەوە. ئەگەر سەرکەوتوو بوو، تۆیت لە ناوەوە.","nav-home":"سەرەکی","nav-why":"بۆچی","nav-os":"سەرچاوە کراوە","nav-sec":"پارێزراو","nav-card":"کارت","nav-inv":"بانگهێشتکراو"},
 kmr:{"col-feat":"Taybetmendî","col-other":"Sepanên din","h1":"🔐 Çima Taybeti Notesharing?","intro":"Piraniya sepanên notan daneyên te berhev dikin. Em nabînin, nikarin bibînin, û qet nabin. Li vir çima.","kb-h2":"🛡️ Çima klavyeya taybet girîng e","kb-p":"Her sepana din klavyeya sîstema telefona te bi kar tîne. Ew klavye dikare tiştên ku tu dinivîsî tomar bike û bişîne Google, Apple an aliyekî sêyemîn. Klavyeya Taybeti ya navxweyî nivîsên te bi temamî îzole dike.","enc-h2":"🔒 Şîfrekirina her‑notî","enc-p":"Piraniya sepanan mifteyeke sereke bi kar tînin — heger bê dizîn, her tişt eşkere dibe. Taybeti her notê bi mifteya xwe ya AES‑256‑GCM şîfre dike.","off-h2":"📵 Offline bi sêwiran","off-p":"Taybeti destûra înternetê nîne. Nikare girê bide, nikare hevdem bike, nikare bar bike. Daneyên te bi rastî nikarin cîhazê terikînin.","login-h2":"🧪 Têketina xwe‑rastdiker","login-p":"Tu hashên şîfreyê nayên tomarkirin — tiştekî were şikandin tine. Sepan rêzeke naskirî bi şîfreya te deşîfre dike. Heger kar kir, tu li hundir î.","nav-home":"Mal","nav-why":"Çima","nav-os":"Çavkanî Vekirî","nav-sec":"Ewle","nav-card":"Kart","nav-inv":"Dawetkirî"}
 };
-function setLang(l){
+function setLang(l){localStorage.setItem('taybeti_lang',l);localStorage.setItem("taybeti_lang",l); localStorage.setItem("taybeti_lang",l);
  document.querySelectorAll('.lang-bar button').forEach(function(b){b.classList.remove('active')});
  var btn=document.getElementById('btn-'+l);if(btn)btn.classList.add('active');
  document.querySelectorAll('[data-i18n]').forEach(function(el){
   var k=el.getAttribute('data-i18n');if(t[l]&&t[l][k])el.textContent=t[l][k];
  });
 }
-setLang('en');
+setLang(localStorage.getItem('taybeti_lang')||'en');
 </script>
 </body>
 </html>
