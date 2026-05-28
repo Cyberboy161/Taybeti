@@ -68,7 +68,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
     <div class="g"><label>QR→</label><select id="qd" onchange="u()"><option value="home">Home</option><option value="invited">Invited</option></select></div>
     <div class="g"><input id="ph" placeholder="Phone" oninput="u()" style="width:70px"><input id="em" placeholder="Email" oninput="u()" style="width:70px"></div>
     <div class="g"><input id="cq" placeholder="Custom QR URL" oninput="u()" style="width:120px"></div>
-    <div class="g"><label><input type="checkbox" id="showUrl" checked onchange="u()" style="width:auto">Show URL</label></div>
+    <div class="g"><label>Lang</label><select id="warnLang" onchange="u()">
+        <option value="all">All 5</option>
+        <option value="en">English only</option>
+        <option value="de">Deutsch only</option>
+        <option value="ckb">کوردی only</option>
+        <option value="kmr">Kurmancî only</option>
+        <option value="tr">Türkçe only</option>
+    </select></div>
     <div class="g"><label>Print</label><select id="pOrient" onchange="u()">
         <option value="portrait">Portrait A4</option>
         <option value="landscape">Landscape A4</option>
@@ -152,7 +159,16 @@ function bgStyle(k){
 }
 
 function ft(forPrint){
-    return'<div class="ft"><div class="w" style="position:relative;left:'+(el.ftxt.x-50)+'%;top:'+(el.ftxt.y-10)*0.3+'%">وێنەی مەگرە. بە کەس مەڵێ.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.</div><div class="l" style="position:relative;left:'+(el.fline.x-50)+'%;top:'+(el.fline.y-70)*0.3+'%;width:'+(el.fline.w||65)+'%"></div></div>';
+    var lang=document.getElementById('warnLang').value;
+    var warnings={
+        'all':'وێنەی مەگرە. بە کەس مەڵێ.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.',
+        'en':'Do not photograph. Do not share. Do not read aloud.',
+        'de':'Nicht fotografieren. Nicht teilen. Nicht laut vorlesen.',
+        'ckb':'وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە.',
+        'kmr':'Wêneyê megre. Bi kesî mebêje. Bi dengê bilind mexwîne.',
+        'tr':'Fotoğraf çekme. Kimseyle paylaşma. Yüksek sesle okuma.'
+    }[lang]||warnings['all'];
+    return'<div class="ft"><div class="w" style="position:relative;left:'+(el.ftxt.x-50)+'%;top:'+(el.ftxt.y-10)*0.3+'%">'+warnings+'</div><div class="l" style="position:relative;left:'+(el.fline.x-50)+'%;top:'+(el.fline.y-70)*0.3+'%;width:'+(el.fline.w||65)+'%"></div></div>';
 }
 
 function backHalf(bgKey){
