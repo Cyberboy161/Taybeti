@@ -52,14 +52,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
  #top,#panel,#preview{display:none!important}
  #main{display:block;height:auto;min-height:0;padding:0}
  body{background:#fff;margin:0;padding:0}
- .print-page{display:grid!important;height:100vh;page-break-after:always}
+ .print-page{display:grid!important;height:100vh;page-break-after:always;width:100%!important;max-width:100%!important}
  .print-page:last-child{page-break-after:auto}
- .print-page .cd-preview{width:auto!important;height:auto!important;min-height:0!important;box-shadow:none!important}
- .print-page .ft{min-height:0!important}
- .print-page .ft .w{font-size:2mm!important}
- .print-page .ft .l{min-height:3mm!important}
- .print-page .bk .qr-w{width:auto!important;height:auto!important}
- @page{size:A4 portrait;margin:3mm}
+ .print-page .cd-preview{box-shadow:none!important}
+ @page{size:A4;margin:3mm}
 }
 .print-page{display:none}
 </style>
@@ -75,6 +71,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
     <div class="g"><input id="ph" placeholder="Phone" oninput="u()" style="width:70px"><input id="em" placeholder="Email" oninput="u()" style="width:70px"></div>
     <div class="g"><input id="cq" placeholder="Custom QR URL" oninput="u()" style="width:120px"></div>
     <div class="g"><label><input type="checkbox" id="showUrl" checked onchange="u()" style="width:auto">Show URL</label></div>
+    <div class="g"><label>Print</label><select id="pOrient" onchange="u()">
+        <option value="portrait">Portrait A4</option>
+        <option value="landscape">Landscape A4</option>
+    </select></div>
     <button class="btn" onclick="window.print()">🖨️ Print</button>
     <a href="index.html">🏠</a>
 </div>
@@ -196,15 +196,18 @@ function u(){
     var lo=document.getElementById('lo').value,bg=document.getElementById('ds').value;
     document.getElementById('pf').innerHTML=makeFrontCard(lo);
     document.getElementById('pb').innerHTML=makeBackCard(lo,bg);
-    // Generate print pages
-    var cols=4,rows=2;if(lo=='2v'||lo=='2'){cols=4;rows=6}
+    // Generate print pages — identical cards, just repeated
+    var orient=document.getElementById('pOrient').value;
+    var cols=orient==='landscape'?5:4;
+    var rows=orient==='landscape'?4:6;
+    // Use preview card size for print too
     var total=cols*rows;
-    var pfHtml='',pbHtml='';
-    for(var i=0;i<total;i++){pfHtml+=makeFrontCard(lo);pbHtml+=makeBackCard(lo,bg)}
-    document.getElementById('printFrontPage').innerHTML=pfHtml;
-    document.getElementById('printBackPage').innerHTML=pbHtml;
-    document.getElementById('printFrontPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;max-width:204mm;margin:0 auto;width:100%';
-    document.getElementById('printBackPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;max-width:204mm;margin:0 auto;width:100%';
+    var pfw='',pbw='';
+    for(var i=0;i<total;i++){pfw+=makeFrontCard(lo);pbw+=makeBackCard(lo,bg)}
+    document.getElementById('printFrontPage').innerHTML=pfw;
+    document.getElementById('printBackPage').innerHTML=pbw;
+    document.getElementById('printFrontPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;max-width:100%;margin:0 auto;width:100%';
+    document.getElementById('printBackPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;max-width:100%;margin:0 auto;width:100%';
 }
 u()
 </script>
