@@ -35,8 +35,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 
 #preview{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;gap:16px}
 #preview h2{color:#fff;font-size:15px;margin:0}
-.cw{display:flex;flex-direction:column;align-items:center}
-.cd-preview{background:#fff;border:1px solid #555;border-radius:3px;overflow:hidden;position:relative;color:#111;width:240px;height:340px;box-shadow:0 4px 25px rgba(0,0,0,.5)}
+.preview-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.cd-preview{background:#fff;border:1px solid #555;border-radius:3px;overflow:hidden;position:relative;color:#111;width:180px;height:250px;box-shadow:0 4px 25px rgba(0,0,0,.5)}
 .cd-preview .ft{height:100%;display:flex;flex-direction:column;padding:4mm 5mm}
 .cd-preview .ft .w{font-size:7.5px;color:#333;text-align:center;line-height:1.3;margin-bottom:2mm}
 .cd-preview .ft .l{width:65%;border-bottom:1px solid #444;flex:1;min-height:8mm}
@@ -54,7 +54,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
  body{background:#fff;margin:0;padding:0}
  .print-page{display:grid!important;height:100vh;page-break-after:always;width:100%!important;max-width:100%!important}
  .print-page:last-child{page-break-after:auto}
- .print-page .cd-preview{box-shadow:none!important}
+ .print-page .cd-preview{box-shadow:none!important;border-color:#999!important}
  @page{size:A4;margin:3mm}
 }
 .print-page{display:none}
@@ -116,8 +116,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
     </div>
 
     <div id="preview">
-        <h2>📝 Front</h2><div class="cw" id="pf"></div>
-        <h2>🖼️ Back</h2><div class="cw" id="pb"></div>
+        <h2>📝 Front</h2><div class="preview-row" id="pf"></div>
+        <h2>🖼️ Back</h2><div class="preview-row" id="pb"></div>
     </div>
 </div>
 
@@ -194,8 +194,13 @@ function makeBackCard(lo,bg){
 
 function u(){
     var lo=document.getElementById('lo').value,bg=document.getElementById('ds').value;
-    document.getElementById('pf').innerHTML=makeFrontCard(lo);
-    document.getElementById('pb').innerHTML=makeBackCard(lo,bg);
+    // Preview — show 2 cards side by side
+    var fc='';
+    for(var i=0;i<2;i++)fc+=makeFrontCard(lo);
+    document.getElementById('pf').innerHTML=fc;
+    var bc='';
+    for(var i=0;i<2;i++)bc+=makeBackCard(lo,bg);
+    document.getElementById('pb').innerHTML=bc;
     // Generate print pages — identical cards, just repeated
     var orient=document.getElementById('pOrient').value;
     var cols=orient==='landscape'?5:4;
