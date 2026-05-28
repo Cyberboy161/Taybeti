@@ -74,7 +74,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
         <option value="landscape">Landscape A4</option>
     </select></div>
     <div class="g" style="margin-left:auto"><label>Design</label><select id="ds" onchange="u()">
-        <option value="cyber" selected>Cyber</option><option value="matrix">Matrix</option><option value="red">Red</option><option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option></select></div>
+        <option value="cyber" selected>Cyber</option><option value="matrix">Matrix</option><option value="red">Red</option><option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option><option value="anime">Anime</option><option value="void">Void</option></select></div>
     <div class="g"><label>Img</label><input type="file" accept="image/*" onchange="upImg(this)"></div>
     <button class="btn" onclick="window.print()">🖨️ Print</button>
     <a href="index.html">🏠</a>
@@ -159,11 +159,24 @@ function backHalf(bgKey){
     var ph=document.getElementById('ph').value.trim(),em=document.getElementById('em').value.trim();
     var cq=document.getElementById('cq').value.trim(),ct=document.getElementById('custTxt').value.trim();
     var bgUrl=uploaded||(bgKey=='cyber'?IMG:'');
-    var cssBg={matrix:'#000',red:'linear-gradient(135deg,#1a0000,#2d0000,#1a0000)',blue:'radial-gradient(ellipse at center,#0a1628,#020810)',
-    circuit:'#0a0f0a',fire:'linear-gradient(180deg,#1a0500,#331100,#1a0500,#330000)',ice:'linear-gradient(180deg,#001122,#003355,#001122)',
-    neon:'#0d0d0d',dark:'linear-gradient(135deg,#0d1117,#161b22,#0d1117)',gold:'linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a)'}[bgKey]||'#111';
-    var bgStyle=bgUrl?'url('+bgUrl+') center/cover no-repeat':cssBg;
-    var bgHtml='<div class="bgl" style="transform:rotate('+el.bg.rot+'deg) scale('+(el.bg.w/100)+');background:'+bgStyle+';width:100%;height:100%"></div>';
+    var cssBg={
+        'cyber': '',
+        'matrix':'linear-gradient(rgba(0,255,0,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,0,.1) 1px, transparent 1px)',
+        'red':'linear-gradient(135deg, #330000, #660000, #330000)',
+        'blue':'radial-gradient(ellipse at center, #0a1628, #020810)',
+        'circuit':'linear-gradient(rgba(0,200,0,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,0,.08) 1px, transparent 1px)',
+        'fire':'linear-gradient(180deg, #ff4400, #ff8800, #ffcc00, #ff6600, #330000)',
+        'ice':'linear-gradient(180deg, #aaddff, #4488cc, #113355, #001122)',
+        'neon':'linear-gradient(135deg, #ff0088, #8800ff, #00aaff, #ff0088)',
+        'dark':'linear-gradient(135deg, #0d1117, #161b22, #0d1117)',
+        'gold':'linear-gradient(160deg, #5c4a00, #aa8822, #ffcc44, #886600)',
+        'anime':'linear-gradient(180deg, #ff88cc, #ffaadd, #88ccff, #ff88cc)',
+        'void':'radial-gradient(ellipse at center, #220044, #000011)'
+    }[bgKey]||'linear-gradient(135deg, #0a1628, #1a2a44, #0a1628)';
+    var baseBg = bgKey === 'matrix' ? '#000' : bgKey === 'circuit' ? '#0a0f0a' : bgKey === 'cyber' ? '' : '#111';
+    var fullBg = (bgUrl ? 'url('+bgUrl+') center/cover no-repeat' : '') + (cssBg ? (bgUrl ? '' : cssBg) : '');
+    if(!bgUrl && !cssBg) fullBg = 'url('+IMG+') center/cover no-repeat';
+    var bgHtml='<div class="bgl" style="transform:rotate('+el.bg.rot+'deg) scale('+(el.bg.w/100)+');background-color:'+baseBg+';background-image:'+fullBg+';background-size:'+(bgKey==='matrix'||bgKey==='circuit'?'4px 4px,4px 4px':'cover')+';width:100%;height:100%"></div>';
     var qr1='<div class="el" style="left:'+el.qr.x+'%;top:'+el.qr.y+'%"><div class="qr-w" style="width:'+el.qr.w+'px;height:'+el.qr.h+'px"><img src="'+QRU()+'" style="width:100%;height:100%"></div></div>';
     var qr2=cq?'<div class="el" style="left:'+el.qr2.x+'%;top:'+el.qr2.y+'%"><div class="qr-w" style="width:'+el.qr2.w+'px;height:'+el.qr2.h+'px"><img src="'+QRU(cq)+'" style="width:100%;height:100%"></div></div>':'';
     var ux=showU()?'<div class="el tx" style="left:'+el.url.x+'%;top:'+el.url.y+'%;font-size:'+el.url.w+'px;white-space:nowrap;transform:translateX(-50%)">'+SITE()+'</div>':'';
