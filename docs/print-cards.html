@@ -174,8 +174,12 @@ function backHalf(bgKey){
         'void':'background:radial-gradient(ellipse at center,#220044,#000)',
         'rainbow':'background:linear-gradient(90deg,red,orange,yellow,green,blue,indigo,violet)'
     };
-    if(uploaded) bgStyles['cyber']='background:url('+uploaded+') center/cover';
-    var bgHtml='<div class="bgl" style="transform:rotate('+el.bg.rot+'deg) scale('+(el.bg.w/100)+');'+bgStyles[bgKey]+';width:100%;height:100%"></div>';
+    var bgHtml='';
+    if(bgKey==='cyber'||uploaded){
+        bgHtml='<img class="bgl" src="'+(uploaded||IMG)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:rotate('+el.bg.rot+'deg) scale('+(el.bg.w/100)+')">';
+    } else {
+        bgHtml='<div class="bgl" style="transform:rotate('+el.bg.rot+'deg) scale('+(el.bg.w/100)+');'+bgStyles[bgKey]+';width:100%;height:100%"></div>';
+    }
     var qr1='<div class="el" style="left:'+el.qr.x+'%;top:'+el.qr.y+'%"><div class="qr-w" style="width:'+el.qr.w+'px;height:'+el.qr.h+'px"><img src="'+QRU()+'" style="width:100%;height:100%"></div></div>';
     var qr2=cq?'<div class="el" style="left:'+el.qr2.x+'%;top:'+el.qr2.y+'%"><div class="qr-w" style="width:'+el.qr2.w+'px;height:'+el.qr2.h+'px"><img src="'+QRU(cq)+'" style="width:100%;height:100%"></div></div>':'';
     var ux=showU()?'<div class="el tx" style="left:'+el.url.x+'%;top:'+el.url.y+'%;font-size:'+el.url.w+'px;white-space:nowrap;transform:translateX(-50%)">'+SITE()+'</div>':'';
