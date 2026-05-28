@@ -36,9 +36,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 #preview{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;gap:16px}
 #preview h2{color:#fff;font-size:15px;margin:0}
 .preview-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.cd-preview{background:#fff;border:1px solid #555;border-radius:3px;overflow:hidden;position:relative;color:#111;width:210px;height:297px;box-shadow:0 4px 25px rgba(0,0,0,.5);display:flex;flex-direction:column}
-.cd-preview .ft{flex:1;display:flex;flex-direction:column;padding:3mm 4mm;min-height:0}
-.cd-preview .bk{flex:1;position:relative;background:#111;overflow:hidden;min-height:0}
+.cd-preview{background:#fff;border:1px solid #555;border-radius:3px;overflow:hidden;position:relative;color:#111;width:210px;height:297px;box-shadow:0 4px 25px rgba(0,0,0,.5)}
+.cd-preview .ft{position:relative;display:flex;flex-direction:column;padding:3mm 4mm}
+.cd-preview .bk{position:relative;background:#111;overflow:hidden}
 .cd-preview .bk .bgl{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .cd-preview .bk .bgl div{width:100%;height:100%}
 .cd-preview .bk .el{position:absolute;z-index:2;pointer-events:none}
@@ -180,12 +180,12 @@ function backHalf(bgKey){
 }
 
 function makeFrontCard(lo){
-    if(lo=='2v')return'<div class="cd-preview" style="display:flex;flex-direction:row"><div class="ft" style="border-right:1.5px dashed #000">'+ft(true)+'</div><div class="ft">'+ft(true)+'</div></div>';
-    if(lo=='1')return'<div class="cd-preview"><div class="ft">'+ft(true)+'</div></div>';
-    return'<div class="cd-preview"><div class="ft" style="border-bottom:1.5px dashed #000">'+ft(true)+'</div><div class="ft">'+ft(true)+'</div></div>';
+    if(lo=='2v')return'<div class="cd-preview" style="display:flex;flex-direction:row"><div class="ft" style="flex:1;border-right:1.5px dashed #000;height:100%">'+ft(true)+'</div><div class="ft" style="flex:1;height:100%">'+ft(true)+'</div></div>';
+    if(lo=='1')return'<div class="cd-preview"><div class="ft" style="height:100%">'+ft(true)+'</div></div>';
+    return'<div class="cd-preview"><div class="ft" style="height:50%;border-bottom:1.5px dashed #000">'+ft(true)+'</div><div class="ft" style="height:50%">'+ft(true)+'</div></div>';
 }
 function makeBackCard(lo,bg){
-    if(lo=='2v')return'<div class="cd-preview" style="display:flex;flex-direction:row"><div style="flex:1;position:relative;border-right:1px dashed #fff8">'+backHalf(bg)+'</div><div style="flex:1;position:relative">'+backHalf(bg)+'</div></div>';
+    if(lo=='2v')return'<div class="cd-preview" style="display:flex;flex-direction:row"><div style="flex:1;position:relative;height:100%;border-right:1px dashed #fff8">'+backHalf(bg)+'</div><div style="flex:1;position:relative;height:100%">'+backHalf(bg)+'</div></div>';
     if(lo=='1')return'<div class="cd-preview">'+backHalf(bg)+'</div>';
     return'<div class="cd-preview"><div style="position:relative;height:50%;border-bottom:1px dashed #fff8">'+backHalf(bg)+'</div><div style="position:relative;height:50%">'+backHalf(bg)+'</div></div>';
 }
