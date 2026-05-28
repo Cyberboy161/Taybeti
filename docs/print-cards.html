@@ -37,7 +37,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 #preview h2{color:#fff;font-size:15px;margin:0}
 .preview-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .cd-preview{background:#fff;border:1px solid #555;border-radius:3px;overflow:hidden;position:relative;color:#111;width:210px;height:297px;box-shadow:0 4px 25px rgba(0,0,0,.5)}
-.cd-preview .ft{position:relative;display:flex;flex-direction:column;padding:3mm 4mm;height:100%}
+.cd-preview .ft{position:relative;display:flex;flex-direction:column;padding:2mm 3mm;height:100%;overflow:hidden}
+.cd-preview .ft .w{font-size:6px;color:#333;text-align:center;line-height:1.2;margin-bottom:1mm;flex-shrink:0}
+.cd-preview .ft .l{width:65%;border-bottom:1px solid #444;flex:1;min-height:4mm}
 .cd-preview .bk{position:relative;background:#111;overflow:hidden;height:100%}
 .cd-preview .bk .bgl{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .cd-preview .bk .bgl div{width:100%;height:100%}
@@ -149,12 +151,7 @@ function bgStyle(k){
 }
 
 function ft(forPrint){
-    var cls=forPrint?'ft':'ft';
-    var p=el.ftxt,pl=el.fline;
-    return'<div class="'+cls+'">'+
-        '<div class="w" style="position:relative;left:'+(p.x-50)+'%;top:'+((p.y-10)*0.5)+'%">وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.</div>'+
-        '<div class="l" style="position:relative;left:'+(pl.x-50)+'%;top:'+((pl.y-70)*0.5)+'%;width:'+(pl.w||65)+'%"></div>'+
-        '</div>';
+    return'<div class="ft"><div class="w" style="position:relative;left:'+(el.ftxt.x-50)+'%;top:'+(el.ftxt.y-10)*0.3+'%">وێنەی مەگرە. بە کەس مەڵێ.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.</div><div class="l" style="position:relative;left:'+(el.fline.x-50)+'%;top:'+(el.fline.y-70)*0.3+'%;width:'+(el.fline.w||65)+'%"></div></div>';
 }
 
 function backHalf(bgKey){
