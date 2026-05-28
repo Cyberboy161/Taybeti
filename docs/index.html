@@ -234,27 +234,27 @@
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
-                <h3>🕵️ <span data-i18n="ft4-title">App Disguise — Hide in Plain Sight</span></h3>
-                <p data-i18n="ft4-desc">Change the app icon and label to Calculator, Notes, Clock, or Settings. The real app stays hidden behind a harmless‑looking front.</p>
-                <div class="detail">Taybeti registers multiple <strong>activity‑alias</strong> entries in the Android manifest — each with a different icon and name. Only one is enabled at a time via <strong>PackageManager.setComponentEnabledSetting()</strong>. The others are completely invisible to the launcher. To anyone glancing at your phone, it's just another calculator or notes app.</div>
+                <h3>⚖️ <span data-i18n="ft4-title">No Company Can Subpoena Your Data</span></h3>
+                <p data-i18n="ft4-desc">Cloud services hand over your data when ordered by courts. We have nothing to hand over — your notes don't exist on any server. They physically cannot comply with a subpoena for data they never held.</p>
+                <div class="detail">When you use Google Keep, Apple Notes, Evernote, or any cloud‑connected note app, your data lives on their servers. Under laws like the <strong>CLOUD Act (USA)</strong>, <strong>GDPR (EU)</strong>, or local court orders, companies <strong>must</strong> hand over stored data. Taybeti has <strong>zero servers</strong>. Zero cloud. Zero data to subpoena. The only copy of your notes exists on your device. Even if every government in the world demanded your data — there is nothing to give them.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
-                <h3>🖨️ <span data-i18n="ft5-title">Gre Cards — Physical Trust Tokens</span></h3>
-                <p data-i18n="ft5-desc">Printable passphrase cards with embedded QR codes. Exchange secrets offline on paper — no server, no keyboard, no trace. <a href="print-cards.html">Build yours →</a></p>
-                <div class="detail">Digital passphrase sharing has a fundamental flaw: every digital channel (messaging apps, email, cloud) can be intercepted or logged. <strong>Gre Cards</strong> let you print passphrase cards on paper, write your shared secret by hand, cut the card in half, and give one piece to the other person. The QR code links to the app download page. No server ever sees your passphrase.</div>
+                <h3>🌍 <span data-i18n="ft5-title">Works Everywhere — No Internet Needed</span></h3>
+                <p data-i18n="ft5-desc">Airport security. Protests. Remote areas. Border crossings. Anywhere a network might be monitored or unavailable — the app works fully offline. No connection, no vulnerability.</p>
+                <div class="detail">Taybeti runs <strong>entirely locally</strong>. All encryption, decryption, note creation, and editing happens on‑device with zero network dependency. This means: <strong>Airports</strong> — no WiFi needed to access your notes. <strong>Protests</strong> — authorities can't intercept your writing. <strong>Border crossings</strong> — device searches won't reveal cloud connections because there are none. <strong>Remote areas</strong> — full functionality anywhere. The app is as functional at the top of a mountain as in a coffee shop.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
-                <h3>🧪 <span data-i18n="ft6-title">Self‑Verifying — Nothing to Crack</span></h3>
-                <p data-i18n="ft6-desc">No password hashes are stored. Login works by decrypting a known string — if your passphrase is wrong, it produces gibberish. An attacker with the raw data gets nothing.</p>
-                <div class="detail">Most apps store <strong>password hashes</strong> (like bcrypt or SHA‑256). If the database is stolen, attackers can brute‑force these hashes offline. Taybeti stores <strong>nothing</strong>. When you enter your passphrase, the app tries to decrypt a pre‑encrypted verification string. If decryption succeeds, the passphrase is correct. If it fails, the result is random bytes — indistinguishable from an incorrect key. There is literally nothing to crack.</div>
+                <h3>🤫 <span data-i18n="ft6-title">Even We Cannot Read Your Notes</span></h3>
+                <p data-i18n="ft6-desc">Zero‑knowledge architecture. Your encryption key is derived from your passphrase — which we never see, never store, and never transmit. Not even the developer can decrypt your notes.</p>
+                <div class="detail">This is the fundamental difference: <strong>zero‑knowledge</strong> means the server (or app developer) has zero ability to access your data. Your encryption key is mathematically derived from your passphrase using <strong>Argon2id key derivation</strong> — the passphrase itself is never stored anywhere. If you lose your passphrase, <strong>nobody can help you recover it</strong> — not even us. This isn't poor design; it's the proof that we have no backdoor. If we could recover your notes, so could an attacker or a government.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
-                <h3>👁️ <span data-i18n="ft7-title">Open Source — Auditable by Anyone</span></h3>
-                <p data-i18n="ft7-desc">Every line of code is public under the MIT license. Security researchers can verify no backdoors exist. You don't trust a promise — you verify proof.</p>
-                <div class="detail">The entire codebase is hosted on <strong>GitHub</strong> under the <strong>MIT license</strong> — one of the most permissive open source licenses. Anyone can read, audit, fork, and modify the code. Every commit is publicly timestamped. A company can't silently add spyware in an update — the community would detect it instantly. <strong>Trust through transparency, not promises.</strong></div>
+                <h3>🖨️ <span data-i18n="ft7-title">Gre Cards — Offline Secret Exchange</span></h3>
+                <p data-i18n="ft7-desc">Print physical passphrase cards with embedded QR codes. Share secrets on paper — no digital trail. Cut, split, and each person keeps their half. <a href="print-cards.html">Build yours →</a></p>
+                <div class="detail">Every digital channel — SMS, email, messaging apps, cloud links — creates a <strong>permanent record</strong> that can be logged, intercepted, or subpoenaed. <strong>Gre Cards</strong> bypass this entirely: print cards on paper, hand‑write your shared passphrase, cut the card in half, and physically hand one piece to the other person. The QR code on the back leads them to the app. No server. No log. No subpoenable record. Paper has been securing secrets for millennia — and it still works.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
