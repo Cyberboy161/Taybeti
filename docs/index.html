@@ -93,10 +93,52 @@
             gap: 1.5rem; margin: 3rem 0;
         }
         .feature-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 1.5rem;
-            transition: border-color 0.2s, background 0.2s;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: border-color 0.2s, background 0.2s, transform 0.2s;
+            cursor: pointer;
         }
+        .feature-card:hover {
+            border-color: var(--accent);
+            background: var(--surface2);
+            transform: scale(1.02);
+        }
+        .feature-card.expanded {
+            grid-column: 1 / -1;
+            border-color: var(--accent);
+            background: var(--surface2);
+        }
+        .feature-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+        .feature-card .detail {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .feature-card.expanded .detail { display: block; }
+        .feature-card .expand-hint {
+            font-size: 0.75rem;
+            color: var(--accent);
+            margin-top: 0.5rem;
+            opacity: 0.6;
+        }
+        .feature-card.expanded .expand-hint { opacity: 1; }
         .feature-card:hover { border-color: var(--accent); background: var(--surface2); }
         .feature-card h3 {
             font-size: 1.15rem; margin-bottom: 0.5rem; color: #fff;
@@ -173,41 +215,59 @@
         </div>
 
         <div class="features">
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🔐 <span data-i18n="ft1-title">Independent Per‑Note Encryption</span></h3>
                 <p data-i18n="ft1-desc">No master key exists. Every note is encrypted with its own AES‑256‑GCM key derived from your passphrase. Cracking one reveals nothing about the others.</p>
+                <div class="detail"><strong>AES‑256‑GCM</strong> is the encryption standard used by governments and banks. <strong>Per‑note keys</strong> mean each note has its own independent password — unlike apps that use one master key where breaking it exposes everything. <strong>Derived from your passphrase</strong> means the key is created mathematically from what you type, never stored anywhere.</div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>📵 <span data-i18n="ft2-title">Zero Internet Access — By Design</span></h3>
                 <p data-i18n="ft2-desc">The app has no internet permission. It cannot connect, cannot sync, cannot phone home. Your data physically cannot leave your device — by architecture, not policy.</p>
+                <div class="detail">Android apps must declare permissions in their manifest. Taybeti declares <strong>zero network permissions</strong> — no INTERNET, no ACCESS_NETWORK_STATE. The operating system itself prevents any network connection. This isn't a promise — it's enforced by Android's sandbox. <strong>Architecture vs policy:</strong> a policy can change tomorrow; architecture cannot be bypassed without rebuilding the app.</div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>⌨️ <span data-i18n="ft3-title">Custom Keyboard — Blocks System Keyloggers</span></h3>
                 <p data-i18n="ft3-desc">Gboard, SwiftKey, and iOS keyboards record keystrokes for analytics. Ours isolates every character from the system. Your passphrase never touches a third‑party keyboard.</p>
+                <div class="detail">When you type in any normal app, your characters first go through the <strong>Input Method Editor (IME)</strong> — the system keyboard. Google's Gboard and Microsoft's SwiftKey both send typing data to their servers for "personalization." Taybeti's keyboard runs <strong>inside the app's own process</strong>, completely bypassing the system IME. No keystroke ever leaves the app's memory space.</div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🕵️ <span data-i18n="ft4-title">App Disguise — Hide in Plain Sight</span></h3>
                 <p data-i18n="ft4-desc">Change the app icon and label to Calculator, Notes, Clock, or Settings. The real app stays hidden behind a harmless‑looking front.</p>
+                <div class="detail">Taybeti registers multiple <strong>activity‑alias</strong> entries in the Android manifest — each with a different icon and name. Only one is enabled at a time via <strong>PackageManager.setComponentEnabledSetting()</strong>. The others are completely invisible to the launcher. To anyone glancing at your phone, it's just another calculator or notes app.</div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🖨️ <span data-i18n="ft5-title">Gre Cards — Physical Trust Tokens</span></h3>
                 <p data-i18n="ft5-desc">Printable passphrase cards with embedded QR codes. Exchange secrets offline on paper — no server, no keyboard, no trace. <a href="print-cards.html">Build yours →</a></p>
+                <div class="detail">Digital passphrase sharing has a fundamental flaw: every digital channel (messaging apps, email, cloud) can be intercepted or logged. <strong>Gre Cards</strong> let you print passphrase cards on paper, write your shared secret by hand, cut the card in half, and give one piece to the other person. The QR code links to the app download page. No server ever sees your passphrase.</div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🧪 <span data-i18n="ft6-title">Self‑Verifying — Nothing to Crack</span></h3>
                 <p data-i18n="ft6-desc">No password hashes are stored. Login works by decrypting a known string — if your passphrase is wrong, it produces gibberish. An attacker with the raw data gets nothing.</p>
+                <div class="detail">Most apps store <strong>password hashes</strong> (like bcrypt or SHA‑256). If the database is stolen, attackers can brute‑force these hashes offline. Taybeti stores <strong>nothing</strong>. When you enter your passphrase, the app tries to decrypt a pre‑encrypted verification string. If decryption succeeds, the passphrase is correct. If it fails, the result is random bytes — indistinguishable from an incorrect key. There is literally nothing to crack.</div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>👁️ <span data-i18n="ft7-title">Open Source — Auditable by Anyone</span></h3>
                 <p data-i18n="ft7-desc">Every line of code is public under the MIT license. Security researchers can verify no backdoors exist. You don't trust a promise — you verify proof.</p>
+                <div class="detail">The entire codebase is hosted on <strong>GitHub</strong> under the <strong>MIT license</strong> — one of the most permissive open source licenses. Anyone can read, audit, fork, and modify the code. Every commit is publicly timestamped. A company can't silently add spyware in an update — the community would detect it instantly. <strong>Trust through transparency, not promises.</strong></div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🎨 <span data-i18n="ft8-title">Rich Editor — Without Sacrificing Security</span></h3>
                 <p data-i18n="ft8-desc">Drawing tools, shapes, image layers, tables, and templates — all rendered inside an encrypted environment. Creativity doesn't have to be exposed.</p>
+                <div class="detail">Most secure note apps offer plain text only. Taybeti includes a full <strong>rich text editor</strong> with drawing panel, shapes, image placement (behind/in‑front/integrated), table support, and page templates — all rendered and stored inside the encrypted note. The encryption wraps the entire document, not just the text. <strong>You don't have to choose between creativity and privacy.</strong></div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>💯 <span data-i18n="ft9-title">Free. No Ads. No Telemetry.</span></h3>
                 <p data-i18n="ft9-desc">No revenue comes from your data. No usage tracking. No analytics SDKs. The only incentive is building something genuinely private.</p>
+                <div class="detail">The app contains <strong>zero analytics libraries</strong> — no Firebase, no Google Analytics, no Crashlytics, no Mixpanel. There is no server to send data to even if we wanted to (there's no internet permission). The app makes <strong>no money from you</strong>. It's fully open source and community‑supported. The business model is simple: your privacy is the product.</div>
+                <div class="expand-hint">Click to learn more</div>
             </div>
         </div>
 
