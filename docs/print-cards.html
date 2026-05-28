@@ -202,8 +202,8 @@ function u(){
     for(var i=0;i<total;i++){pfw+=makeFrontCard(lo);pbw+=makeBackCard(lo,bg)}
     document.getElementById('printFrontPage').innerHTML=pfw;
     document.getElementById('printBackPage').innerHTML=pbw;
-    document.getElementById('printFrontPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;max-width:100%;margin:0 auto;width:100%';
-    document.getElementById('printBackPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;max-width:100%;margin:0 auto;width:100%';
+    document.getElementById('printFrontPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:1mm;max-width:100%;margin:0 auto;width:100%';
+    document.getElementById('printBackPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:1mm;max-width:100%;margin:0 auto;width:100%';
 }
 u()
 </script>
