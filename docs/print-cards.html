@@ -48,7 +48,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 .cd-preview .bk .qr-w img{display:block;width:100%;height:100%}
 .cd-preview .bk .tx{color:#fff;text-shadow:0 0 2px #000;line-height:1.2}
 
-@media print{#top,#panel{display:none}#preview{display:none}#main{display:block;height:auto;min-height:0}body{background:#fff}}
+@media print{#top,#panel{display:none}#preview{display:none}#main{display:block;height:auto;min-height:0}body{background:#fff}.print-page{display:grid!important}}
+.print-page{display:none}
 </style>
 </head>
 <body>
@@ -61,6 +62,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
     <div class="g"><label>QR→</label><select id="qd" onchange="u()"><option value="home">Home</option><option value="invited">Invited</option></select></div>
     <div class="g"><input id="ph" placeholder="Phone" oninput="u()" style="width:70px"><input id="em" placeholder="Email" oninput="u()" style="width:70px"></div>
     <div class="g"><input id="cq" placeholder="Custom QR URL" oninput="u()" style="width:120px"></div>
+    <div class="g"><label><input type="checkbox" id="showUrl" checked onchange="u()" style="width:auto">Show URL</label></div>
     <button class="btn" onclick="window.print()">🖨️ Print</button>
     <a href="index.html">🏠</a>
 </div>
@@ -74,6 +76,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
         <div class="elem" data-el="contact" onclick="sel('contact')"><span class="ic">📋</span><div class="lb">Contact Info<div class="sub">Phone & email</div></div></div>
         <div class="elem" data-el="custom" onclick="sel('custom')"><span class="ic">✏️</span><div class="lb">Custom Text<div class="sub">Type below</div></div></div>
         <div class="elem" data-el="bg" onclick="sel('bg')"><span class="ic">🖼️</span><div class="lb">Background<div class="sub">Zoom + rotate</div></div></div>
+        <div class="elem" data-el="ftxt" onclick="sel('ftxt')"><span class="ic">📝</span><div class="lb">Front Text<div class="sub">Move warning</div></div></div>
 
         <input type="text" id="custTxt" placeholder="Type your custom text here" oninput="u()">
 
@@ -105,22 +108,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
     </div>
 </div>
 
+<div class="print-page" id="printFrontPage"></div>
+<div class="print-page" id="printBackPage"></div>
+
 <script>
 var IMG="https://cyberboy161.github.io/Taybeti/card-bg.png";var uploaded='';var selEl='qr';
-var el={qr:{x:30,y:30,w:40,h:40},qr2:{x:60,y:30,w:40,h:40},url:{x:50,y:3,w:7,h:0},contact:{x:50,y:88,w:6,h:0},custom:{x:50,y:50,w:8,h:0},bg:{x:0,y:0,w:100,h:100,rot:0}};
+var el={qr:{x:30,y:30,w:40,h:40},qr2:{x:60,y:30,w:40,h:40},url:{x:50,y:3,w:7,h:0},contact:{x:50,y:88,w:6,h:0},custom:{x:50,y:50,w:8,h:0},bg:{x:0,y:0,w:100,h:100,rot:0},ftxt:{x:50,y:10,w:0,h:0}};
 
 function SITE(){return document.getElementById('qd').value=='home'?'https://cyberboy161.github.io/Taybeti/index.html':'https://cyberboy161.github.io/Taybeti/invited.html'}
+function showU(){return document.getElementById('showUrl').checked}
 function QRU(u){return"https://api.qrserver.com/v1/create-qr-code/?size=80x80&data="+encodeURIComponent(u||SITE())}
 
 function upImg(i){if(i.files&&i.files[0]){var r=new FileReader();r.onload=function(e){uploaded=e.target.result;u()};r.readAsDataURL(i.files[0])}}
 function sel(e){selEl=e;document.querySelectorAll('#panel .elem').forEach(function(x){x.classList.toggle('sel',x.dataset.el===e)})}
 function mv(dx,dy){var p=el[selEl];if(!p)return;p.x=Math.max(0,Math.min(92,(p.x||0)+dx*3));p.y=Math.max(0,Math.min(92,(p.y||0)+dy*3));u()}
-function resetEl(){var p=el[selEl];if(!p)return;var d={qr:[30,30],qr2:[60,30],url:[50,3],contact:[50,88],custom:[50,50]};var df=d[selEl]||[50,50];p.x=df[0];p.y=df[1];u()}
-function sizeEl(d){
-    var p=el[selEl];if(!p||selEl=='bg')return;
-    if(selEl=='url'||selEl=='contact'||selEl=='custom'){p.w=Math.max(3,Math.min(24,(p.w||6)+d));u()}
-    else{p.w=Math.max(8,Math.min(60,(p.w||15)+d*4));p.h=p.w;u()}
-}
+function resetEl(){var p=el[selEl];if(!p)return;var d={qr:[30,30],qr2:[60,30],url:[50,3],contact:[50,88],custom:[50,50],ftxt:[50,10]};var df=d[selEl]||[50,50];p.x=df[0];p.y=df[1];u()}
+function sizeEl(d){var p=el[selEl];if(!p||selEl=='bg'||selEl=='ftxt')return;if(selEl=='url'||selEl=='contact'||selEl=='custom'){p.w=Math.max(3,Math.min(24,(p.w||6)+d));u()}else{p.w=Math.max(8,Math.min(60,(p.w||15)+d*4));p.h=p.w;u()}}
 function rotateBg(d){el.bg.rot=(el.bg.rot||0)+d;u()}
 function zoomBg(d){el.bg.w=Math.max(30,Math.min(200,(el.bg.w||100)+d));el.bg.h=el.bg.w;u()}
 
@@ -134,32 +137,49 @@ function bgStyle(k){
     return uploaded?'url('+uploaded+') center/cover':(k=='cyber'?'url('+IMG+') center/cover':m[k]||m.dark)
 }
 
-function ft(){return'<div class="w">وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.</div><div class="l"></div>'}
+function ft(forPrint){
+    var cls=forPrint?'ft':'ft';
+    var p=el.ftxt;
+    return'<div class="'+cls+'"><div class="w" style="position:relative;left:'+(p.x-50)+'%;top:'+((p.y-10)*0.5)+'%">وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.</div><div class="l"></div></div>';
+}
 
 function backHalf(bgKey){
     var ph=document.getElementById('ph').value.trim(),em=document.getElementById('em').value.trim();
-    var cq=document.getElementById('cq').value.trim();
-    var ct=document.getElementById('custTxt').value.trim();
+    var cq=document.getElementById('cq').value.trim(),ct=document.getElementById('custTxt').value.trim();
     var bgHtml='<div class="bgl" style="transform:rotate('+el.bg.rot+'deg) scale('+(el.bg.w/100)+')"><div style="background:'+bgStyle(bgKey)+';width:100%;height:100%"></div></div>';
     var qr1='<div class="el" style="left:'+el.qr.x+'%;top:'+el.qr.y+'%"><div class="qr-w" style="width:'+el.qr.w+'px;height:'+el.qr.h+'px"><img src="'+QRU()+'" style="width:100%;height:100%"></div></div>';
     var qr2=cq?'<div class="el" style="left:'+el.qr2.x+'%;top:'+el.qr2.y+'%"><div class="qr-w" style="width:'+el.qr2.w+'px;height:'+el.qr2.h+'px"><img src="'+QRU(cq)+'" style="width:100%;height:100%"></div></div>':'';
-    var ux='<div class="el tx" style="left:'+el.url.x+'%;top:'+el.url.y+'%;font-size:'+el.url.w+'px">'+SITE()+'</div>';
+    var ux=showU()?'<div class="el tx" style="left:'+el.url.x+'%;top:'+el.url.y+'%;font-size:'+el.url.w+'px">'+SITE()+'</div>':'';
     var ci='';
     if(ph||em)ci='<div class="el tx" style="left:'+el.contact.x+'%;top:'+el.contact.y+'%;font-size:'+el.contact.w+'px">'+(ph?'📞'+ph:'')+(ph&&em?' · ':'')+(em?'📧'+em:'')+'</div>';
     var cx=ct?'<div class="el tx" style="left:'+el.custom.x+'%;top:'+el.custom.y+'%;font-size:'+el.custom.w+'px">'+ct+'</div>':'';
     return'<div class="bk">'+bgHtml+qr1+qr2+ux+ci+cx+'</div>';
 }
 
+function makeFrontCard(lo){
+    if(lo=='2v')return'<div class="cd-preview" style="display:flex;flex-direction:row"><div class="ft" style="border-right:1.5px dashed #000">'+ft(true)+'</div><div class="ft">'+ft(true)+'</div></div>';
+    if(lo=='1')return'<div class="cd-preview"><div class="ft">'+ft(true)+'</div></div>';
+    return'<div class="cd-preview"><div class="ft" style="border-bottom:1.5px dashed #000">'+ft(true)+'</div><div class="ft">'+ft(true)+'</div></div>';
+}
+function makeBackCard(lo,bg){
+    if(lo=='2v')return'<div class="cd-preview" style="display:flex;flex-direction:row"><div style="flex:1;position:relative;border-right:1px dashed #fff8">'+backHalf(bg)+'</div><div style="flex:1;position:relative">'+backHalf(bg)+'</div></div>';
+    if(lo=='1')return'<div class="cd-preview">'+backHalf(bg)+'</div>';
+    return'<div class="cd-preview"><div style="position:relative;height:50%;border-bottom:1px dashed #fff8">'+backHalf(bg)+'</div><div style="position:relative;height:50%">'+backHalf(bg)+'</div></div>';
+}
+
 function u(){
     var lo=document.getElementById('lo').value,bg=document.getElementById('ds').value;
-    var fc=lo=='2v'?'<div class="cd-preview" style="display:flex;flex-direction:row"><div class="ft" style="border-right:1.5px dashed #000">'+ft()+'</div><div class="ft">'+ft()+'</div></div>'
-           :lo=='1'?'<div class="cd-preview"><div class="ft">'+ft()+'</div></div>'
-           :'<div class="cd-preview"><div class="ft" style="border-bottom:1.5px dashed #000">'+ft()+'</div><div class="ft">'+ft()+'</div></div>';
-    document.getElementById('pf').innerHTML=fc;
-    var bc=lo=='2v'?'<div class="cd-preview" style="display:flex;flex-direction:row"><div style="flex:1;position:relative;border-right:1px dashed #fff8">'+backHalf(bg)+'</div><div style="flex:1;position:relative">'+backHalf(bg)+'</div></div>'
-           :lo=='1'?'<div class="cd-preview">'+backHalf(bg)+'</div>'
-           :'<div class="cd-preview"><div style="position:relative;height:50%;border-bottom:1px dashed #fff8">'+backHalf(bg)+'</div><div style="position:relative;height:50%">'+backHalf(bg)+'</div></div>';
-    document.getElementById('pb').innerHTML=bc;
+    document.getElementById('pf').innerHTML=makeFrontCard(lo);
+    document.getElementById('pb').innerHTML=makeBackCard(lo,bg);
+    // Generate print pages
+    var cols=4,rows=2;if(lo=='2v'||lo=='2'){cols=4;rows=6}
+    var total=cols*rows;
+    var pfHtml='',pbHtml='';
+    for(var i=0;i<total;i++){pfHtml+=makeFrontCard(lo);pbHtml+=makeBackCard(lo,bg)}
+    document.getElementById('printFrontPage').innerHTML=pfHtml;
+    document.getElementById('printBackPage').innerHTML=pbHtml;
+    document.getElementById('printFrontPage').style.cssText='display:none;grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;width:100%;max-width:204mm;margin:0 auto';
+    document.getElementById('printBackPage').style.cssText='display:none;grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;width:100%;max-width:204mm;margin:0 auto';
 }
 u()
 </script>
