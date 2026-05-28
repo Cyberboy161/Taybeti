@@ -219,55 +219,55 @@
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🔐 <span data-i18n="ft1-title">Independent Per‑Note Encryption</span></h3>
                 <p data-i18n="ft1-desc">No master key exists. Every note is encrypted with its own AES‑256‑GCM key derived from your passphrase. Cracking one reveals nothing about the others.</p>
-                <div class="detail" data-i18n=""><strong>AES‑256‑GCM</strong> is the encryption standard used by governments and banks. <strong>Per‑note keys</strong> mean each note has its own independent password — unlike apps that use one master key where breaking it exposes everything. <strong>Derived from your passphrase</strong> means the key is created mathematically from what you type, never stored anywhere.</div>
+                <div class="detail" data-i18n="ft1-detail"><strong>AES‑256‑GCM</strong> is the encryption standard used by governments and banks. <strong>Per‑note keys</strong> mean each note has its own independent password — unlike apps that use one master key where breaking it exposes everything. <strong>Derived from your passphrase</strong> means the key is created mathematically from what you type, never stored anywhere.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>📵 <span data-i18n="ft2-title">Zero Internet Access — By Design</span></h3>
                 <p data-i18n="ft2-desc">The app has no internet permission. It cannot connect, cannot sync, cannot phone home. Your data physically cannot leave your device — by architecture, not policy.</p>
-                <div class="detail" data-i18n="">Android apps must declare permissions in their manifest. Taybeti declares <strong>zero network permissions</strong> — no INTERNET, no ACCESS_NETWORK_STATE. The operating system itself prevents any network connection. This isn't a promise — it's enforced by Android's sandbox. <strong>Architecture vs policy:</strong> a policy can change tomorrow; architecture cannot be bypassed without rebuilding the app.</div>
+                <div class="detail" data-i18n="ft2-detail">Android apps must declare permissions in their manifest. Taybeti declares <strong>zero network permissions</strong> — no INTERNET, no ACCESS_NETWORK_STATE. The operating system itself prevents any network connection. This isn't a promise — it's enforced by Android's sandbox. <strong>Architecture vs policy:</strong> a policy can change tomorrow; architecture cannot be bypassed without rebuilding the app.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>⌨️ <span data-i18n="ft3-title">Custom Keyboard — Blocks System Keyloggers</span></h3>
                 <p data-i18n="ft3-desc">Gboard, SwiftKey, and iOS keyboards record keystrokes for analytics. Ours isolates every character from the system. Your passphrase never touches a third‑party keyboard.</p>
-                <div class="detail" data-i18n="">When you type in any normal app, your characters first go through the <strong>Input Method Editor (IME)</strong> — the system keyboard. Google's Gboard and Microsoft's SwiftKey both send typing data to their servers for "personalization." Taybeti's keyboard runs <strong>inside the app's own process</strong>, completely bypassing the system IME. No keystroke ever leaves the app's memory space.</div>
+                <div class="detail" data-i18n="ft3-detail">When you type in any normal app, your characters first go through the <strong>Input Method Editor (IME)</strong> — the system keyboard. Google's Gboard and Microsoft's SwiftKey both send typing data to their servers for "personalization." Taybeti's keyboard runs <strong>inside the app's own process</strong>, completely bypassing the system IME. No keystroke ever leaves the app's memory space.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>⚖️ <span data-i18n="ft4-title">No Company Can Subpoena Your Data</span></h3>
                 <p data-i18n="ft4-desc">Cloud services hand over your data when ordered by courts. We have nothing to hand over — your notes don't exist on any server. They physically cannot comply with a subpoena for data they never held.</p>
-                <div class="detail" data-i18n="">When you use Google Keep, Apple Notes, Evernote, or any cloud‑connected note app, your data lives on their servers. Under laws like the <strong>CLOUD Act (USA)</strong>, <strong>GDPR (EU)</strong>, or local court orders, companies <strong>must</strong> hand over stored data. Taybeti has <strong>zero servers</strong>. Zero cloud. Zero data to subpoena. The only copy of your notes exists on your device. Even if every government in the world demanded your data — there is nothing to give them.</div>
+                <div class="detail" data-i18n="ft4-detail">When you use Google Keep, Apple Notes, Evernote, or any cloud‑connected note app, your data lives on their servers. Under laws like the <strong>CLOUD Act (USA)</strong>, <strong>GDPR (EU)</strong>, or local court orders, companies <strong>must</strong> hand over stored data. Taybeti has <strong>zero servers</strong>. Zero cloud. Zero data to subpoena. The only copy of your notes exists on your device. Even if every government in the world demanded your data — there is nothing to give them.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🌍 <span data-i18n="ft5-title">Works Everywhere — No Internet Needed</span></h3>
                 <p data-i18n="ft5-desc">Airport security. Protests. Remote areas. Border crossings. Anywhere a network might be monitored or unavailable — the app works fully offline. No connection, no vulnerability.</p>
-                <div class="detail" data-i18n="">Taybeti runs <strong>entirely locally</strong>. All encryption, decryption, note creation, and editing happens on‑device with zero network dependency. This means: <strong>Airports</strong> — no WiFi needed to access your notes. <strong>Protests</strong> — authorities can't intercept your writing. <strong>Border crossings</strong> — device searches won't reveal cloud connections because there are none. <strong>Remote areas</strong> — full functionality anywhere. The app is as functional at the top of a mountain as in a coffee shop.</div>
+                <div class="detail" data-i18n="ft5-detail">Taybeti runs <strong>entirely locally</strong>. All encryption, decryption, note creation, and editing happens on‑device with zero network dependency. This means: <strong>Airports</strong> — no WiFi needed to access your notes. <strong>Protests</strong> — authorities can't intercept your writing. <strong>Border crossings</strong> — device searches won't reveal cloud connections because there are none. <strong>Remote areas</strong> — full functionality anywhere. The app is as functional at the top of a mountain as in a coffee shop.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🤫 <span data-i18n="ft6-title">Even We Cannot Read Your Notes</span></h3>
                 <p data-i18n="ft6-desc">Zero‑knowledge architecture. Your encryption key is derived from your passphrase — which we never see, never store, and never transmit. Not even the developer can decrypt your notes.</p>
-                <div class="detail" data-i18n="">This is the fundamental difference: <strong>zero‑knowledge</strong> means the server (or app developer) has zero ability to access your data. Your encryption key is mathematically derived from your passphrase using <strong>Argon2id key derivation</strong> — the passphrase itself is never stored anywhere. If you lose your passphrase, <strong>nobody can help you recover it</strong> — not even us. This isn't poor design; it's the proof that we have no backdoor. If we could recover your notes, so could an attacker or a government.</div>
+                <div class="detail" data-i18n="ft6-detail">This is the fundamental difference: <strong>zero‑knowledge</strong> means the server (or app developer) has zero ability to access your data. Your encryption key is mathematically derived from your passphrase using <strong>Argon2id key derivation</strong> — the passphrase itself is never stored anywhere. If you lose your passphrase, <strong>nobody can help you recover it</strong> — not even us. This isn't poor design; it's the proof that we have no backdoor. If we could recover your notes, so could an attacker or a government.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🖨️ <span data-i18n="ft7-title">Gre Cards — Offline Secret Exchange</span></h3>
                 <p data-i18n="ft7-desc">Print physical passphrase cards with embedded QR codes. Share secrets on paper — no digital trail. Cut, split, and each person keeps their half. <a href="print-cards.html">Build yours →</a></p>
-                <div class="detail" data-i18n="">Every digital channel — SMS, email, messaging apps, cloud links — creates a <strong>permanent record</strong> that can be logged, intercepted, or subpoenaed. <strong>Gre Cards</strong> bypass this entirely: print cards on paper, hand‑write your shared passphrase, cut the card in half, and physically hand one piece to the other person. The QR code on the back leads them to the app. No server. No log. No subpoenable record. Paper has been securing secrets for millennia — and it still works.</div>
+                <div class="detail" data-i18n="ft7-detail">Every digital channel — SMS, email, messaging apps, cloud links — creates a <strong>permanent record</strong> that can be logged, intercepted, or subpoenaed. <strong>Gre Cards</strong> bypass this entirely: print cards on paper, hand‑write your shared passphrase, cut the card in half, and physically hand one piece to the other person. The QR code on the back leads them to the app. No server. No log. No subpoenable record. Paper has been securing secrets for millennia — and it still works.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>🎨 <span data-i18n="ft8-title">Rich Editor — Without Sacrificing Security</span></h3>
                 <p data-i18n="ft8-desc">Drawing tools, shapes, image layers, tables, and templates — all rendered inside an encrypted environment. Creativity doesn't have to be exposed.</p>
-                <div class="detail" data-i18n="">Most secure note apps offer plain text only. Taybeti includes a full <strong>rich text editor</strong> with drawing panel, shapes, image placement (behind/in‑front/integrated), table support, and page templates — all rendered and stored inside the encrypted note. The encryption wraps the entire document, not just the text. <strong>You don't have to choose between creativity and privacy.</strong></div>
+                <div class="detail" data-i18n="ft8-detail">Most secure note apps offer plain text only. Taybeti includes a full <strong>rich text editor</strong> with drawing panel, shapes, image placement (behind/in‑front/integrated), table support, and page templates — all rendered and stored inside the encrypted note. The encryption wraps the entire document, not just the text. <strong>You don't have to choose between creativity and privacy.</strong></div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
             <div class="feature-card" onclick="this.classList.toggle('expanded')">
                 <h3>💯 <span data-i18n="ft9-title">Free. No Ads. No Telemetry.</span></h3>
                 <p data-i18n="ft9-desc">No revenue comes from your data. No usage tracking. No analytics SDKs. The only incentive is building something genuinely private.</p>
-                <div class="detail" data-i18n="">The app contains <strong>zero analytics libraries</strong> — no Firebase, no Google Analytics, no Crashlytics, no Mixpanel. There is no server to send data to even if we wanted to (there's no internet permission). The app makes <strong>no money from you</strong>. It's fully open source and community‑supported. The business model is simple: your privacy is the product.</div>
+                <div class="detail" data-i18n="ft9-detail">The app contains <strong>zero analytics libraries</strong> — no Firebase, no Google Analytics, no Crashlytics, no Mixpanel. There is no server to send data to even if we wanted to (there's no internet permission). The app makes <strong>no money from you</strong>. It's fully open source and community‑supported. The business model is simple: your privacy is the product.</div>
                 <div class="expand-hint">Click to learn more</div>
             </div>
         </div>
@@ -317,6 +317,7 @@
                 "ft9-title": "Free. No Ads. No Telemetry.",
                 "ft9-desc": "No revenue comes from your data. No usage tracking. No analytics SDKs. The only incentive is building something genuinely private.",
                 "detail": "Click a card to expand it and learn how each security feature actually works.",
+                "ft1-detail": "<strong>AES-256-GCM</strong> is the encryption standard used by governments and banks. <strong>Per-note keys</strong> mean each note has its own password — unlike apps that use one master key. <strong>Derived from your passphrase</strong> means the key is created mathematically from what you type, never stored anywhere.",
                 "join-community": "🌍 Join the Community:",
                 footer: "© 2026 Taybeti Notesharing. Licensed under MIT."
             },
@@ -344,6 +345,7 @@
                 "ft9-title": "Kostenlos. Keine Werbung. Keine Telemetrie.",
                 "ft9-desc": "Keine Einnahmen aus deinen Daten. Kein Nutzungs‑Tracking. Keine Analyse‑SDKs. Der einzige Anreiz ist, etwas wirklich Privates zu bauen.",
                 "detail": "Klicke auf eine Karte, um zu erfahren, wie jede Sicherheitsfunktion tatsächlich funktioniert.",
+                "ft1-detail": "<strong>AES-256-GCM</strong> ist der Verschlüsselungsstandard von Regierungen und Banken. <strong>Pro-Notiz-Schlüssel</strong> bedeuten, dass jede Notiz ihr eigenes Passwort hat. <strong>Abgeleitet von deiner Passphrase</strong> — der Schlüssel wird mathematisch erstellt, nie gespeichert.",
                 "join-community": "🌍 Trete der Community bei:",
                 footer: "© 2026 Taybeti Notesharing. Lizenziert unter MIT."
             },
@@ -371,6 +373,7 @@
                 "ft9-title": "Ücretsiz. Reklamsız. Telemetrisiz.",
                 "ft9-desc": "Verilerinizden gelir elde edilmez. Kullanım takibi yok. Analiz SDK'ları yok. Tek teşvik, gerçekten özel bir şey inşa etmektir.",
                 "detail": "Her güvenlik özelliğinin nasıl çalıştığını öğrenmek için bir karta tıklayın.",
+                "ft1-detail": "<strong>AES-256-GCM</strong> hükümetler ve bankalar tarafından kullanılan şifreleme standardıdır. <strong>Not-başına anahtarlar</strong> her notun kendi şifresi olduğu anlamına gelir. <strong>Parolanızdan türetilir</strong> — anahtar matematiksel olarak oluşturulur, asla saklanmaz.",
                 "join-community": "🌍 Topluluğa Katılın:",
                 footer: "© 2026 Taybeti Notesharing. MIT Lisansı altında."
             },
@@ -398,6 +401,7 @@
                 "ft9-title": "خۆڕایی. بێ ڕیکلام. بێ تێلیمیتری.",
                 "ft9-desc": "هیچ داهاتێک لە داتاکانتەوە نییە. هیچ شوێنکەوتنی بەکارهێنان نییە. هیچ SDK ی شیکاری نییە. تاکە هاندان دروستکردنی شتێکی بەڕاستی تایبەتە.",
                 "detail": "کرتە لەسەر کارتێک بکە بۆ ئەوەی بزانیت هەر تایبەتمەندییەکی ئاسایش چۆن کاردەکات.",
+                "ft1-detail": "<strong>AES-256-GCM</strong> ستانداردی شفرەکردنە کە لەلایەن حوکومەت و بانکەکانەوە بەکاردێت. <strong>کلیلی هەر تێبینییەک</strong> واتە هەر تێبینییەک ووشەی نهێنی تایبەتی خۆی هەیە. <strong>لە ووشەی نهێنییەکەتەوە وەردەگیرێت</strong> — کلیلیەکە بە بیرکاری دروست دەکرێت، هەرگیز پاشەکەوت ناکرێت.",
                 "join-community": "🌍 بەشداری لە کۆمەڵگە بکە:",
                 footer: "© 2026 Taybeti Notesharing. لەژێر مۆڵەتی MIT دایە."
             },
@@ -425,6 +429,7 @@
                 "ft9-title": "Belaş. Bê Reklam. Bê Telemetrî.",
                 "ft9-desc": "Tu hatin ji daneyên te nayê çêkirin. Şopandina bikaranînê tune. SDK-yên analîtîkê tune. Tenê teşwîq avakirina tiştekî bi rastî taybet e.",
                 "detail": "Li ser kartekê bitikîne da ku fêr bibî ka her taybetmendiya ewlehiyê çawa dixebite.",
+                "ft1-detail": "<strong>AES-256-GCM</strong> standarda şîfrekirinê ye ku ji aliyê hikumet û bankayan ve tê bikaranîn. <strong>Mifteyên her-notî</strong> tê wateya ku her not şîfreya xwe heye. <strong>Ji şîfreya te tê berhem anîn</strong> — mifte bi matematîkî tê çêkirin, qet nayê tomarkirin.",
                 "join-community": "🌍 Beşdarî Civakê Bibe:",
                 footer: "© 2026 Taybeti Notesharing. Di bin Lîsansa MIT de."
             }
