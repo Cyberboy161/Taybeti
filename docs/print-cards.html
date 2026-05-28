@@ -65,7 +65,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 <body>
 
 <div id="top">
-    <a href="index.html" style="color:#ccc;text-decoration:none;font-size:12px;margin-right:6px">🏠 Home</a>
     <div class="g"><label>QR→</label><select id="qd" onchange="u()"><option value="home">Home</option><option value="invited">Invited</option></select></div>
     <div class="g"><input id="ph" placeholder="Phone" oninput="u()" style="width:70px"><input id="em" placeholder="Email" oninput="u()" style="width:70px"></div>
     <div class="g"><input id="cq" placeholder="Custom QR URL" oninput="u()" style="width:120px"></div>
@@ -77,6 +76,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
     <div class="g" style="margin-left:auto"><label>Design</label><select id="ds" onchange="u()">
         <option value="cyber" selected>Cyber</option><option value="matrix">Matrix</option><option value="red">Red</option><option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option><option value="anime">Anime</option><option value="void">Void</option><option value="rainbow">Rainbow</option></select></div>
     <div class="g"><label>Img</label><input type="file" accept="image/*" onchange="upImg(this)"></div>
+    <a href="index.html" style="color:#ccc;text-decoration:none;font-size:12px">🏠 Home</a>
     <button class="btn" onclick="window.print()">🖨️ Print</button>
 </div>
 
