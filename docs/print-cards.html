@@ -194,8 +194,8 @@ function u(){
     document.getElementById('pb').innerHTML=makeBackCard(lo,bg);
     // Generate print pages — identical cards, just repeated
     var orient=document.getElementById('pOrient').value;
-    var cols=orient==='landscape'?4:4;
-    var rows=orient==='landscape'?3:4;
+    var cols=orient==='landscape'?4:3;
+    var rows=orient==='landscape'?2:3;
     // Use preview card size for print too
     var total=cols*rows;
     var pfw='',pbw='';
