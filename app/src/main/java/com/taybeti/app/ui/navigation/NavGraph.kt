@@ -275,7 +275,6 @@ fun MainDrawerScreen(
     var showDecoySetupDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showSecurityTips by remember { mutableStateOf(false) }
-    var showWhyTaybeti by remember { mutableStateOf(false) }
     var showPrintCardsInfo by remember { mutableStateOf(false) }
 
     val strings = LocalStrings.current
@@ -410,7 +409,7 @@ fun MainDrawerScreen(
     if (showPrintCardsInfo) {
         AlertDialog(
             onDismissRequest = { showPrintCardsInfo = false },
-            title = { Text("🖨️ Girê Cards (Print Cards)", fontWeight = FontWeight.Bold) },
+            title = { Text("🖨️ Gre Cards", fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     Text("What are they?", fontWeight = FontWeight.Bold)
@@ -476,42 +475,6 @@ fun MainDrawerScreen(
                 }
             },
             confirmButton = { TextButton(onClick = { showSecurityTips = false }) { Text("Got it") } }
-        )
-    }
-
-    if (showWhyTaybeti) {
-        AlertDialog(
-            onDismissRequest = { showWhyTaybeti = false },
-            title = { Text("❓ Why Taybeti?", fontWeight = FontWeight.Bold) },
-            text = {
-                val rows = listOf(
-                    Triple("Encryption", "Per-note AES-256-GCM", "At-rest only/none"),
-                    Triple("Keys", "Your passphrase = key", "Company holds keys"),
-                    Triple("Cloud", "Nothing. Zero.", "Synced to servers"),
-                    Triple("Offline", "100% — no internet", "Requires internet"),
-                    Triple("Keyboard", "Built-in, blocks loggers", "System tracked"),
-                    Triple("Source", "Open Source (MIT)", "Closed, proprietary"),
-                    Triple("Cost", "Free forever", "Ads or paid")
-                )
-                Column {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text("Feature", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                        Text("Taybeti", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-                        Text("Others", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.weight(1f))
-                    }
-                    rows.forEach { (feat, tay, other) ->
-                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-                            Text(feat, fontSize = 12.sp, modifier = Modifier.weight(1f))
-                            Text(tay, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-                            Text(other, fontSize = 12.sp, color = Color.Gray, modifier = Modifier.weight(1f))
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text("⚠️ The Keyboard Problem", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
-                    Text("Even if an app is encrypted, your phone's system keyboard records everything. Use apps with their own keyboard.", fontSize = 12.sp)
-                }
-            },
-            confirmButton = { TextButton(onClick = { showWhyTaybeti = false }) { Text("Close") } }
         )
     }
 
@@ -599,18 +562,13 @@ fun MainDrawerScreen(
                     }
                     androidx.compose.material3.HorizontalDivider()
                     Text("More", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                    androidx.compose.material3.HorizontalDivider()
+                    Text("More", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
                     DrawerItem(Icons.Default.Warning, "Security & Help") {
                         scope.launch { drawerState.close() }
                         showSecurityTips = true
                     }
-                    DrawerItem(Icons.Default.Note, "Girê Cards (Print Cards)") {
-                        scope.launch { drawerState.close() }
-                        showPrintCardsInfo = true
-                    }
-                    DrawerItem(Icons.Default.Star, "Why Taybeti?") {
-                        scope.launch { drawerState.close(); showWhyTaybeti = true }
-                    }
-                    DrawerItem(Icons.Default.Note, "Girê Cards (Print Cards)") {
+                    DrawerItem(Icons.Default.Note, "Gre Cards") {
                         scope.launch { drawerState.close() }
                         showPrintCardsInfo = true
                     }
