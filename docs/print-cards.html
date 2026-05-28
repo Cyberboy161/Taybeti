@@ -12,6 +12,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 #top select,#top input{background:#1a1a1a;color:#eee;border:1px solid #333;padding:3px 6px;border-radius:4px;font-size:10px}
 #top .g{display:flex;align-items:center;gap:3px;background:#151515;padding:2px 6px;border-radius:5px}
 .btn{background:#4f9cf7;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600;font-size:11px}
+.btn.green{background:#2ecc40}
 #top a{color:#555;text-decoration:none;font-size:10px}
 
 #app{display:flex;height:100vh;padding-top:50px}
@@ -31,9 +32,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 .arr button.al{grid-column:1;grid-row:2}.arr button.ar{grid-column:3;grid-row:2}
 .arr button.ad{grid-column:2;grid-row:3}
 .arr button.am{grid-column:2;grid-row:2;font-size:10px}
-
 .szrow{display:flex;gap:2px}
-.szrow button{flex:1;background:#222;color:#aaa;border:1px solid #333;border-radius:3px;padding:2px;cursor:pointer;font-size:9px}
+.szrow button{flex:1;background:#222;color:#aaa;border:1px solid #333;border-radius:3px;padding:3px;cursor:pointer;font-size:10px}
 .szrow button:hover{background:#4f9cf7;color:#fff}
 
 #preview{flex:1;display:flex;flex-direction:column;align-items:center;padding:12px;overflow-y:auto;gap:10px}
@@ -49,9 +49,19 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 .cd .bk .el{position:absolute;z-index:2;pointer-events:none}
 .cd .bk .qr-w{background:#fff;border-radius:0.8mm;padding:0.8mm;box-shadow:0 0 1mm rgba(0,0,0,.5);display:flex}
 .cd .bk .qr-w img{display:block}
+.cd .bk .tx{font-size:5px;color:#fff;text-shadow:0 0 2px #000;line-height:1.2}
 
-@media print{#top,#panel{display:none}#app{display:block;height:auto;padding:0}#preview{display:none}.prn{display:grid!important}}
-.prn{display:none}
+.ready-mode #panel{display:none}
+.ready-mode #preview{display:none}
+.ready-mode .prn{display:grid!important}
+
+.prn{display:none;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:2mm;max-width:204mm;margin:0 auto;padding:10px}
+.prn .cd{width:auto;height:auto;box-shadow:none}
+.prn .cd .ft{min-height:0}
+.prn .cd .ft .w{font-size:5px}
+.prn .cd .ft .l{min-height:4mm}
+
+@media print{#top{display:none}#app{display:block;height:auto;padding:0}#panel{display:none}#preview{display:none}.prn{display:grid!important}body{background:#fff}}
 </style>
 </head>
 <body>
@@ -73,21 +83,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
         <h3>Select Element</h3>
         <div class="elem sel" data-el="qr" onclick="sel('qr')"><span class="ic">▣</span><div class="lb">Website QR<div class="sub">Move + resize</div></div></div>
         <div class="elem" data-el="qr2" onclick="sel('qr2')"><span class="ic">▣</span><div class="lb">Custom QR<div class="sub">Instagram etc</div></div></div>
-        <div class="elem" data-el="url" onclick="sel('url')"><span class="ic">🔗</span><div class="lb">URL Text<div class="sub">Website link</div></div></div>
-        <div class="elem" data-el="contact" onclick="sel('contact')"><span class="ic">📋</span><div class="lb">Contact Info<div class="sub">Phone & email</div></div></div>
+        <div class="elem" data-el="url" onclick="sel('url')"><span class="ic">🔗</span><div class="lb">URL Text<div class="sub">Font size ↑↓</div></div></div>
+        <div class="elem" data-el="contact" onclick="sel('contact')"><span class="ic">📋</span><div class="lb">Contact Info<div class="sub">Font size ↑↓</div></div></div>
+        <div class="elem" data-el="custom" onclick="sel('custom')"><span class="ic">✏️</span><div class="lb">Custom Text<div class="sub">Your own words</div></div></div>
         <div class="elem" data-el="bg" onclick="sel('bg')"><span class="ic">🖼️</span><div class="lb">Background<div class="sub">Zoom + rotate</div></div></div>
 
         <div class="arr">
             <button class="ac" onclick="mv(0,-1)">▲</button>
             <button class="al" onclick="mv(-1,0)">◀</button>
-            <button class="am" onclick="resetEl()" title="Reset position">↺</button>
+            <button class="am" onclick="resetEl()" title="Reset">↺</button>
             <button class="ar" onclick="mv(1,0)">▶</button>
             <button class="ad" onclick="mv(0,1)">▼</button>
         </div>
 
         <div class="szrow">
-            <button onclick="sizeEl(-1)" title="Smaller">−</button>
-            <button onclick="sizeEl(1)" title="Bigger">+</button>
+            <button onclick="sizeEl(-1)">A−</button>
+            <button onclick="sizeEl(1)">A+</button>
         </div>
 
         <div style="display:flex;gap:3px;flex-wrap:wrap">
@@ -95,9 +106,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
             <button class="btn" style="font-size:9px;padding:3px 6px;flex:1" onclick="rotateBg(90)">90°↻</button>
         </div>
         <div class="szrow">
-            <button onclick="zoomBg(-10)" title="Zoom out">◉−</button>
-            <button onclick="zoomBg(10)" title="Zoom in">◉+</button>
+            <button onclick="zoomBg(-10)">◉−</button>
+            <button onclick="zoomBg(10)">◉+</button>
         </div>
+        <button class="btn green" onclick="toggleReady()" id="readyBtn" style="margin-top:4px">✅ Ready for Print</button>
     </div>
 
     <div id="preview">
@@ -106,13 +118,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
     </div>
 </div>
 
-<!-- Print grids -->
 <div class="prn" id="prf"></div>
 <div class="prn" id="prb"></div>
 
 <script>
-var IMG="https://cyberboy161.github.io/Taybeti/card-bg.png";var uploaded='';var selEl='qr';
-var el={qr:{x:30,y:30,w:26,h:26},qr2:{x:60,y:30,w:26,h:26},url:{x:50,y:2,w:0,h:0},contact:{x:50,y:88,w:0,h:0},bg:{x:0,y:0,w:100,h:100,rot:0}};
+var IMG="https://cyberboy161.github.io/Taybeti/card-bg.png";var uploaded='';var selEl='qr';var ready=false;
+var el={qr:{x:30,y:30,w:26,h:26},qr2:{x:60,y:30,w:26,h:26},url:{x:50,y:2,w:7,h:0},contact:{x:50,y:88,w:6,h:0},custom:{x:50,y:50,w:7,h:0},bg:{x:0,y:0,w:100,h:100,rot:0}};
 
 function SITE(){return document.getElementById('qd').value==='home'?'https://cyberboy161.github.io/Taybeti/index.html':'https://cyberboy161.github.io/Taybeti/invited.html'}
 function QRU(u){return"https://api.qrserver.com/v1/create-qr-code/?size=60x60&data="+encodeURIComponent(u||SITE())}
@@ -120,10 +131,13 @@ function QRU(u){return"https://api.qrserver.com/v1/create-qr-code/?size=60x60&da
 function upImg(i){if(i.files&&i.files[0]){var r=new FileReader();r.onload=function(e){uploaded=e.target.result;u()};r.readAsDataURL(i.files[0])}}
 function sel(e){selEl=e;document.querySelectorAll('#panel .elem').forEach(function(x){x.classList.toggle('sel',x.dataset.el===e)})}
 function mv(dx,dy){var p=el[selEl];if(!p)return;p.x=Math.max(0,Math.min(95,(p.x||0)+dx*4));p.y=Math.max(0,Math.min(95,(p.y||0)+dy*4));u()}
-function resetEl(){var p=el[selEl];if(p){p.x=selEl==='contact'?50:selEl==='url'?50:selEl==='qr2'?60:30;p.y=selEl==='contact'?88:selEl==='url'?2:30;u()}}
-function sizeEl(d){var p=el[selEl];if(!p||selEl==='url'||selEl==='contact')return;var s=(p.w||10)+d*3;p.w=Math.max(6,Math.min(50,s));p.h=p.w;u()}
+function resetEl(){var p=el[selEl];if(!p)return;var d={qr:[30,30],qr2:[60,30],url:[50,2],contact:[50,88],custom:[50,50]};var df=d[selEl]||[50,50];p.x=df[0];p.y=df[1];u()}
+function sizeEl(d){var p=el[selEl];if(!p||selEl==='bg')return;
+ if(selEl==='url'||selEl==='contact'||selEl==='custom'){p.w=Math.max(3,Math.min(20,(p.w||6)+d));u()}
+ else{p.w=Math.max(6,Math.min(50,(p.w||10)+d*3));p.h=p.w;u()}}
 function rotateBg(d){el.bg.rot=(el.bg.rot||0)+d;u()}
 function zoomBg(d){el.bg.w=Math.max(30,Math.min(200,(el.bg.w||100)+d));el.bg.h=el.bg.w;u()}
+function toggleReady(){ready=!ready;document.body.classList.toggle('ready-mode',ready);document.getElementById('readyBtn').textContent=ready?'✏️ Back to Edit':'✅ Ready for Print';if(ready)buildPrint()}
 
 function bgStyle(k){
     var m={matrix:'#000;background-image:linear-gradient(rgba(0,255,0,.08)1px,transparent 1px),linear-gradient(90deg,rgba(0,255,0,.08)1px,transparent 1px);background-size:3px 3px',
@@ -132,35 +146,54 @@ function bgStyle(k){
     fire:'linear-gradient(180deg,#1a0500,#331100,#1a0500,#330000)',ice:'linear-gradient(180deg,#001122,#003355,#001122)',
     neon:'#0d0d0d;background-image:linear-gradient(rgba(255,0,128,.05)2px,transparent 2px),linear-gradient(90deg,rgba(0,255,255,.05)2px,transparent 2px);background-size:6mm 6mm,6mm 6mm',
     dark:'linear-gradient(135deg,#0d1117,#161b22,#0d1117)',gold:'linear-gradient(160deg,#1a1a0a,#2a2010,#1a1a0a)'};
+    var u=document.getElementById('customText');var ct=u?u.value.trim():'';
     return uploaded?'url('+uploaded+') center/cover':(k==='cyber'?'url('+IMG+') center/cover':m[k]||m.dark)
 }
-
 function ft(){return'<div class="w">وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.</div><div class="l"></div>'}
 
-function backHalf(bgKey){
+function backHalf(bgKey,isPrint){
     var ph=document.getElementById('ph').value.trim(),em=document.getElementById('em').value.trim();
     var cq=document.getElementById('cq').value.trim();
-    var bgHtml='<div class="bgl" style="transform:rotate('+el.bg.rot+'deg) scale('+(el.bg.w/100)+')"><div style="background:'+bgStyle(bgKey)+';width:100%;height:100%"></div></div>';
-    var qr1='<div class="el" style="left:'+el.qr.x+'%;top:'+el.qr.y+'%"><div class="qr-w" style="width:'+el.qr.w+'px;height:'+el.qr.h+'px"><img src="'+QRU()+'" style="width:100%;height:100%"></div></div>';
-    var qr2=cq?'<div class="el" style="left:'+el.qr2.x+'%;top:'+el.qr2.y+'%"><div class="qr-w" style="width:'+el.qr2.w+'px;height:'+el.qr2.h+'px"><img src="'+QRU(cq)+'" style="width:100%;height:100%"></div></div>':'';
-    var url='<div class="el" style="left:'+el.url.x+'%;top:'+el.url.y+'%;font-size:5px;color:#fffd;text-shadow:0 0 1px #000">'+SITE()+'</div>';
+    var ct=document.getElementById('custTxt')?document.getElementById('custTxt').value.trim():'';
+    var sz=isPrint?0.6:1;
+    var bgHtml='<div class="bgl" style="transform:rotate('+el.bg.rot+'deg) scale('+(el.bg.w/100)*sz+')"><div style="background:'+bgStyle(bgKey)+';width:100%;height:100%"></div></div>';
+    var qr1='<div class="el" style="left:'+el.qr.x+'%;top:'+el.qr.y+'%"><div class="qr-w" style="width:'+(el.qr.w*sz)+'px;height:'+(el.qr.h*sz)+'px"><img src="'+QRU()+'" style="width:100%;height:100%"></div></div>';
+    var qr2=cq?'<div class="el" style="left:'+el.qr2.x+'%;top:'+el.qr2.y+'%"><div class="qr-w" style="width:'+(el.qr2.w*sz)+'px;height:'+(el.qr2.h*sz)+'px"><img src="'+QRU(cq)+'" style="width:100%;height:100%"></div></div>':'';
+    var ux='<div class="el tx" style="left:'+el.url.x+'%;top:'+el.url.y+'%;font-size:'+(el.url.w*sz)+'px">'+SITE()+'</div>';
     var ci='';
-    if(ph||em)ci='<div class="el" style="left:'+el.contact.x+'%;top:'+el.contact.y+'%;font-size:5px;color:#fff;text-shadow:0 0 1px #000">'+(ph?'📞'+ph:'')+(ph&&em?' · ':'')+(em?'📧'+em:'')+'</div>';
-    return'<div class="bk">'+bgHtml+qr1+qr2+url+ci+'</div>';
+    if(ph||em)ci='<div class="el tx" style="left:'+el.contact.x+'%;top:'+el.contact.y+'%;font-size:'+(el.contact.w*sz)+'px">'+(ph?'📞'+ph:'')+(ph&&em?' · ':'')+(em?'📧'+em:'')+'</div>';
+    var cx=ct?'<div class="el tx" style="left:'+el.custom.x+'%;top:'+el.custom.y+'%;font-size:'+(el.custom.w*sz)+'px">'+ct+'</div>':'';
+    return'<div class="bk">'+bgHtml+qr1+qr2+ux+ci+cx+'</div>';
 }
 
 function u(){
     var lo=document.getElementById('lo').value,bg=document.getElementById('ds').value;
-    // Front
     var fc=lo==='2v'?'<div class="cd" style="display:flex;flex-direction:row"><div class="ft" style="border-right:1.5px dashed #000">'+ft()+'</div><div class="ft">'+ft()+'</div></div>'
            :lo==='1'?'<div class="cd"><div class="ft">'+ft()+'</div></div>'
            :'<div class="cd"><div class="ft" style="border-bottom:1.5px dashed #000">'+ft()+'</div><div class="ft">'+ft()+'</div></div>';
     document.getElementById('pf').innerHTML=fc;
-    // Back
-    var bc=lo==='2v'?'<div class="cd" style="display:flex;flex-direction:row"><div style="flex:1;position:relative;border-right:1px dashed #fff8">'+backHalf(bg)+'</div><div style="flex:1;position:relative">'+backHalf(bg)+'</div></div>'
-           :lo==='1'?'<div class="cd">'+backHalf(bg)+'</div>'
-           :'<div class="cd"><div style="position:relative;height:50%;border-bottom:1px dashed #fff8">'+backHalf(bg)+'</div><div style="position:relative;height:50%">'+backHalf(bg)+'</div></div>';
+    var bc=lo==='2v'?'<div class="cd" style="display:flex;flex-direction:row"><div style="flex:1;position:relative;border-right:1px dashed #fff8">'+backHalf(bg,false)+'</div><div style="flex:1;position:relative">'+backHalf(bg,false)+'</div></div>'
+           :lo==='1'?'<div class="cd">'+backHalf(bg,false)+'</div>'
+           :'<div class="cd"><div style="position:relative;height:50%;border-bottom:1px dashed #fff8">'+backHalf(bg,false)+'</div><div style="position:relative;height:50%">'+backHalf(bg,false)+'</div></div>';
     document.getElementById('pb').innerHTML=bc;
+}
+
+function buildPrint(){
+    var lo=document.getElementById('lo').value,bg=document.getElementById('ds').value;
+    var pf=document.getElementById('prf'),pb=document.getElementById('prb');
+    pf.innerHTML='';pb.innerHTML='';
+    var cols=4,rows=2;if(lo==='2v'||lo==='2'){cols=4;rows=6}
+    pf.style.gridTemplateColumns='repeat('+cols+',1fr)';pf.style.gridTemplateRows='repeat('+rows+',1fr)';
+    pb.style.gridTemplateColumns='repeat('+cols+',1fr)';pb.style.gridTemplateRows='repeat('+rows+',1fr)';
+    var total=cols*rows;
+    for(var i=0;i<total;i++){
+        pf.innerHTML+=lo==='2v'?'<div class="cd" style="display:flex;flex-direction:row"><div class="ft" style="border-right:1.5px dashed #000">'+ft()+'</div><div class="ft">'+ft()+'</div></div>'
+            :lo==='1'?'<div class="cd"><div class="ft">'+ft()+'</div></div>'
+            :'<div class="cd"><div class="ft" style="border-bottom:1.5px dashed #000">'+ft()+'</div><div class="ft">'+ft()+'</div></div>';
+        pb.innerHTML+=lo==='2v'?'<div class="cd" style="display:flex;flex-direction:row"><div style="flex:1;position:relative;border-right:1px dashed #fff8">'+backHalf(bg,true)+'</div><div style="flex:1;position:relative">'+backHalf(bg,true)+'</div></div>'
+            :lo==='1'?'<div class="cd">'+backHalf(bg,true)+'</div>'
+            :'<div class="cd"><div style="position:relative;height:50%;border-bottom:1px dashed #fff8">'+backHalf(bg,true)+'</div><div style="position:relative;height:50%">'+backHalf(bg,true)+'</div></div>';
+    }
 }
 u()
 </script>
