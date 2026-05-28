@@ -94,6 +94,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.Button
@@ -196,7 +197,8 @@ data class TextSpan(
     val fontFamily: String = "Default",
     val fontSize: Int = 16,
     val textColor: String? = null,
-    val highlightColor: String? = null
+    val highlightColor: String? = null,
+    val isChecked: Boolean = false
 ) {
     fun toSpanStyle(): SpanStyle {
         var style = SpanStyle(
@@ -219,7 +221,7 @@ data class TextSpan(
     private fun buildTextDecoration(): TextDecoration? {
         val decorations = mutableListOf<TextDecoration>()
         if (isUnderline) decorations.add(TextDecoration.Underline)
-        if (isStrikethrough) decorations.add(TextDecoration.LineThrough)
+        if (isStrikethrough || isChecked) decorations.add(TextDecoration.LineThrough)
         return when (decorations.size) {
             0 -> null
             1 -> decorations[0]
@@ -692,6 +694,7 @@ fun NoteEditorScreen(
     var showPageColorPicker by remember { mutableStateOf(false) }
     var pageBackgroundColor by remember { mutableStateOf(Color(0xFF1A1A1A)) }
     var showDrawingPanel by remember { mutableStateOf(false) }
+    var checklistMode by remember { mutableStateOf(false) }
     var showSecurityTips by remember { mutableStateOf(false) }
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
@@ -884,6 +887,9 @@ fun NoteEditorScreen(
             onKey = { char ->
                 saveUndoState()
                 if (currentPageIndex < pages.size) {
+                    if (checklistMode) {
+                        pages[currentPageIndex].applyToCurrentSpan { it.copy(isChecked = true) }
+                    }
                     pages[currentPageIndex].appendText(char.toString())
                 }
             },
@@ -2200,6 +2206,16 @@ fun NoteEditorScreen(
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
+                                    .border(1.dp, if (checklistMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                    .clickable { checklistMode = !checklistMode },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.CheckBoxOutlineBlank, "Checklist", modifier = Modifier.size(22.dp), tint = if (checklistMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
                                     .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
                                     .clickable { showDrawingPanel = true },
                                 contentAlignment = Alignment.Center
@@ -2817,7 +2833,20 @@ private fun PageBlockRich(
 
                     if (paraAnnotated.isNotEmpty() || paragraph.tableRows == null) {
                         val isLast = paraIdx == formattedText.paragraphs.lastIndex
+                        val isCheckItem = paragraph.spans.any { it.isChecked }
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            if (isCheckItem) {
+                                Checkbox(
+                                    checked = paragraph.spans.all { it.isChecked } && paragraph.spans.any { it.text.isNotEmpty() },
+                                    onCheckedChange = { checked ->
+                                        paragraph.spans.forEachIndexed { idx, span ->
+                                            paragraph.spans[idx] = span.copy(isChecked = checked)
+                                        }
+                                        formattedText.renderVersion++
+                                    },
+                                    modifier = Modifier.size(18.dp).padding(end = 4.dp)
+                                )
+                            }
                             if (prefix.isNotEmpty()) {
                                 Text(
                                     text = prefix,
