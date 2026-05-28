@@ -37,7 +37,7 @@
             android:name=".MainActivityCalc"
             android:targetActivity=".MainActivity"
             android:enabled="false"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@drawable/ic_disguise_calc"
             android:label="Calculator"
             android:exported="true">
             <intent-filter>
@@ -50,7 +50,7 @@
             android:name=".MainActivityNotes"
             android:targetActivity=".MainActivity"
             android:enabled="false"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@drawable/ic_disguise_notes"
             android:label="Notes"
             android:exported="true">
             <intent-filter>
@@ -63,7 +63,7 @@
             android:name=".MainActivityClock"
             android:targetActivity=".MainActivity"
             android:enabled="false"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@drawable/ic_disguise_clock"
             android:label="Clock"
             android:exported="true">
             <intent-filter>
@@ -76,7 +76,7 @@
             android:name=".MainActivitySettings"
             android:targetActivity=".MainActivity"
             android:enabled="false"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@drawable/ic_disguise_settings"
             android:label="Settings"
             android:exported="true">
             <intent-filter>

@@ -431,23 +431,47 @@ fun MainDrawerScreen(
     if (showSecurityTips) {
         AlertDialog(
             onDismissRequest = { showSecurityTips = false },
-            title = { Text("🛡️ 10 Rules for Staying Secure", fontWeight = FontWeight.Bold) },
+            title = { Text("🛡️ Security & Help", fontWeight = FontWeight.Bold) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text("📋 10 Security Rules", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
                     listOf(
-                        "1. Use apps with their own keyboard" to "System keyboards log every keystroke.",
-                        "2. Never reuse passphrases" to "Every account — a unique passphrase. Write on paper.",
-                        "3. Prefer offline-first apps" to "No internet = no data leak possible.",
-                        "4. Verify, don't trust" to "Open source means you can check.",
-                        "5. Only share passphrases physically" to "In emergencies only. Prefer paper, in person.",
-                        "6. Disable cloud sync" to "Every sync is a copy on someone else's server.",
-                        "7. Be aware of surroundings" to "Shoulder surfing still works. Don't type in public.",
-                        "8. Keep software updated" to "Patches fix known vulnerabilities.",
-                        "9. Review app permissions" to "Revoke camera, mic, location from apps.",
-                        "10. Trust your instincts" to "If something feels wrong — stop."
+                        "1. Use apps with own keyboard" to "System keyboards log keystrokes.",
+                        "2. Never reuse passphrases" to "Unique per account. Write on paper.",
+                        "3. Prefer offline-first" to "No internet = no data leak.",
+                        "4. Verify, don't trust" to "Open source means auditable.",
+                        "5. Share passphrases physically" to "Paper, in person. Digital = exposed.",
+                        "6. Disable cloud sync" to "Your data on their server.",
+                        "7. Be aware of surroundings" to "Don't type passphrases in public.",
+                        "8. Keep updated" to "Patches fix holes.",
+                        "9. Review permissions" to "Revoke camera, mic, location.",
+                        "10. Trust instincts" to "If it feels wrong — stop."
                     ).forEach { (t, d) ->
-                        Text(t, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
-                        Text(d, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text(t, fontWeight = FontWeight.Bold, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+                        Text(d, fontSize = 11.sp, color = Color.Gray)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Text("❓ Why Taybeti?", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                    val rows = listOf(
+                        Triple("Encryption", "Per-note AES-256", "At-rest/none"),
+                        Triple("Keys", "Your passphrase", "Company holds"),
+                        Triple("Cloud", "Zero", "Synced"),
+                        Triple("Offline", "100%", "Needs internet"),
+                        Triple("Keyboard", "Built-in", "System tracked"),
+                        Triple("Source", "Open (MIT)", "Closed"),
+                        Triple("Cost", "Free forever", "Ads/paid")
+                    )
+                    Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                        Text("Feature", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), fontSize = 11.sp)
+                        Text("Taybeti", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f), fontSize = 11.sp)
+                        Text("Others", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.weight(1f), fontSize = 11.sp)
+                    }
+                    rows.forEach { (feat, tay, other) ->
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+                            Text(feat, fontSize = 10.sp, modifier = Modifier.weight(1f))
+                            Text(tay, fontSize = 10.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+                            Text(other, fontSize = 10.sp, color = Color.Gray, modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             },
@@ -575,8 +599,13 @@ fun MainDrawerScreen(
                     }
                     androidx.compose.material3.HorizontalDivider()
                     Text("More", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-                    DrawerItem(Icons.Default.Warning, "Security Tips") {
-                        scope.launch { drawerState.close(); showSecurityTips = true }
+                    DrawerItem(Icons.Default.Warning, "Security & Help") {
+                        scope.launch { drawerState.close() }
+                        showSecurityTips = true
+                    }
+                    DrawerItem(Icons.Default.Note, "Girê Cards (Print Cards)") {
+                        scope.launch { drawerState.close() }
+                        showPrintCardsInfo = true
                     }
                     DrawerItem(Icons.Default.Star, "Why Taybeti?") {
                         scope.launch { drawerState.close(); showWhyTaybeti = true }
