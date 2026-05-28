@@ -48,7 +48,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 .cd-preview .bk .qr-w img{display:block;width:100%;height:100%}
 .cd-preview .bk .tx{color:#fff;text-shadow:0 0 2px #000;line-height:1.2}
 
-@media print{#top,#panel{display:none}#preview{display:none}#main{display:block;height:auto;min-height:0}body{background:#fff}.print-page{display:grid!important}}
+@media print{
+ #top,#panel,#preview{display:none!important}
+ #main{display:block;height:auto;min-height:0;padding:0}
+ body{background:#fff}
+ .print-page{display:grid!important}
+ .print-page .cd-preview{width:auto!important;height:auto!important;min-height:0!important}
+ .print-page .ft{min-height:0!important}
+}
 .print-page{display:none}
 </style>
 </head>
@@ -178,8 +185,8 @@ function u(){
     for(var i=0;i<total;i++){pfHtml+=makeFrontCard(lo);pbHtml+=makeBackCard(lo,bg)}
     document.getElementById('printFrontPage').innerHTML=pfHtml;
     document.getElementById('printBackPage').innerHTML=pbHtml;
-    document.getElementById('printFrontPage').style.cssText='display:none;grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;width:100%;max-width:204mm;margin:0 auto';
-    document.getElementById('printBackPage').style.cssText='display:none;grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;width:100%;max-width:204mm;margin:0 auto';
+    document.getElementById('printFrontPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;max-width:204mm;margin:0 auto;width:100%';
+    document.getElementById('printBackPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:2mm;max-width:204mm;margin:0 auto;width:100%';
 }
 u()
 </script>
