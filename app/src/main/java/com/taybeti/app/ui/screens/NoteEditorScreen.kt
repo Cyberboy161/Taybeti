@@ -693,8 +693,6 @@ fun NoteEditorScreen(
     var pageBackgroundColor by remember { mutableStateOf(Color(0xFF1A1A1A)) }
     var showDrawingPanel by remember { mutableStateOf(false) }
     var showSecurityTips by remember { mutableStateOf(false) }
-    var showWhyTaybeti by remember { mutableStateOf(false) }
-    var showPrintCardsInfo by remember { mutableStateOf(false) }
     var editingTableCell by remember { mutableStateOf<Triple<Int, Int, Int>?>(null) }
     var tableCellText by remember { mutableStateOf("") }
     var zoomScale by remember { mutableStateOf(1f) }
@@ -1779,52 +1777,6 @@ fun NoteEditorScreen(
             )
         }
 
-        if (showWhyTaybeti) {
-            AlertDialog(
-                onDismissRequest = { showWhyTaybeti = false },
-                title = { Text("❓ Why Taybeti?", fontWeight = FontWeight.Bold) },
-                text = {
-                    Column {
-                        val rows = listOf(
-                            Triple("🔒 Encryption", "Per‑note AES‑256‑GCM", "At‑rest only, or none"),
-                            Triple("🔑 Keys", "Your passphrase = your key", "Company holds the keys"),
-                            Triple("☁️ Cloud", "Nothing. Zero.", "Synced to their servers"),
-                            Triple("📵 Offline", "100% — no internet permission", "Requires internet"),
-                            Triple("⌨️ Keyboard", "Built‑in, blocks keyloggers", "System keyboard (tracked)"),
-                            Triple("👁️ Source", "Open Source (MIT license)", "Closed, proprietary"),
-                            Triple("💸 Cost", "Free forever", "Free with ads, or paid")
-                        )
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Feature", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                            Text("Taybeti", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-                            Text("Others", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.weight(1f))
-                        }
-                        rows.forEach { (feat, tay, other) ->
-                            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(feat, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-                                Text(tay, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-                                Text(other, style = MaterialTheme.typography.bodySmall, color = Color.Gray, modifier = Modifier.weight(1f))
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            "Custom Keyboard Matters",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Text(
-                            "Your phone's system keyboard (Gboard, SwiftKey) records keystrokes. If the app doesn't have its own keyboard, encryption means nothing.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showWhyTaybeti = false }) { Text("Close") }
-                }
-            )
-        }
-
         if (showSecurityTips) {
             val scrollState = rememberScrollState()
             AlertDialog(
@@ -1868,42 +1820,6 @@ fun NoteEditorScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = { showSecurityTips = false }) { Text("Got it") }
-                }
-            )
-        }
-
-        if (showPrintCardsInfo) {
-            AlertDialog(
-                onDismissRequest = { showPrintCardsInfo = false },
-                title = { Text("🖨️ Girê Cards (Print Cards)", fontWeight = FontWeight.Bold) },
-                text = {
-                    Column {
-                        Text(
-                            "Printable passphrase cards — 8 or 24 per A4 sheet.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text("How it works:", fontWeight = FontWeight.Bold)
-                        Text("1. Visit the Print Cards page on our website")
-                        Text("2. Customize the design, layout, and QR codes")
-                        Text("3. Print on A4 paper (front + back)")
-                        Text("4. Both people write the same passphrase on the front")
-                        Text("5. Cut along the dashed line — each person keeps their half")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Why use them:", fontWeight = FontWeight.Bold)
-                        Text("🔒 Passphrases should never be stored digitally. Paper is the most secure way — no server, no cloud, no keyboard logs. A physical card ensures no one else sees your shared secret.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("🤝 As a bonus: sharing a physical token builds real-world trust. Each person holds a unique object — a tangible bond.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            "🔗 Visit: cyberboy161.github.io/Taybeti/print-cards.html",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showPrintCardsInfo = false }) { Text("Got it") }
                 }
             )
         }
@@ -2073,16 +1989,8 @@ fun NoteEditorScreen(
                                     onDismissRequest = { showMoreMenu = false }
                                 ) {
                                     DropdownMenuItem(
-                                        text = { Text("🛡️ Security Tips") },
+                                        text = { Text("🛡️ Security & Help") },
                                         onClick = { showMoreMenu = false; showSecurityTips = true }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text("❓ Why Taybeti?") },
-                                        onClick = { showMoreMenu = false; showWhyTaybeti = true }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text("🖨️ Girê Cards") },
-                                        onClick = { showMoreMenu = false; showPrintCardsInfo = true }
                                     )
                                 }
                             }
