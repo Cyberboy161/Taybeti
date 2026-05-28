@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Gre Cards — Builder</title>
 <style>
-@page{size:A4 portrait;margin:3mm}
+@page{size:A4 portrait;margin:2mm}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflow-y:auto;min-height:100vh}
 #top{position:sticky;top:0;z-index:200;background:#0a0a0a;border-bottom:1px solid #222;padding:6px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
@@ -36,7 +36,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 #preview{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;gap:16px}
 #preview h2{color:#fff;font-size:15px;margin:0}
 .preview-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.cd-preview{background:#fff;border:1px solid #555;border-radius:3px;overflow:hidden;position:relative;color:#111;width:210px;height:297px;box-shadow:0 4px 25px rgba(0,0,0,.5)}
+.cd-preview{background:#fff;border:1px solid #555;border-radius:3px;overflow:hidden;position:relative;color:#111;width:220px;height:310px;box-shadow:0 4px 25px rgba(0,0,0,.5)}
 .cd-preview .ft{position:relative;display:flex;flex-direction:column;padding:2mm 3mm;height:100%;overflow:hidden}
 .cd-preview .ft .w{font-size:6px;color:#333;text-align:center;line-height:1.2;margin-bottom:1mm;flex-shrink:0}
 .cd-preview .ft .l{width:65%;border-bottom:1px solid #444;flex:1;min-height:4mm}
@@ -63,8 +63,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 <body>
 
 <div id="top">
-    <div class="g"><label>Layout</label><select id="lo" onchange="u()"><option value="2h">2 strips</option><option value="1">1</option><option value="2v">2 vert</option></select></div>
-    <div class="g"><label>Design</label><select id="ds" onchange="u()">
+    <div class="g"><label>Design</label><select id="ds" onchange="u()"><select id="ds" onchange="u()">
         <option value="cyber">Cyber</option><option value="matrix">Matrix</option><option value="red">Red</option><option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option></select></div>
     <div class="g"><label>Img</label><input type="file" accept="image/*" onchange="upImg(this)"></div>
     <div class="g"><label>QR→</label><select id="qd" onchange="u()"><option value="home">Home</option><option value="invited">Invited</option></select></div>
@@ -188,7 +187,7 @@ function makeBackCard(lo,bg){
 }
 
 function u(){
-    var lo=document.getElementById('lo').value,bg=document.getElementById('ds').value;
+    var lo='2h',bg=document.getElementById('ds').value;
     // Preview — show 2 cards side by side
     document.getElementById('pf').innerHTML=makeFrontCard(lo);
     document.getElementById('pb').innerHTML=makeBackCard(lo,bg);
@@ -202,8 +201,8 @@ function u(){
     for(var i=0;i<total;i++){pfw+=makeFrontCard(lo);pbw+=makeBackCard(lo,bg)}
     document.getElementById('printFrontPage').innerHTML=pfw;
     document.getElementById('printBackPage').innerHTML=pbw;
-    document.getElementById('printFrontPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:1mm;max-width:100%;margin:0 auto;width:100%';
-    document.getElementById('printBackPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:1mm;max-width:100%;margin:0 auto;width:100%';
+    document.getElementById('printFrontPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:0.5mm;max-width:100%;margin:0 auto;width:100%';
+    document.getElementById('printBackPage').style.cssText='grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:0.5mm;max-width:100%;margin:0 auto;width:100%';
 }
 u()
 </script>
