@@ -51,10 +51,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 @media print{
  #top,#panel,#preview{display:none!important}
  #main{display:block;height:auto;min-height:0;padding:0}
- body{background:#fff}
- .print-page{display:grid!important}
- .print-page .cd-preview{width:auto!important;height:auto!important;min-height:0!important}
+ body{background:#fff;margin:0;padding:0}
+ .print-page{display:grid!important;height:100vh;page-break-after:always}
+ .print-page:last-child{page-break-after:auto}
+ .print-page .cd-preview{width:auto!important;height:auto!important;min-height:0!important;box-shadow:none!important}
  .print-page .ft{min-height:0!important}
+ .print-page .ft .w{font-size:2mm!important}
+ .print-page .ft .l{min-height:3mm!important}
+ .print-page .bk .qr-w{width:auto!important;height:auto!important}
+ @page{size:A4 portrait;margin:3mm}
 }
 .print-page{display:none}
 </style>
@@ -84,6 +89,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
         <div class="elem" data-el="custom" onclick="sel('custom')"><span class="ic">✏️</span><div class="lb">Custom Text<div class="sub">Type below</div></div></div>
         <div class="elem" data-el="bg" onclick="sel('bg')"><span class="ic">🖼️</span><div class="lb">Background<div class="sub">Zoom + rotate</div></div></div>
         <div class="elem" data-el="ftxt" onclick="sel('ftxt')"><span class="ic">📝</span><div class="lb">Front Text<div class="sub">Move warning</div></div></div>
+        <div class="elem" data-el="fline" onclick="sel('fline')"><span class="ic">📏</span><div class="lb">Write Line<div class="sub">Move the line</div></div></div>
 
         <input type="text" id="custTxt" placeholder="Type your custom text here" oninput="u()">
 
@@ -120,7 +126,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 
 <script>
 var IMG="https://cyberboy161.github.io/Taybeti/card-bg.png";var uploaded='';var selEl='qr';
-var el={qr:{x:30,y:30,w:40,h:40},qr2:{x:60,y:30,w:40,h:40},url:{x:50,y:3,w:7,h:0},contact:{x:50,y:88,w:6,h:0},custom:{x:50,y:50,w:8,h:0},bg:{x:0,y:0,w:100,h:100,rot:0},ftxt:{x:50,y:10,w:0,h:0}};
+var el={qr:{x:30,y:30,w:40,h:40},qr2:{x:60,y:30,w:40,h:40},url:{x:50,y:3,w:7,h:0},contact:{x:50,y:88,w:6,h:0},custom:{x:50,y:50,w:8,h:0},bg:{x:0,y:0,w:100,h:100,rot:0},ftxt:{x:50,y:10,w:0,h:0},fline:{x:50,y:70,w:0,h:0}};
 
 function SITE(){return document.getElementById('qd').value=='home'?'https://cyberboy161.github.io/Taybeti/index.html':'https://cyberboy161.github.io/Taybeti/invited.html'}
 function showU(){return document.getElementById('showUrl').checked}
@@ -129,7 +135,7 @@ function QRU(u){return"https://api.qrserver.com/v1/create-qr-code/?size=80x80&da
 function upImg(i){if(i.files&&i.files[0]){var r=new FileReader();r.onload=function(e){uploaded=e.target.result;u()};r.readAsDataURL(i.files[0])}}
 function sel(e){selEl=e;document.querySelectorAll('#panel .elem').forEach(function(x){x.classList.toggle('sel',x.dataset.el===e)})}
 function mv(dx,dy){var p=el[selEl];if(!p)return;p.x=Math.max(0,Math.min(92,(p.x||0)+dx*3));p.y=Math.max(0,Math.min(92,(p.y||0)+dy*3));u()}
-function resetEl(){var p=el[selEl];if(!p)return;var d={qr:[30,30],qr2:[60,30],url:[50,3],contact:[50,88],custom:[50,50],ftxt:[50,10]};var df=d[selEl]||[50,50];p.x=df[0];p.y=df[1];u()}
+function resetEl(){var p=el[selEl];if(!p)return;var d={qr:[30,30],qr2:[60,30],url:[50,3],contact:[50,88],custom:[50,50],ftxt:[50,10],fline:[50,70]};var df=d[selEl]||[50,50];p.x=df[0];p.y=df[1];u()}
 function sizeEl(d){var p=el[selEl];if(!p||selEl=='bg'||selEl=='ftxt')return;if(selEl=='url'||selEl=='contact'||selEl=='custom'){p.w=Math.max(3,Math.min(24,(p.w||6)+d));u()}else{p.w=Math.max(8,Math.min(60,(p.w||15)+d*4));p.h=p.w;u()}}
 function rotateBg(d){el.bg.rot=(el.bg.rot||0)+d;u()}
 function zoomBg(d){el.bg.w=Math.max(30,Math.min(200,(el.bg.w||100)+d));el.bg.h=el.bg.w;u()}
@@ -146,8 +152,11 @@ function bgStyle(k){
 
 function ft(forPrint){
     var cls=forPrint?'ft':'ft';
-    var p=el.ftxt;
-    return'<div class="'+cls+'"><div class="w" style="position:relative;left:'+(p.x-50)+'%;top:'+((p.y-10)*0.5)+'%">وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.</div><div class="l"></div></div>';
+    var p=el.ftxt,pl=el.fline;
+    return'<div class="'+cls+'">'+
+        '<div class="w" style="position:relative;left:'+(p.x-50)+'%;top:'+((p.y-10)*0.5)+'%">وێنەی مەگرە. بە کەس مەڵێ. بە دەنگی بەرز مەیخوێنەرەوە.<br>Do not photograph. Do not share.<br>Nicht fotografieren. Nicht teilen.</div>'+
+        '<div class="l" style="position:relative;left:'+(pl.x-50)+'%;top:'+((pl.y-70)*0.5)+'%"></div>'+
+        '</div>';
 }
 
 function backHalf(bgKey){
