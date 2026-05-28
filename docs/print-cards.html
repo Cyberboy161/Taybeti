@@ -9,8 +9,9 @@
 body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflow-y:auto;min-height:100vh}
 #top{position:sticky;top:0;z-index:200;background:#0a0a0a;border-bottom:1px solid #222;padding:6px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
 #top label{color:#888;font-size:11px}
-#top select{background:#222;color:#fff;border:1px solid #555;padding:6px 10px;border-radius:5px;font-size:12px;min-width:90px;height:32px;cursor:pointer}
-#top select option{background:#1a1a1a;color:#fff}
+#top select{background:#222;color:#fff;border:1px solid #555;padding:4px 8px;border-radius:5px;font-size:12px;min-width:90px;height:30px;cursor:pointer}
+#top select:focus{outline:none;border-color:#4f9cf7}
+#top input{background:#1a1a1a;color:#eee;border:1px solid #333;padding:5px 8px;border-radius:4px;font-size:11px}
 #top .g{display:flex;align-items:center;gap:4px;background:#151515;padding:3px 8px;border-radius:5px}
 .btn{background:#4f9cf7;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;font-size:12px}
 .btn.green{background:#2ecc40}
@@ -64,9 +65,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
 <body>
 
 <div id="top">
-    <div class="g"><label>Design</label><select id="ds" onchange="u()"><select id="ds" onchange="u()">
-        <option value="cyber">Cyber</option><option value="matrix">Matrix</option><option value="red">Red</option><option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option></select></div>
-    <div class="g"><label>Img</label><input type="file" accept="image/*" onchange="upImg(this)"></div>
     <div class="g"><label>QR→</label><select id="qd" onchange="u()"><option value="home">Home</option><option value="invited">Invited</option></select></div>
     <div class="g"><input id="ph" placeholder="Phone" oninput="u()" style="width:70px"><input id="em" placeholder="Email" oninput="u()" style="width:70px"></div>
     <div class="g"><input id="cq" placeholder="Custom QR URL" oninput="u()" style="width:120px"></div>
@@ -75,6 +73,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
         <option value="portrait">Portrait A4</option>
         <option value="landscape">Landscape A4</option>
     </select></div>
+    <div class="g" style="margin-left:auto"><label>Design</label><select id="ds" onchange="u()">
+        <option value="cyber" selected>Cyber</option><option value="matrix">Matrix</option><option value="red">Red</option><option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option></select></div>
+    <div class="g"><label>Img</label><input type="file" accept="image/*" onchange="upImg(this)"></div>
     <button class="btn" onclick="window.print()">🖨️ Print</button>
     <a href="index.html">🏠</a>
 </div>
