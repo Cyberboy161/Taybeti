@@ -220,7 +220,7 @@ fun NoteEncryptionTutorialDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "How Note Encryption Works",
+                            InlineTranslations.t("how_works", lang),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -245,7 +245,7 @@ fun NoteEncryptionTutorialDialog(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        "Step ${step + 1} of $totalSteps",
+                        "${InlineTranslations.t("step", lang)} ${step + 1} / $totalSteps",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
