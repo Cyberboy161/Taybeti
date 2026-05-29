@@ -233,6 +233,7 @@ object InlineTranslations {
             "share_decode" to "They decode & decrypt",
             "step_label" to "step",
             "sec_compromise" to "These issues may compromise the security of your encrypted data.",
+            "change_lang" to "Change language",
         ),
         "de" to mapOf(
             "skip" to "Überspringen", "back" to "Zurück", "next" to "Weiter", "done" to "Fertig!",
@@ -441,6 +442,7 @@ object InlineTranslations {
             "step_label" to "Schritt",
             "sec_compromise" to "Diese Probleme könnten die Sicherheit deiner Daten gefährden.",
             "step" to "Schritt",
+            "change_lang" to "Sprache ändern",
         ),
         "tr" to mapOf(
             "skip" to "Atla", "back" to "Geri", "next" to "İleri", "done" to "Tamam!",
@@ -646,6 +648,7 @@ object InlineTranslations {
             "step_label" to "adım",
             "sec_compromise" to "Bu sorunlar verilerinin güvenliğini tehlikeye atabilir.",
             "step" to "Adım",
+            "change_lang" to "Dili değiştir",
         ),
         "ckb" to mapOf(
             "skip" to "پەڕاندن", "back" to "گەڕانەوە", "next" to "داهاتوو", "done" to "تەواو!",
@@ -847,6 +850,7 @@ object InlineTranslations {
             "step_label" to "هەنگاو",
             "sec_compromise" to "ئەم کێشانە ئاسایشی داتاکەت دەخەنە مەترسی.",
             "step" to "هەنگاو",
+            "change_lang" to "گۆڕینی زمان",
         ),
         "kmr" to mapOf(
             "skip" to "Bihêle", "back" to "Vegere", "next" to "Pêşve", "done" to "Qediya!",
@@ -1048,6 +1052,7 @@ object InlineTranslations {
             "step_label" to "gav",
             "sec_compromise" to "Dibe ku ev pirsgirêk ewlekariya daneyên te tawîz bidin.",
             "step" to "Gav",
+            "change_lang" to "Ziman biguhere",
         ),
     )
 

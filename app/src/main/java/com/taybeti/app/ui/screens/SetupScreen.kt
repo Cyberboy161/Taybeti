@@ -1,6 +1,9 @@
 package com.taybeti.app.ui.screens
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,14 +11,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.taybeti.app.data.repository.NoteRepository
@@ -41,21 +49,25 @@ import com.taybeti.app.util.Constants
 import com.taybeti.app.util.InlineTranslations
 import com.taybeti.app.util.LocalLanguageCode
 import com.taybeti.app.util.LocalStrings
+import com.taybeti.app.util.LocaleManager
 import kotlinx.coroutines.launch
 
 @Composable
 fun SetupScreen(
     repository: NoteRepository,
-    onSetupComplete: () -> Unit
+    onSetupComplete: () -> Unit,
+    onChangeLanguage: (String) -> Unit = {}
 ) {
     val strings = LocalStrings.current
     val lang = LocalLanguageCode.current
+    val context = LocalContext.current
     var masterPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var decoyPassword by remember { mutableStateOf("") }
     var confirmDecoy by remember { mutableStateOf("") }
     var enableDecoy by remember { mutableStateOf(false) }
     var showDecoyInfo by remember { mutableStateOf(false) }
+    var showLanguageMenu by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var showTutorial by remember { mutableStateOf(false) }
@@ -63,6 +75,29 @@ fun SetupScreen(
 
     KeyboardHost {
         Column(modifier = Modifier.fillMaxSize()) {
+        // Language globe button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Box {
+                IconButton(onClick = { showLanguageMenu = true }) {
+                    Icon(Icons.Default.Language, InlineTranslations.t("change_lang", lang), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+                }
+                DropdownMenu(expanded = showLanguageMenu, onDismissRequest = { showLanguageMenu = false }) {
+                    LocaleManager.languages.forEach { language ->
+                        DropdownMenuItem(
+                            text = { Text(language.label) },
+                            onClick = {
+                                showLanguageMenu = false
+                                LocaleManager.setLanguage(context, language.code)
+                                onChangeLanguage(language.code)
+                            }
+                        )
+                    }
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .weight(1f)

@@ -217,6 +217,9 @@ fun AppNavGraph(
                     navController.navigate(NavRoutes.NOTES) {
                         popUpTo(NavRoutes.SETUP) { inclusive = true }
                     }
+                },
+                onChangeLanguage = { lang ->
+                    currentLanguage = lang
                 }
             )
         }
