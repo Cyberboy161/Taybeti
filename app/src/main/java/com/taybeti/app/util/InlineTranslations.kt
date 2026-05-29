@@ -440,6 +440,7 @@ object InlineTranslations {
             "share_decode" to "Sie entschlüsseln",
             "step_label" to "Schritt",
             "sec_compromise" to "Diese Probleme könnten die Sicherheit deiner Daten gefährden.",
+            "step" to "Schritt",
         ),
         "tr" to mapOf(
             "skip" to "Atla", "back" to "Geri", "next" to "İleri", "done" to "Tamam!",
@@ -644,6 +645,7 @@ object InlineTranslations {
             "share_decode" to "Onlar çözer",
             "step_label" to "adım",
             "sec_compromise" to "Bu sorunlar verilerinin güvenliğini tehlikeye atabilir.",
+            "step" to "Adım",
         ),
         "ckb" to mapOf(
             "skip" to "پەڕاندن", "back" to "گەڕانەوە", "next" to "داهاتوو", "done" to "تەواو!",
@@ -844,6 +846,7 @@ object InlineTranslations {
             "share_decode" to "ئەوان دەیکەنەوە",
             "step_label" to "هەنگاو",
             "sec_compromise" to "ئەم کێشانە ئاسایشی داتاکەت دەخەنە مەترسی.",
+            "step" to "هەنگاو",
         ),
         "kmr" to mapOf(
             "skip" to "Bihêle", "back" to "Vegere", "next" to "Pêşve", "done" to "Qediya!",
@@ -1044,6 +1047,7 @@ object InlineTranslations {
             "share_decode" to "Ew vedikin",
             "step_label" to "gav",
             "sec_compromise" to "Dibe ku ev pirsgirêk ewlekariya daneyên te tawîz bidin.",
+            "step" to "Gav",
         ),
     )
 

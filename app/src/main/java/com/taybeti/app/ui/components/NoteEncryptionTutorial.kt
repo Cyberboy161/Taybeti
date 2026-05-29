@@ -316,7 +316,8 @@ fun NoteEncryptionTutorialDialog(
                                     onActivateConfirm = { activeField = "confirmPassphrase" },
                                     onToggleShow = { showPassphrase = !showPassphrase },
                                     onCopy = ::handleCopy,
-                                    onPaste = ::handlePaste
+                                    onPaste = ::handlePaste,
+                                    lang = lang
                                 )
                                 2 -> Step3_Encrypt(
                                     userMessage,
