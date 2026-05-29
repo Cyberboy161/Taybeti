@@ -77,7 +77,7 @@ fun SetupScreen(
         Column(modifier = Modifier.fillMaxSize()) {
         // Language globe button
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
             horizontalArrangement = Arrangement.End
         ) {
             Box {
