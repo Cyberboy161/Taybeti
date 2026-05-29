@@ -414,18 +414,18 @@ fun MainDrawerScreen(
             title = { Text(InlineTranslations.t("card_title", lang), fontWeight = FontWeight.Bold) },
             text = {
                 Column {
-                    Text("What are they?", fontWeight = FontWeight.Bold)
-                    Text("Printable passphrase cards — 8 or 24 per A4 sheet. Each card has a front side (for writing passphrases) and a back side (with QR codes and designs). After printing, cut along the dashed line so each person keeps their half.")
+                    Text(InlineTranslations.t("card_what", lang), fontWeight = FontWeight.Bold)
+                    Text(InlineTranslations.t("card_what_desc", lang))
                     Spacer(Modifier.height(8.dp))
-                    Text("Why use them:", fontWeight = FontWeight.Bold)
-                    Text("🔒 Passphrases should never be stored digitally. Paper is the most secure way — no server, no cloud, no keyboard logs. A physical card that you both write, cut, and keep ensures no one else ever sees your shared secret.")
+                    Text(InlineTranslations.t("card_why", lang), fontWeight = FontWeight.Bold)
+                    Text(InlineTranslations.t("card_why_desc", lang))
                     Spacer(Modifier.height(4.dp))
-                    Text("🤝 As a bonus: sharing a physical token builds real-world trust. Each person holds a unique object — a tangible bond.")
+                    Text(InlineTranslations.t("card_bonus", lang))
                     Spacer(Modifier.height(8.dp))
-                    Text("🔗 cyberboy161.github.io/Taybeti/print-cards.html", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp)
+                    Text(InlineTranslations.t("card_link", lang), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp)
                 }
             },
-            confirmButton = { TextButton(onClick = { showPrintCardsInfo = false }) { Text("Got it") } }
+            confirmButton = { TextButton(onClick = { showPrintCardsInfo = false }) { Text(InlineTranslations.t("sec_got_it", lang)) } }
         )
     }
 
@@ -435,37 +435,36 @@ fun MainDrawerScreen(
             title = { Text(InlineTranslations.t("sec_title", lang), fontWeight = FontWeight.Bold) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text("📋 10 Security Rules", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
                     listOf(
-                        "1. Use apps with own keyboard" to "System keyboards log keystrokes.",
-                        "2. Never reuse passphrases" to "Unique per account. Write on paper.",
-                        "3. Prefer offline-first" to "No internet = no data leak.",
-                        "4. Verify, don't trust" to "Open source means auditable.",
-                        "5. Share passphrases physically" to "Paper, in person. Digital = exposed.",
-                        "6. Disable cloud sync" to "Your data on their server.",
-                        "7. Be aware of surroundings" to "Don't type passphrases in public.",
-                        "8. Keep updated" to "Patches fix holes.",
-                        "9. Review permissions" to "Revoke camera, mic, location.",
-                        "10. Trust instincts" to "If it feels wrong — stop."
+                        InlineTranslations.t("sec_1_title", lang) to InlineTranslations.t("sec_1_desc", lang),
+                        InlineTranslations.t("sec_2_title", lang) to InlineTranslations.t("sec_2_desc", lang),
+                        InlineTranslations.t("sec_3_title", lang) to InlineTranslations.t("sec_3_desc", lang),
+                        InlineTranslations.t("sec_4_title", lang) to InlineTranslations.t("sec_4_desc", lang),
+                        InlineTranslations.t("sec_5_title", lang) to InlineTranslations.t("sec_5_desc", lang),
+                        InlineTranslations.t("sec_6_title", lang) to InlineTranslations.t("sec_6_desc", lang),
+                        InlineTranslations.t("sec_7_title", lang) to InlineTranslations.t("sec_7_desc", lang),
+                        InlineTranslations.t("sec_8_title", lang) to InlineTranslations.t("sec_8_desc", lang),
+                        InlineTranslations.t("sec_9_title", lang) to InlineTranslations.t("sec_9_desc", lang),
+                        InlineTranslations.t("sec_10_title", lang) to InlineTranslations.t("sec_10_desc", lang),
                     ).forEach { (t, d) ->
                         Text(t, fontWeight = FontWeight.Bold, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
                         Text(d, fontSize = 11.sp, color = Color.Gray)
                     }
                     Spacer(Modifier.height(12.dp))
-                    Text("❓ Why Taybeti?", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                    Text(InlineTranslations.t("why_title", lang), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
                     val rows = listOf(
-                        Triple("Encryption", "Per-note AES-256", "At-rest/none"),
-                        Triple("Keys", "Your passphrase", "Company holds"),
-                        Triple("Cloud", "Zero", "Synced"),
-                        Triple("Offline", "100%", "Needs internet"),
-                        Triple("Keyboard", "Built-in", "System tracked"),
-                        Triple("Source", "Open (MIT)", "Closed"),
-                        Triple("Cost", "Free forever", "Ads/paid")
+                        Triple(InlineTranslations.t("why_enc", lang), InlineTranslations.t("why_enc_t", lang), InlineTranslations.t("why_enc_o", lang)),
+                        Triple(InlineTranslations.t("why_keys", lang), InlineTranslations.t("why_keys_t", lang), InlineTranslations.t("why_keys_o", lang)),
+                        Triple(InlineTranslations.t("why_cloud", lang), InlineTranslations.t("why_cloud_t", lang), InlineTranslations.t("why_cloud_o", lang)),
+                        Triple(InlineTranslations.t("why_off", lang), InlineTranslations.t("why_off_t", lang), InlineTranslations.t("why_off_o", lang)),
+                        Triple(InlineTranslations.t("why_kb", lang), InlineTranslations.t("why_kb_t", lang), InlineTranslations.t("why_kb_o", lang)),
+                        Triple(InlineTranslations.t("why_src", lang), InlineTranslations.t("why_src_t", lang), InlineTranslations.t("why_src_o", lang)),
+                        Triple(InlineTranslations.t("why_cost", lang), InlineTranslations.t("why_cost_t", lang), InlineTranslations.t("why_cost_o", lang)),
                     )
                     Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                        Text("Feature", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), fontSize = 11.sp)
-                        Text("Taybeti", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f), fontSize = 11.sp)
-                        Text("Others", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.weight(1f), fontSize = 11.sp)
+                        Text(InlineTranslations.t("why_feature", lang), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), fontSize = 11.sp)
+                        Text(InlineTranslations.t("why_taybeti", lang), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f), fontSize = 11.sp)
+                        Text(InlineTranslations.t("why_others", lang), fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.weight(1f), fontSize = 11.sp)
                     }
                     rows.forEach { (feat, tay, other) ->
                         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
@@ -476,7 +475,7 @@ fun MainDrawerScreen(
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showSecurityTips = false }) { Text("Got it") } }
+            confirmButton = { TextButton(onClick = { showSecurityTips = false }) { Text(InlineTranslations.t("sec_got_it", lang)) } }
         )
     }
 
