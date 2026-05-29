@@ -327,15 +327,11 @@ fun NoteEncryptionTutorialDialog(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Back")
                             }
-                            Button(onClick = {
-                                if (step < totalSteps - 1) step++ else onDismiss()
-                            }, enabled = step < totalSteps - 1 || userPassphrase.isNotEmpty()) {
-                                Text("Next")
-                            }
-                        } else {
-                            Button(onClick = onDismiss) {
-                                Text("Done!")
-                            }
+                        }
+                        Button(onClick = {
+                            if (step < totalSteps - 1) step++ else onDismiss()
+                        }, enabled = step < totalSteps - 1 || userPassphrase.isNotEmpty()) {
+                            Text(if (step < totalSteps - 1) "Next" else "Done!")
                         }
                     }
 
