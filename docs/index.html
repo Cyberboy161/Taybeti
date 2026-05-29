@@ -87,6 +87,17 @@
         }
         .github-link:hover { color: var(--accent); }
 
+        .donate-area { margin-top: 1.2rem; }
+        .donate-link {
+            display: inline-block; padding: 8px 18px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            color: var(--text-secondary); font-weight: 500; text-decoration: none;
+            font-size: 0.92rem;
+            transition: all .2s;
+        }
+        .donate-link:hover { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent), 0.05); }
+
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -213,6 +224,9 @@
                 <span class="version-badge">v1.0.56</span>
             </div>
             <a class="github-link" href="https://github.com/Cyberboy161/Taybeti" data-i18n="github">View on GitHub →</a>
+            <div class="donate-area">
+                <a class="donate-link" href="https://py.pl/ed8JmswunsxNZ84x6EtaIQ" target="_blank" data-i18n="donate">❤️ Support this project — donate €10</a>
+            </div>
         </div>
 
         <div class="features">
@@ -297,6 +311,7 @@
                 tagline: "Total privacy. Total security. Total you.",
                 subtitle: `<em>Taybeti</em> means private, personal, and exclusive in Kurdish — and that's exactly what this app delivers. Built from the ground up for those who refuse to compromise on privacy. Every note is encrypted with its own key. No cloud, no tracking, no backdoors. Open source. Free forever. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">View the code on GitHub</a>.`,
                 download: "⬇ Download app",
+                donate: "❤️ Support this project — donate €10",
                 github: "View on GitHub →",
                 "ft1-title": "Independent Per‑Note Encryption",
                 "ft1-desc": "No master key exists. Every note is encrypted with its own AES‑256‑GCM key derived from your passphrase. Cracking one reveals nothing about the others.",
@@ -343,6 +358,7 @@
                 tagline: "Totale Privatsphäre. Totale Sicherheit. Ganz du.",
                 subtitle: `<em>Taybeti</em> bedeutet auf Kurdisch privat, persönlich und exklusiv — genau das liefert diese App. Entwickelt für alle, die bei der Privatsphäre keine Kompromisse eingehen. Jede Notiz mit eigenem Schlüssel verschlüsselt. Keine Cloud, kein Tracking, keine Hintertüren. Open Source. Für immer kostenlos. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">Code auf GitHub ansehen</a>.`,
                 download: "⬇ App herunterladen",
+                donate: "❤️ Unterstütze dieses Projekt — 10 € spenden",
                 github: "Auf GitHub ansehen →",
                 "ft1-title": "Unabhängige Pro‑Notiz‑Verschlüsselung",
                 "ft1-desc": "Kein Hauptschlüssel. Jede Notiz wird mit eigenem AES‑256‑GCM‑Schlüssel verschlüsselt. Eine geknackte Notiz verrät nichts über die anderen.",
@@ -389,6 +405,7 @@
                 tagline: "Tam gizlilik. Tam güvenlik. Tamamen sen.",
                 subtitle: `<em>Taybeti</em> Kürtçe'de özel, kişisel ve ayrıcalıklı anlamına gelir — bu uygulama tam olarak bunu sunar. Gizlilikten ödün vermeyenler için sıfırdan inşa edildi. Her not kendi anahtarıyla şifrelenir. Bulut yok, izleme yok, arka kapı yok. Açık kaynak. Sonsuza kadar ücretsiz. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">GitHub'da kodu görün</a>.`,
                 download: "⬇ Uygulamayı İndir",
+                donate: "❤️ Bu projeyi destekle — 10 € bağışla",
                 github: "GitHub'da Görüntüle →",
                 "ft1-title": "Bağımsız Not‑Başına Şifreleme",
                 "ft1-desc": "Ana anahtar yok. Her not kendi AES‑256‑GCM anahtarıyla şifrelenir. Birinin kırılması diğerleri hakkında hiçbir şey vermez.",
@@ -435,6 +452,7 @@
                 tagline: "تایبەتی تەواو. ئاسایشی تەواو. تەواوی تۆ.",
                 subtitle: `<em>تایبەتی</em> واتای شەخسی و تایبەت و تایبەتمەند دەدات بە کوردی — و ئەم ئەپە هەر ئەوە پێشکەش دەکات. لە بنەڕەتەوە بۆ ئەوانە دروستکراوە کە لە تایبەتمەندێتی کەم ناکەنەوە. هەر تێبینییەک بە کلیلی تایبەتی خۆی شفرە دەکرێت. هەور نییە، شوێنکەوتن نییە، دەرگای پشتەوە نییە. سەرچاوە کراوە. بۆ هەمیشە خۆڕایی. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">کۆدەکە لە GitHub ببینە</a>.`,
                 download: "⬇ دابەزاندنی ئەپ",
+                donate: "❤️ پشتگیری ئەم پڕۆژەیە — ١٠ €",
                 github: "لە GitHub ببینە →",
                 "ft1-title": "شفرەکردنی سەربەخۆی هەر تێبینییەک",
                 "ft1-desc": "هیچ کلیلی سەرەکی نییە. هەر تێبینییەک بە کلیلی AES‑256‑GCM ی تایبەتی خۆی شفرە دەکرێت. شکاندنی یەکێک هیچ شتێک لەسەر ئەوانی تر ئاشکرا ناکات.",
@@ -481,6 +499,7 @@
                 tagline: "Nepeniya tevahî. Ewlehiya tevahî. Tevahiya te.",
                 subtitle: `<em>Taybeti</em> bi kurdî wateya şexsî, kesane û taybet dide — û ev sepan tam wê pêşkêş dike. Ji bo wan kesên ku li ser nepeniyê tawîz nadin, ji sifirê ve hatî çêkirin. Her not bi mifteya xwe ve tê şîfrekirin. Ewr tune, şopandin tune, paşderî tune. Çavkanî vekirî. Herdem belaş. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">Kod li GitHub bibîne</a>.`,
                 download: "⬇ Sepanê Daxîne",
+                donate: "❤️ Piştgiriya vê projeyê bike — 10 €",
                 github: "Li GitHub Binêre →",
                 "ft1-title": "Şîfrekirina Serbixwe ya Her‑Notî",
                 "ft1-desc": "Mifteya sereke tune. Her not bi mifteya xwe ya AES‑256‑GCM tê şîfrekirin. Şikandina yekê tiştekî li ser ên din eşkere nake.",
