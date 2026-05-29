@@ -102,15 +102,16 @@
         .ios-badge {
             display: inline-flex; align-items: center; gap: 8px;
             padding: 8px 16px; border-radius: 24px;
-            background: #2a1a1a; border: 1px solid #5a3030; color: #e57373;
+            background: #1a0a0a; border: 1px solid #4a1515; color: #e57373;
             font-weight: 500; font-size: .9rem; cursor: pointer; user-select: none;
             transition: all .2s;
         }
-        .ios-badge:hover { background: #3a2424; border-color: #d32f2f; }
+        .ios-badge:hover { background: #2a1010; border-color: #8b0000; box-shadow: 0 0 12px rgba(139,0,0,.3); }
         .ios-badge .exmark {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 22px; height: 22px; border-radius: 50%;
-            background: #d32f2f; color: #fff; font-weight: 700; font-size: 14px; line-height:1;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: #8b0000; font-size: 15px; line-height: 1;
+            box-shadow: 0 0 6px rgba(220,20,60,.5);
         }
         .ios-panel {
             display: none; margin-top: 10px; padding: 16px;
@@ -259,7 +260,7 @@
             </div>
             <div class="ios-warn" id="iosWarn">
                 <div class="ios-badge" id="iosBadge" onclick="document.getElementById('iosPanel').classList.toggle('show')">
-                    <span class="exmark">!</span><span data-i18n="ios-badge">Not available on iOS — tap to learn why</span>
+                    <span class="exmark">🍎</span><span data-i18n="ios-badge">Not available on iOS — tap to learn why</span>
                 </div>
                 <div class="ios-panel" id="iosPanel">
                     <h4 data-i18n="ios-title">Why Taybeti Cannot Exist on iOS</h4>
