@@ -313,7 +313,8 @@ fun NoteEncryptionTutorialDialog(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(bottom = if (isKeyboardVisible) 80.dp else 0.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         if (step > 0) {
