@@ -562,8 +562,6 @@ fun MainDrawerScreen(
                     }
                     androidx.compose.material3.HorizontalDivider()
                     Text("More", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-                    androidx.compose.material3.HorizontalDivider()
-                    Text("More", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
                     DrawerItem(Icons.Default.Warning, "Security & Help") {
                         scope.launch { drawerState.close() }
                         showSecurityTips = true

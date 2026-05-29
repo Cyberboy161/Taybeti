@@ -198,7 +198,7 @@ data class TextSpan(
     val fontSize: Int = 16,
     val textColor: String? = null,
     val highlightColor: String? = null,
-    val isChecked: Boolean = false
+    val isChecked: Boolean? = null
 ) {
     fun toSpanStyle(): SpanStyle {
         var style = SpanStyle(
@@ -221,7 +221,7 @@ data class TextSpan(
     private fun buildTextDecoration(): TextDecoration? {
         val decorations = mutableListOf<TextDecoration>()
         if (isUnderline) decorations.add(TextDecoration.Underline)
-        if (isStrikethrough || isChecked) decorations.add(TextDecoration.LineThrough)
+        if (isStrikethrough || isChecked == true) decorations.add(TextDecoration.LineThrough)
         return when (decorations.size) {
             0 -> null
             1 -> decorations[0]
@@ -888,7 +888,8 @@ fun NoteEditorScreen(
                 saveUndoState()
                 if (currentPageIndex < pages.size) {
                     if (checklistMode) {
-                        pages[currentPageIndex].applyToCurrentSpan { it.copy(isChecked = true) }
+                        // Just mark the span as checkable — not checked yet
+                        pages[currentPageIndex].applyToCurrentSpan { it.copy(isChecked = false) }
                     }
                     pages[currentPageIndex].appendText(char.toString())
                 }
@@ -923,22 +924,31 @@ fun NoteEditorScreen(
         if (showUnsavedDialog) {
             AlertDialog(
                 onDismissRequest = { showUnsavedDialog = false },
-                title = { Text(strings.discardNoteTitle) },
-                text = { Text(strings.discardNoteMsg) },
+                title = { Text("Save note?") },
+                text = { Text("You have unsaved changes.") },
                 confirmButton = {
-                    TextButton(onClick = { showUnsavedDialog = false }) {
-                        Text(strings.stay)
+                    TextButton(onClick = {
+                        showUnsavedDialog = false
+                        // Save note before exiting
+                        if (currentPageIndex < pages.size) {
+                            saveUndoStateImmediate()
+                        }
+                        onBack()
+                    }) {
+                        Text("Save & Exit")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = {
-                        showUnsavedDialog = false
-                        SecureMemory.clear(plaintext.toCharArray())
-                        plaintext = ""
-                        images.clear()
-                        onBack()
-                    }) {
-                        Text(strings.discard, color = MaterialTheme.colorScheme.error)
+                    Row {
+                        TextButton(onClick = { showUnsavedDialog = false }) {
+                            Text("Stay")
+                        }
+                        TextButton(onClick = {
+                            showUnsavedDialog = false
+                            onBack()
+                        }) {
+                            Text("Discard", color = MaterialTheme.colorScheme.error)
+                        }
                     }
                 }
             )
@@ -2833,14 +2843,16 @@ private fun PageBlockRich(
 
                     if (paraAnnotated.isNotEmpty() || paragraph.tableRows == null) {
                         val isLast = paraIdx == formattedText.paragraphs.lastIndex
-                        val isCheckItem = paragraph.spans.any { it.isChecked }
+                        val isCheckItem = paragraph.spans.any { it.isChecked != null }
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             if (isCheckItem) {
                                 Checkbox(
-                                    checked = paragraph.spans.all { it.isChecked } && paragraph.spans.any { it.text.isNotEmpty() },
+                                    checked = paragraph.spans.all { it.isChecked == true } && paragraph.spans.any { it.text.isNotEmpty() },
                                     onCheckedChange = { checked ->
                                         paragraph.spans.forEachIndexed { idx, span ->
-                                            paragraph.spans[idx] = span.copy(isChecked = checked)
+                                            if (span.isChecked != null) {
+                                                paragraph.spans[idx] = span.copy(isChecked = checked)
+                                            }
                                         }
                                         formattedText.renderVersion++
                                     },
