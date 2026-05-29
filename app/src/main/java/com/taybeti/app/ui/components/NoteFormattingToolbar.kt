@@ -50,12 +50,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.taybeti.app.util.InlineTranslations
+import com.taybeti.app.util.LocalLanguageCode
 
 @Composable
 fun NoteFormattingToolbar(
     onInsertFormat: (String) -> Unit,
     onAddAttachment: (AttachmentType) -> Unit
 ) {
+    val lang = LocalLanguageCode.current
     var showAttachMenu by remember { mutableStateOf(false) }
 
     Column(
@@ -127,7 +130,7 @@ fun NoteFormattingToolbar(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        "Attach",
+                        InlineTranslations.t("attach", lang),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary
@@ -141,22 +144,22 @@ fun NoteFormattingToolbar(
             ) {
                 DropdownMenuItem(
                     leadingIcon = { Icon(Icons.Default.Image, null, modifier = Modifier.size(18.dp)) },
-                    text = { Text("Image") },
+                    text = { Text(InlineTranslations.t("image", lang)) },
                     onClick = { showAttachMenu = false; onAddAttachment(AttachmentType.IMAGE) }
                 )
                 DropdownMenuItem(
                     leadingIcon = { Icon(Icons.Default.MusicNote, null, modifier = Modifier.size(18.dp)) },
-                    text = { Text("Audio") },
+                    text = { Text(InlineTranslations.t("audio", lang)) },
                     onClick = { showAttachMenu = false; onAddAttachment(AttachmentType.AUDIO) }
                 )
                 DropdownMenuItem(
                     leadingIcon = { Icon(Icons.Default.VideoFile, null, modifier = Modifier.size(18.dp)) },
-                    text = { Text("Video") },
+                    text = { Text(InlineTranslations.t("video", lang)) },
                     onClick = { showAttachMenu = false; onAddAttachment(AttachmentType.VIDEO) }
                 )
                 DropdownMenuItem(
                     leadingIcon = { Icon(Icons.Default.List, null, modifier = Modifier.size(18.dp)) },
-                    text = { Text("Document") },
+                    text = { Text(InlineTranslations.t("document", lang)) },
                     onClick = { showAttachMenu = false; onAddAttachment(AttachmentType.DOCUMENT) }
                 )
             }
