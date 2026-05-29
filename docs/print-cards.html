@@ -137,7 +137,7 @@ var IMG="https://cyberboy161.github.io/Taybeti/card-bg.png";var uploaded='';var 
 var el={qr:{x:70,y:30,w:40,h:40},qr2:{x:60,y:30,w:40,h:40},url:{x:50,y:93,w:6,h:0},contact:{x:50,y:88,w:6,h:0},custom:{x:50,y:50,w:8,h:0},bg:{x:0,y:0,w:100,h:100,rot:0},ftxt:{x:50,y:10,w:0,h:0},fline:{x:68,y:75,w:65,h:0}};
 
 function SITE(){return document.getElementById('qd').value=='home'?'https://cyberboy161.github.io/Taybeti/index.html':'https://cyberboy161.github.io/Taybeti/invited.html'}
-function showU(){return document.getElementById('showUrl').checked}
+function showU(){var el=document.getElementById('showUrl');return el?el.checked:false}
 function QRU(u){return"https://api.qrserver.com/v1/create-qr-code/?size=80x80&data="+encodeURIComponent(u||SITE())}
 
 function upImg(i){if(i.files&&i.files[0]){var r=new FileReader();r.onload=function(e){uploaded=e.target.result;u()};r.readAsDataURL(i.files[0])}}
