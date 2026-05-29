@@ -82,6 +82,15 @@ fun SettingsScreen(
     // File Security settings
     var secureFileDeletion by remember { mutableStateOf(false) }
 
+    // Security Hardening settings
+    var fakeNoteCountEnabled by remember { mutableStateOf(false) }
+    var fakeNoteCountValue by remember { mutableStateOf(5) }
+    var deadManSwitchEnabled by remember { mutableStateOf(false) }
+    var deadManSwitchDays by remember { mutableStateOf(30) }
+    var duressWipeEnabled by remember { mutableStateOf(false) }
+    var canaryLogEnabled by remember { mutableStateOf(false) }
+    var readOnceEnabled by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         autoClearClipboard = SecuritySettingsManager.getAutoClearClipboard(context)
         shredDeletedNotes = SecuritySettingsManager.getShredDeletedNotes(context)
@@ -92,6 +101,13 @@ fun SettingsScreen(
         antiDebugging = SecuritySettingsManager.getAntiDebugging(context)
         checkSuspiciousProcesses = SecuritySettingsManager.getCheckSuspiciousProcesses(context)
         secureFileDeletion = SecuritySettingsManager.getSecureFileDeletion(context)
+        fakeNoteCountEnabled = SecuritySettingsManager.getFakeNoteCountEnabled(context)
+        fakeNoteCountValue = SecuritySettingsManager.getFakeNoteCountValue(context)
+        deadManSwitchEnabled = SecuritySettingsManager.getDeadManSwitchEnabled(context)
+        deadManSwitchDays = SecuritySettingsManager.getDeadManSwitchDays(context)
+        duressWipeEnabled = SecuritySettingsManager.getDuressWipe(context)
+        canaryLogEnabled = SecuritySettingsManager.getCanaryLog(context)
+        readOnceEnabled = SecuritySettingsManager.getReadOnceDefault(context)
     }
 
     val lockOptions = remember {
@@ -354,6 +370,98 @@ fun SettingsScreen(
                 }
             )
 
+            // Security Hardening Section
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                InlineTranslations.t("harden_title", lang),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = InlineTranslations.t("fake_count", lang),
+                subtitle = InlineTranslations.t("fake_count_desc", lang),
+                checked = fakeNoteCountEnabled,
+                onCheckedChange = {
+                    fakeNoteCountEnabled = it
+                    SecuritySettingsManager.setFakeNoteCountEnabled(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            if (fakeNoteCountEnabled) {
+                SettingsNumberPicker(
+                    label = "Count: $fakeNoteCountValue",
+                    value = fakeNoteCountValue,
+                    min = 1,
+                    max = 20,
+                    onValueChange = {
+                        fakeNoteCountValue = it
+                        SecuritySettingsManager.setFakeNoteCountValue(context, it)
+                    }
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            }
+
+            SettingsToggle(
+                title = InlineTranslations.t("dead_man", lang),
+                subtitle = InlineTranslations.t("dead_man_desc", lang),
+                checked = deadManSwitchEnabled,
+                onCheckedChange = {
+                    deadManSwitchEnabled = it
+                    SecuritySettingsManager.setDeadManSwitchEnabled(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            if (deadManSwitchEnabled) {
+                SettingsNumberPicker(
+                    label = InlineTranslations.t("days_label", lang).replace("{n}", deadManSwitchDays.toString()),
+                    value = deadManSwitchDays,
+                    min = 1,
+                    max = 365,
+                    onValueChange = {
+                        deadManSwitchDays = it
+                        SecuritySettingsManager.setDeadManSwitchDays(context, it)
+                    }
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            }
+
+            SettingsToggle(
+                title = InlineTranslations.t("duress_wipe", lang),
+                subtitle = InlineTranslations.t("duress_wipe_desc", lang),
+                checked = duressWipeEnabled,
+                onCheckedChange = {
+                    duressWipeEnabled = it
+                    SecuritySettingsManager.setDuressWipe(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = InlineTranslations.t("canary_log", lang),
+                subtitle = InlineTranslations.t("canary_log_desc", lang),
+                checked = canaryLogEnabled,
+                onCheckedChange = {
+                    canaryLogEnabled = it
+                    SecuritySettingsManager.setCanaryLog(context, it)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsToggle(
+                title = InlineTranslations.t("read_once", lang),
+                subtitle = InlineTranslations.t("read_once_desc", lang),
+                checked = readOnceEnabled,
+                onCheckedChange = {
+                    readOnceEnabled = it
+                    SecuritySettingsManager.setReadOnceDefault(context, it)
+                }
+            )
+
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
@@ -469,4 +577,47 @@ fun LanguagePickerDialog(
             }
         }
     )
+}
+
+@Composable
+fun SettingsNumberPicker(
+    label: String,
+    value: Int,
+    min: Int,
+    max: Int,
+    onValueChange: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            "−",
+            style = MaterialTheme.typography.titleLarge,
+            color = if (value > min) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+            modifier = Modifier
+                .clickable(enabled = value > min) { onValueChange(value - 1) }
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        )
+        Text(
+            value.toString(),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        Text(
+            "+",
+            style = MaterialTheme.typography.titleLarge,
+            color = if (value < max) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+            modifier = Modifier
+                .clickable(enabled = value < max) { onValueChange(value + 1) }
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        )
+    }
 }
