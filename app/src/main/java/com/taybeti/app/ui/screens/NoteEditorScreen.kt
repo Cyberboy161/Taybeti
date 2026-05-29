@@ -2228,7 +2228,12 @@ fun NoteEditorScreen(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .border(1.dp, if (checklistMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
-                                    .clickable { checklistMode = !checklistMode },
+                                    .clickable {
+                                        checklistMode = !checklistMode
+                                        if (checklistMode) {
+                                            pages.getOrNull(currentPageIndex)?.applyToCurrentSpan { it.copy(isChecked = false) }
+                                        }
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(Icons.Default.CheckBoxOutlineBlank, "Checklist", modifier = Modifier.size(22.dp), tint = if (checklistMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
@@ -2867,7 +2872,7 @@ private fun PageBlockRich(
                                         }
                                         formattedText.renderVersion++
                                     },
-                                    modifier = Modifier.size(18.dp).padding(end = 4.dp)
+                                    modifier = Modifier.size(20.dp).padding(end = 6.dp)
                                 )
                             }
                             if (prefix.isNotEmpty()) {
