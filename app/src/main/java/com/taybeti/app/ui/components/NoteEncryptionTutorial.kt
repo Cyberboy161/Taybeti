@@ -249,6 +249,32 @@ fun NoteEncryptionTutorialDialog(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Navigation buttons — above content so they're always visible
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        if (step > 0) {
+                            Button(
+                                onClick = { step--; activeField = null },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Back")
+                            }
+                        } else { Spacer(Modifier) }
+                        Button(onClick = {
+                            if (step < totalSteps - 1) step++ else onDismiss()
+                        }, enabled = step < totalSteps - 1 || userPassphrase.isNotEmpty()) {
+                            Text(if (step < totalSteps - 1) "Next" else "Done!")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     AnimatedContent(
                         targetState = step,
                         transitionSpec = {
@@ -311,32 +337,7 @@ fun NoteEncryptionTutorialDialog(
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(bottom = if (isKeyboardVisible) 80.dp else 0.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        if (step > 0) {
-                            Button(
-                                onClick = { step--; activeField = null },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                                )
-                            ) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Back")
-                            }
-                        }
-                        Button(onClick = {
-                            if (step < totalSteps - 1) step++ else onDismiss()
-                        }, enabled = step < totalSteps - 1 || userPassphrase.isNotEmpty()) {
-                            Text(if (step < totalSteps - 1) "Next" else "Done!")
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
+                    // Progress dots
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
