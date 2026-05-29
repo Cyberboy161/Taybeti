@@ -258,8 +258,8 @@
                 <a class="donate-link" href="https://py.pl/ed8JmswunsxNZ84x6EtaIQ" target="_blank" data-i18n="donate">❤️ Support this project — donate €10</a>
             </div>
             <div class="ios-warn" id="iosWarn">
-                <div class="ios-badge" id="iosBadge" data-i18n="ios-badge">
-                    <span class="exmark">!</span><span>Not available on iOS — tap to learn why</span>
+                <div class="ios-badge" id="iosBadge" onclick="document.getElementById('iosPanel').classList.toggle('show')">
+                    <span class="exmark">!</span><span data-i18n="ios-badge">Not available on iOS — tap to learn why</span>
                 </div>
                 <div class="ios-panel" id="iosPanel">
                     <h4 data-i18n="ios-title">Why Taybeti Cannot Exist on iOS</h4>
@@ -361,7 +361,7 @@
                 subtitle: `<em>Taybeti</em> means private, personal, and exclusive in Kurdish — and that's exactly what this app delivers. Built from the ground up for those who refuse to compromise on privacy. Every note is encrypted with its own key. No cloud, no tracking, no backdoors. Open source. Free forever. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">View the code on GitHub</a>.`,
                 download: "⬇ Download app",
                 donate: "❤️ Support this project — donate €10",
-                ios-badge: "!  Not available on iOS — tap to learn why",
+                ios-badge: "Not available on iOS — tap to learn why",
                 ios-title: "Why Taybeti Cannot Exist on iOS",
                 ios-intro: "Apple's restrictions make genuine privacy impossible on iOS. These are not missing features — Apple actively prevents developers from securing your data:",
                 ios-kb: "<strong>Custom keyboard:</strong> Apple severely restricts third-party keyboards. Your passphrases still pass through the system keyboard, visible to Apple's input method.",
@@ -418,7 +418,7 @@
                 subtitle: `<em>Taybeti</em> bedeutet auf Kurdisch privat, persönlich und exklusiv — genau das liefert diese App. Entwickelt für alle, die bei der Privatsphäre keine Kompromisse eingehen. Jede Notiz mit eigenem Schlüssel verschlüsselt. Keine Cloud, kein Tracking, keine Hintertüren. Open Source. Für immer kostenlos. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">Code auf GitHub ansehen</a>.`,
                 download: "⬇ App herunterladen",
                 donate: "❤️ Unterstütze dieses Projekt — 10 € spenden",
-                ios-badge: "!  Nicht verfügbar für iOS — tippen um zu erfahren warum",
+                ios-badge: "Nicht verfügbar für iOS — tippen um zu erfahren warum",
                 ios-title: "Warum Taybeti auf iOS nicht existieren kann",
                 ios-intro: "Apples Einschränkungen machen echte Privatsphäre auf iOS unmöglich. Dies sind keine fehlenden Funktionen — Apple verhindert aktiv, dass Entwickler deine Daten sichern:",
                 ios-kb: "<strong>Eigene Tastatur:</strong> Apple schränkt Drittanbieter-Tastaturen stark ein. Deine Passphrasen durchlaufen weiterhin die Systemtastatur, sichtbar für Apples Eingabemethode.",
@@ -475,7 +475,7 @@
                 subtitle: `<em>Taybeti</em> Kürtçe'de özel, kişisel ve ayrıcalıklı anlamına gelir — bu uygulama tam olarak bunu sunar. Gizlilikten ödün vermeyenler için sıfırdan inşa edildi. Her not kendi anahtarıyla şifrelenir. Bulut yok, izleme yok, arka kapı yok. Açık kaynak. Sonsuza kadar ücretsiz. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">GitHub'da kodu görün</a>.`,
                 download: "⬇ Uygulamayı İndir",
                 donate: "❤️ Bu projeyi destekle — 10 € bağışla",
-                ios-badge: "!  iOS'ta mevcut değil — nedenini öğrenmek için dokun",
+                ios-badge: "iOS'ta mevcut değil — nedenini öğrenmek için dokun",
                 ios-title: "Taybeti iOS'ta Neden Var Olamaz",
                 ios-intro: "Apple'ın kısıtlamaları iOS'ta gerçek gizliliği imkansız kılar. Bunlar eksik özellikler değil — Apple geliştiricilerin verilerinizi güvence altına almasını aktif olarak engeller:",
                 ios-kb: "<strong>Özel klavye:</strong> Apple üçüncü taraf klavyeleri ciddi şekilde kısıtlar. Parolalarınız hala sistem klavyesinden geçer, Apple'ın giriş yöntemine görünür.",
@@ -532,7 +532,7 @@
                 subtitle: `<em>تایبەتی</em> واتای شەخسی و تایبەت و تایبەتمەند دەدات بە کوردی — و ئەم ئەپە هەر ئەوە پێشکەش دەکات. لە بنەڕەتەوە بۆ ئەوانە دروستکراوە کە لە تایبەتمەندێتی کەم ناکەنەوە. هەر تێبینییەک بە کلیلی تایبەتی خۆی شفرە دەکرێت. هەور نییە، شوێنکەوتن نییە، دەرگای پشتەوە نییە. سەرچاوە کراوە. بۆ هەمیشە خۆڕایی. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">کۆدەکە لە GitHub ببینە</a>.`,
                 download: "⬇ دابەزاندنی ئەپ",
                 donate: "❤️ پشتگیری ئەم پڕۆژەیە — ١٠ €",
-                ios-badge: "!  لە iOS بەردەست نییە — بۆ زانینی هۆکارەکەی دەست لێ بدە",
+                ios-badge: "لە iOS بەردەست نییە — بۆ زانینی هۆکارەکەی دەست لێ بدە",
                 ios-title: "بۆچی تایبەتی لەسەر iOS بوونی نییە",
                 ios-intro: "ڕێگرییەکانی ئەپڵ تایبەتمەندی ڕاستەقینە لەسەر iOS ناکاتە شتێکی مەحاڵ. ئەمانە تایبەتمەندی ونبوو نین — ئەپڵ بە چالاکی ڕێگری لە گەشەپێدەران دەکات لە پاراستنی داتاکەت:",
                 ios-kb: "<strong>تەختەکلیلی تایبەت:</strong> ئەپڵ بە توندی تەختەکلیلی لایەنی سێیەم ڕێکدەخات. تێپەڕوشەکانت هێشتا بە تەختەکلیلی سیستەمدا تێدەپەڕن و بۆ شێوازی ئەپڵ دیارن.",
@@ -589,7 +589,7 @@
                 subtitle: `<em>Taybeti</em> bi kurdî wateya şexsî, kesane û taybet dide — û ev sepan tam wê pêşkêş dike. Ji bo wan kesên ku li ser nepeniyê tawîz nadin, ji sifirê ve hatî çêkirin. Her not bi mifteya xwe ve tê şîfrekirin. Ewr tune, şopandin tune, paşderî tune. Çavkanî vekirî. Herdem belaş. <a href="https://github.com/Cyberboy161/Taybeti" target="_blank">Kod li GitHub bibîne</a>.`,
                 download: "⬇ Sepanê Daxîne",
                 donate: "❤️ Piştgiriya vê projeyê bike — 10 €",
-                ios-badge: "!  Li ser iOS-ê peyda nabe — ji bo fêrbûna sedemê pêl bike",
+                ios-badge: "Li ser iOS-ê peyda nabe — ji bo fêrbûna sedemê pêl bike",
                 ios-title: "Çima Taybeti Li Ser iOS-ê Nabe",
                 ios-intro: "Sînorkirinên Apple-ê nepeniya rastîn li ser iOS-ê ne gengaz dike. Ev ne taybetmendiyên wenda ne — Apple bi awayekî çalak nahêle pêşdebir daneyên te ewle bikin:",
                 ios-kb: "<strong>Klavyeya taybet:</strong> Apple klavyeyên partiya sêyemîn bi tundî sînordar dike. Şîfreyên te hê jî di klavyeya sîstemê re derbas dibin, ji rêbaza têketina Apple-ê re xuya ne.",
@@ -669,8 +669,6 @@ function setLanguage(lang) { localStorage.setItem("taybeti_lang",lang);
             });
         }
 
-// iOS warning toggle
-document.getElementById("iosBadge").addEventListener("click",function(){document.getElementById("iosPanel").classList.toggle("show")});
         setLanguage(localStorage.getItem('taybeti_lang') || 'en');
     </script>
 </body>
