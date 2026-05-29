@@ -140,7 +140,7 @@ fun NoteEncryptionTutorialDialog(
         if (decryptPassphrase == userPassphrase) {
             decryptedResult = userMessage
         } else {
-            decryptedResult = "ERROR: Wrong passphrase or corrupted data"
+            decryptedResult = InlineTranslations.t("tutorial_error", lang)
         }
         isDecrypting = false
     }

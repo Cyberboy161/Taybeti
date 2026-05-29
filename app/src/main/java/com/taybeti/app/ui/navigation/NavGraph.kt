@@ -562,7 +562,7 @@ fun MainDrawerScreen(
                         navController.navigate(NavRoutes.ABOUT)
                     }
                     androidx.compose.material3.HorizontalDivider()
-                    Text("More", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                    Text(InlineTranslations.t("more", lang), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
                     DrawerItem(Icons.Default.Warning, InlineTranslations.t("sec_title", lang)) {
                         scope.launch { drawerState.close() }
                         showSecurityTips = true

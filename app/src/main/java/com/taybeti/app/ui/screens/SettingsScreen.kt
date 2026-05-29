@@ -40,6 +40,8 @@ import com.taybeti.app.security.SecuritySettingsManager
 import com.taybeti.app.util.LocaleManager
 import com.taybeti.app.util.AppDisguise
 import com.taybeti.app.util.LocalStrings
+import com.taybeti.app.util.InlineTranslations
+import com.taybeti.app.util.LocalLanguageCode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +62,7 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val strings = LocalStrings.current
+    val lang = LocalLanguageCode.current
     var showLanguagePicker by remember { mutableStateOf(false) }
     var showDisguisePicker by remember { mutableStateOf(false) }
     var showLockTimerDropdown by remember { mutableStateOf(false) }
@@ -158,8 +161,8 @@ fun SettingsScreen(
 
             // App Disguise
             SettingsRow(
-                title = "App Disguise",
-                subtitle = AppDisguise.options.firstOrNull { it.first == AppDisguise.getCurrentDisguise(context) }?.second ?: "Taybeti Notesharing"
+                title = InlineTranslations.t("app_disguise", lang),
+                subtitle = AppDisguise.options.firstOrNull { it.first == AppDisguise.getCurrentDisguise(context) }?.second ?: InlineTranslations.t("taybeti_notesharing", lang)
             ) {
                 showDisguisePicker = true
             }
@@ -228,7 +231,7 @@ fun SettingsScreen(
             // Memory & Data Section
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Memory & Data",
+                InlineTranslations.t("memory_data", lang),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -236,8 +239,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Clear clipboard after copy",
-                subtitle = "Auto-clear clipboard 30s after copying decrypted content",
+                title = InlineTranslations.t("clear_clipboard", lang),
+                subtitle = InlineTranslations.t("clear_clipboard_desc", lang),
                 checked = autoClearClipboard,
                 onCheckedChange = {
                     autoClearClipboard = it
@@ -247,8 +250,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Shred deleted notes",
-                subtitle = "Overwrite with random data before deletion",
+                title = InlineTranslations.t("shred_deleted", lang),
+                subtitle = InlineTranslations.t("shred_deleted_desc", lang),
                 checked = shredDeletedNotes,
                 onCheckedChange = {
                     shredDeletedNotes = it
@@ -258,8 +261,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Hide from recent apps",
-                subtitle = "Prevent app content from showing in Android's recent apps screen",
+                title = InlineTranslations.t("hide_recent", lang),
+                subtitle = InlineTranslations.t("hide_recent_desc", lang),
                 checked = excludeFromRecents,
                 onCheckedChange = {
                     excludeFromRecents = it
@@ -269,8 +272,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Disable lock screen preview",
-                subtitle = "Disable notification preview on lock screen",
+                title = InlineTranslations.t("disable_lockscreen", lang),
+                subtitle = InlineTranslations.t("disable_lockscreen_desc", lang),
                 checked = disableLockscreenPreview,
                 onCheckedChange = {
                     disableLockscreenPreview = it
@@ -281,7 +284,7 @@ fun SettingsScreen(
             // App Integrity Section
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "App Integrity",
+                InlineTranslations.t("app_integrity", lang),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -289,8 +292,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Check app signature",
-                subtitle = "Detect tampered APKs at runtime",
+                title = InlineTranslations.t("check_signature", lang),
+                subtitle = InlineTranslations.t("check_signature_desc", lang),
                 checked = checkAppSignature,
                 onCheckedChange = {
                     checkAppSignature = it
@@ -300,8 +303,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Detect emulator",
-                subtitle = "Check if app is running on an emulator",
+                title = InlineTranslations.t("detect_emulator", lang),
+                subtitle = InlineTranslations.t("detect_emulator_desc", lang),
                 checked = detectEmulator,
                 onCheckedChange = {
                     detectEmulator = it
@@ -311,8 +314,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Anti-debugging",
-                subtitle = "Detect Frida, Xposed, or other hooking frameworks",
+                title = InlineTranslations.t("anti_debugging", lang),
+                subtitle = InlineTranslations.t("anti_debugging_desc", lang),
                 checked = antiDebugging,
                 onCheckedChange = {
                     antiDebugging = it
@@ -322,8 +325,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Check suspicious processes",
-                subtitle = "Scan for suspicious running processes",
+                title = InlineTranslations.t("check_processes", lang),
+                subtitle = InlineTranslations.t("check_processes_desc", lang),
                 checked = checkSuspiciousProcesses,
                 onCheckedChange = {
                     checkSuspiciousProcesses = it
@@ -334,7 +337,7 @@ fun SettingsScreen(
             // File Security Section
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "File Security",
+                InlineTranslations.t("file_security", lang),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -342,8 +345,8 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggle(
-                title = "Secure file deletion",
-                subtitle = "Shred exported decrypted files after viewing",
+                title = InlineTranslations.t("secure_delete", lang),
+                subtitle = InlineTranslations.t("secure_delete_desc", lang),
                 checked = secureFileDeletion,
                 onCheckedChange = {
                     secureFileDeletion = it

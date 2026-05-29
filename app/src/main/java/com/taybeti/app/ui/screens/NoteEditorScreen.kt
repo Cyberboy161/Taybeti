@@ -1615,13 +1615,13 @@ fun NoteEditorScreen(
                 title = { Text("Insert Table") },
                 text = {
                     Column {
-                        Text("Rows: ${tableInsertData.rows}", fontWeight = FontWeight.Medium)
+                        Text(InlineTranslations.t("rows_label", lang).replace("{n}", "${tableInsertData.rows}"), fontWeight = FontWeight.Medium)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = { if (tableInsertData.rows > 1) tableInsertData = tableInsertData.copy(rows = tableInsertData.rows - 1) }) { Text("-") }
                             Button(onClick = { if (tableInsertData.rows < 20) tableInsertData = tableInsertData.copy(rows = tableInsertData.rows + 1) }) { Text("+") }
                         }
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text("Columns: ${tableInsertData.columns}", fontWeight = FontWeight.Medium)
+                        Text(InlineTranslations.t("columns_label", lang).replace("{n}", "${tableInsertData.columns}"), fontWeight = FontWeight.Medium)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = { if (tableInsertData.columns > 1) tableInsertData = tableInsertData.copy(columns = tableInsertData.columns - 1) }) { Text("-") }
                             Button(onClick = { if (tableInsertData.columns < 10) tableInsertData = tableInsertData.copy(columns = tableInsertData.columns + 1) }) { Text("+") }
@@ -1658,18 +1658,18 @@ fun NoteEditorScreen(
                             val ft = pages.getOrNull(currentPageIndex)
                             val isActive = ft?.template == tmpl
                             val name = when (tmpl) {
-                                PageTemplate.BLANK -> "Blank"
-                                PageTemplate.LINED -> "Lined"
-                                PageTemplate.GRID -> "Grid"
-                                PageTemplate.DOTTED -> "Dotted"
-                                PageTemplate.CORNELL -> "Cornell"
+                                PageTemplate.BLANK -> InlineTranslations.t("blank", lang)
+                                PageTemplate.LINED -> InlineTranslations.t("lined", lang)
+                                PageTemplate.GRID -> InlineTranslations.t("grid", lang)
+                                PageTemplate.DOTTED -> InlineTranslations.t("dotted", lang)
+                                PageTemplate.CORNELL -> InlineTranslations.t("cornell", lang)
                             }
                             val desc = when (tmpl) {
-                                PageTemplate.BLANK -> "Empty page"
-                                PageTemplate.LINED -> "Horizontal lines"
-                                PageTemplate.GRID -> "Grid pattern"
-                                PageTemplate.DOTTED -> "Dot grid"
-                                PageTemplate.CORNELL -> "Cornell layout"
+                                PageTemplate.BLANK -> InlineTranslations.t("empty_page", lang)
+                                PageTemplate.LINED -> InlineTranslations.t("horizontal_lines", lang)
+                                PageTemplate.GRID -> InlineTranslations.t("grid_pattern", lang)
+                                PageTemplate.DOTTED -> InlineTranslations.t("dot_grid", lang)
+                                PageTemplate.CORNELL -> InlineTranslations.t("cornell_layout", lang)
                             }
                             val bgColor = if (isDark) Color(0xFF1E1E1E) else Color.White
                             val lineColor = if (isDark) Color(0xFF444444) else Color(0xFFCCCCCC)
@@ -1682,11 +1682,11 @@ fun NoteEditorScreen(
                                         if (curFt != null) {
                                             curFt.template = tmpl
                                             curFt.headerText = when (tmpl) {
-                                                PageTemplate.CORNELL -> "Topic: ___________"
+                                                PageTemplate.CORNELL -> InlineTranslations.t("topic_placeholder", lang)
                                                 else -> ""
                                             }
                                             curFt.footerText = when (tmpl) {
-                                                PageTemplate.CORNELL -> "Summary: ___________"
+                                                PageTemplate.CORNELL -> InlineTranslations.t("summary_placeholder", lang)
                                                 else -> ""
                                             }
                                         }
@@ -1811,22 +1811,22 @@ fun NoteEditorScreen(
             val scrollState = rememberScrollState()
             AlertDialog(
                 onDismissRequest = { showSecurityTips = false },
-                title = { Text("🛡️ 10 Rules for Staying Secure", fontWeight = FontWeight.Bold) },
+                title = { Text(InlineTranslations.t("sec_title", lang), fontWeight = FontWeight.Bold) },
                 text = {
                     Column(
                         modifier = Modifier.verticalScroll(scrollState)
                     ) {
                         val rules = listOf(
-                            "1. Use apps with their own keyboard — system keyboards record everything" to "If the app doesn't have a custom keyboard, assume every keystroke is logged by Gboard, SwiftKey, or the OS.",
-                            "2. Never reuse passphrases" to "Every note, every account — a unique passphrase. Write them on paper, not in a password manager.",
-                            "3. Prefer offline‑first apps" to "An app with no internet permission cannot leak your data — by architecture.",
-                            "4. Verify, don't trust" to "Use open source software. A closed‑source app claiming security is meaningless.",
-                            "5. Only share passphrases physically" to "In emergencies only, share via a separate channel. Always prefer paper — in person.",
-                            "6. Disable cloud sync for sensitive data" to "Every sync copies your data to someone else's server. Keep sensitive files local.",
-                            "7. Be aware of your surroundings" to "Shoulder surfing is ancient and effective. Never type passphrases in public.",
-                            "8. Keep software updated" to "Patches fix known holes. Enable automatic updates for security‑critical apps.",
-                            "9. Review app permissions regularly" to "Remove camera, mic, location from apps that don't need them.",
-                            "10. Trust your instincts" to "If something feels wrong — stop. The best security is you."
+                            InlineTranslations.t("sec_1_title", lang) to InlineTranslations.t("sec_1_desc", lang),
+                            InlineTranslations.t("sec_2_title", lang) to InlineTranslations.t("sec_2_desc", lang),
+                            InlineTranslations.t("sec_3_title", lang) to InlineTranslations.t("sec_3_desc", lang),
+                            InlineTranslations.t("sec_4_title", lang) to InlineTranslations.t("sec_4_desc", lang),
+                            InlineTranslations.t("sec_5_title", lang) to InlineTranslations.t("sec_5_desc", lang),
+                            InlineTranslations.t("sec_6_title", lang) to InlineTranslations.t("sec_6_desc", lang),
+                            InlineTranslations.t("sec_7_title", lang) to InlineTranslations.t("sec_7_desc", lang),
+                            InlineTranslations.t("sec_8_title", lang) to InlineTranslations.t("sec_8_desc", lang),
+                            InlineTranslations.t("sec_9_title", lang) to InlineTranslations.t("sec_9_desc", lang),
+                            InlineTranslations.t("sec_10_title", lang) to InlineTranslations.t("sec_10_desc", lang)
                         )
                         rules.forEach { (title, desc) ->
                             Column(modifier = Modifier.padding(vertical = 6.dp)) {
@@ -1836,20 +1836,20 @@ fun NoteEditorScreen(
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            "The Keyboard Problem",
+                            InlineTranslations.t("sec_keyboard", lang),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error
                         )
                         Text(
-                            "Even if the app itself is secure, your phone's keyboard sees everything. Taybeti has its own keyboard — your keystrokes never touch the system.",
+                            InlineTranslations.t("sec_keyboard_desc", lang),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showSecurityTips = false }) { Text("Got it") }
+                    TextButton(onClick = { showSecurityTips = false }) { Text(InlineTranslations.t("sec_got_it", lang)) }
                 }
             )
         }
@@ -1971,7 +1971,7 @@ fun NoteEditorScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            if (isNewNote) strings.newNote else title.ifEmpty { "Note" },
+                            if (isNewNote) strings.newNote else title.ifEmpty { InlineTranslations.t("note_fallback", lang) },
                             fontWeight = FontWeight.Bold
                         )
                     },
