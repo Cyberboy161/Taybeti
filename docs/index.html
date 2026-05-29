@@ -98,6 +98,36 @@
         }
         .donate-link:hover { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent), 0.05); }
 
+        .ios-warn { margin-top: 1.2rem; position: relative; }
+        .ios-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 24px;
+            background: #2a1a1a; border: 1px solid #5a3030; color: #e57373;
+            font-weight: 500; font-size: .9rem; cursor: pointer; user-select: none;
+            transition: all .2s;
+        }
+        .ios-badge:hover { background: #3a2424; border-color: #d32f2f; }
+        .ios-badge .exmark {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: #d32f2f; color: #fff; font-weight: 700; font-size: 14px; line-height:1;
+        }
+        .ios-panel {
+            display: none; margin-top: 10px; padding: 16px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: var(--radius); font-size: .88rem; line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        .ios-panel.show { display: block; }
+        .ios-panel h4 { color: #e57373; margin-bottom: 10px; font-size: 1rem; }
+        .ios-panel ul { padding-left: 18px; margin: 8px 0; }
+        .ios-panel ul li { margin-bottom: 4px; }
+        .ios-panel .callout {
+            margin-top: 10px; padding: 8px 12px; border-radius: 8px;
+            background: #2a1a1a; border-left: 3px solid #d32f2f;
+            font-weight: 500; color: #e57373;
+        }
+
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -226,6 +256,25 @@
             <a class="github-link" href="https://github.com/Cyberboy161/Taybeti" data-i18n="github">View on GitHub →</a>
             <div class="donate-area">
                 <a class="donate-link" href="https://py.pl/ed8JmswunsxNZ84x6EtaIQ" target="_blank" data-i18n="donate">❤️ Support this project — donate €10</a>
+            </div>
+            <div class="ios-warn" id="iosWarn">
+                <div class="ios-badge" id="iosBadge" data-i18n="ios-badge">
+                    <span class="exmark">!</span><span>Not available on iOS — tap to learn why</span>
+                </div>
+                <div class="ios-panel" id="iosPanel">
+                    <h4 data-i18n="ios-title">Why Taybeti Cannot Exist on iOS</h4>
+                    <p data-i18n="ios-intro">Apple's restrictions make genuine privacy impossible on iOS. These are not missing features — Apple actively prevents developers from securing your data:</p>
+                    <ul>
+                        <li data-i18n="ios-kb"><strong>Custom keyboard:</strong> Apple severely restricts third-party keyboards. Your passphrases still pass through the system keyboard, visible to Apple's input method.</li>
+                        <li data-i18n="ios-disguise"><strong>App disguise:</strong> iOS has no activity aliases. You cannot change the app icon or name at runtime — your encrypted notes app is always visible.</li>
+                        <li data-i18n="ios-overlay"><strong>Screen overlay detection:</strong> Apple provides no API to detect other apps drawing over yours. A malicious app can silently record your screen.</li>
+                        <li data-i18n="ios-root"><strong>Root/jailbreak detection:</strong> Different and weaker than Android. Apple's walled garden gives you fewer tools to verify your device's integrity.</li>
+                        <li data-i18n="ios-sign"><strong>App signature checks:</strong> iOS uses a different signing model. Verifying that your APK hasn't been tampered with is not portable.</li>
+                    </ul>
+                    <div class="callout" data-i18n="ios-callout">
+                        <strong>Your privacy deserves better.</strong> Apple's walled garden is not designed for you — it's designed for Apple. If you care about real privacy, this is your sign to leave.
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -569,6 +618,9 @@ function setLanguage(lang) { localStorage.setItem("taybeti_lang",lang);
                 }
             });
         }
+
+// iOS warning toggle
+document.getElementById("iosBadge").addEventListener("click",function(){document.getElementById("iosPanel").classList.toggle("show")});
         setLanguage(localStorage.getItem('taybeti_lang') || 'en');
     </script>
 </body>
