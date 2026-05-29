@@ -110,8 +110,7 @@
         .ios-badge .exmark {
             display: inline-flex; align-items: center; justify-content: center;
             width: 24px; height: 24px; border-radius: 50%;
-            background: #8b0000; font-size: 15px; line-height: 1;
-            box-shadow: 0 0 6px rgba(220,20,60,.5);
+            box-shadow: 0 0 8px rgba(220,20,60,.6); overflow: hidden;
         }
         .ios-panel {
             display: none; margin-top: 10px; padding: 16px;
@@ -260,7 +259,7 @@
             </div>
             <div class="ios-warn" id="iosWarn">
                 <div class="ios-badge" id="iosBadge" onclick="document.getElementById('iosPanel').classList.toggle('show')">
-                    <span class="exmark">🍎</span><span data-i18n="ios-badge">Not available on iOS — tap to learn why</span>
+                    <span class="exmark"><img src="angryapple.jpg" width="24" height="24" style="border-radius:50%;object-fit:cover" alt=""></span><span data-i18n="ios-badge">Not available on iOS — tap to learn why</span>
                 </div>
                 <div class="ios-panel" id="iosPanel">
                     <h4 data-i18n="ios-title">Why Taybeti Cannot Exist on iOS</h4>
