@@ -477,14 +477,14 @@ private fun Step1_WriteNote(
         Text("1", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Write your secret note",
+            InlineTranslations.t("write_note", lang),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Tap the field below and use the keyboard to type.",
+            InlineTranslations.t("try_it", lang),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -500,10 +500,10 @@ private fun Step1_WriteNote(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 TutorialTextField(
-                    label = "Your note:",
+                    label = InlineTranslations.t("your_note", lang),
                     value = message,
                     isActive = isActive,
-                    placeholder = "Tap to type your secret message...",
+                    placeholder = InlineTranslations.t("tap_type_secret", lang),
                     onActivate = onActivate,
                     onCopy = onCopy,
                     onPaste = onPaste
@@ -531,14 +531,14 @@ private fun Step2_CreatePassphrase(
         Text("2", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Create a passphrase",
+            InlineTranslations.t("create_passphrase", lang),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "This locks your note. Use 4+ characters.",
+            InlineTranslations.t("passphrase_desc", lang),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -563,7 +563,7 @@ private fun Step2_CreatePassphrase(
                     label = "",
                     value = passphrase,
                     isActive = activeField == "passphrase",
-                    placeholder = "Tap to enter passphrase (min 4 chars)",
+                    placeholder = InlineTranslations.t("tap_enter_passphrase", lang),
                     isPassword = true,
                     showPassword = showPassphrase,
                     onActivate = onActivatePassphrase,
@@ -584,7 +584,7 @@ private fun Step2_CreatePassphrase(
                     label = "",
                     value = confirmPassphrase,
                     isActive = activeField == "confirmPassphrase",
-                    placeholder = "Tap to re-enter passphrase",
+                    placeholder = InlineTranslations.t("tap_reenter_pass", lang),
                     isPassword = true,
                     showPassword = showPassphrase,
                     onActivate = onActivateConfirm,
@@ -604,7 +604,7 @@ private fun Step2_CreatePassphrase(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            if (passphrasesMatch) "Passphrases match!" else "Passphrases do not match",
+                            if (passphrasesMatch) InlineTranslations.t("pass_match", lang) else InlineTranslations.t("pass_no_match", lang),
                             style = MaterialTheme.typography.bodySmall,
                             color = if (passphrasesMatch) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
                         )
@@ -631,7 +631,7 @@ private fun Step2_CreatePassphrase(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "If you want to share this note with a friend, write both passphrases on paper. Never send them digitally.",
+                            InlineTranslations.t("share_tip", lang),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                         )
@@ -654,14 +654,14 @@ private fun Step3_Encrypt(
         Text("3", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Encrypt your note",
+            InlineTranslations.t("encrypt_your_note_title", lang),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Watch your text become unreadable.",
+            InlineTranslations.t("encrypt_desc", lang),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -703,7 +703,7 @@ private fun Step3_Encrypt(
                 ) {
                     Icon(Icons.Default.Lock, null, Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (isEncrypting) "Encrypting..." else "Encrypt Note")
+                    Text(if (isEncrypting) InlineTranslations.t("encrypting_btn", lang) else InlineTranslations.t("encrypt_note_btn", lang))
                 }
             }
         }
@@ -716,14 +716,14 @@ private fun Step4_EncryptedResult(encryptedResult: String, lang: String = "en") 
         Text("4", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Encrypted result",
+            InlineTranslations.t("enc_result_title", lang),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "This is what gets stored — unreadable without the key.",
+            InlineTranslations.t("enc_result_desc", lang),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -739,7 +739,7 @@ private fun Step4_EncryptedResult(encryptedResult: String, lang: String = "en") 
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Encrypted:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                    Text(InlineTranslations.t("encrypted_label", lang), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                     Spacer(modifier = Modifier.weight(1f))
                     Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
                 }
@@ -760,7 +760,7 @@ private fun Step4_EncryptedResult(encryptedResult: String, lang: String = "en") 
                         )
                     } else {
                         Text(
-                            "No encrypted data yet.",
+                            InlineTranslations.t("no_enc_data", lang),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
@@ -790,14 +790,14 @@ private fun Step5_Decrypt(
         Text("5", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Decrypt to read it back",
+            InlineTranslations.t("decrypt_read_back_title", lang),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Enter the same passphrase to unlock.",
+            InlineTranslations.t("decrypt_desc", lang),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -830,10 +830,10 @@ private fun Step5_Decrypt(
 
                 Spacer(modifier = Modifier.height(12.dp))
                 TutorialTextField(
-                    label = "Enter passphrase to decrypt:",
+                    label = InlineTranslations.t("enter_passphrase_decrypt", lang),
                     value = decryptPassphrase,
                     isActive = isActive,
-                    placeholder = "Tap to enter passphrase",
+                    placeholder = InlineTranslations.t("tap_enter_passphrase_only", lang),
                     isPassword = true,
                     onActivate = onActivate,
                     onCopy = onCopy,
@@ -848,7 +848,7 @@ private fun Step5_Decrypt(
                 ) {
                     Icon(Icons.Default.LockOpen, null, Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (isDecrypting) "Decrypting..." else "Decrypt")
+                    Text(if (isDecrypting) InlineTranslations.t("decrypting_btn", lang) else InlineTranslations.t("decrypt_btn", lang))
                 }
 
                 if (decryptedResult.isNotEmpty()) {
@@ -907,14 +907,14 @@ private fun Step6_Done(lang: String = "en") {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            "You're ready!",
+            InlineTranslations.t("you_ready", lang),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Now you understand how Taybeti protects your notes.\nEvery note uses its own unique passphrase for maximum security.",
+            InlineTranslations.t("final_desc", lang),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -932,10 +932,10 @@ private fun Step6_Done(lang: String = "en") {
                 Text(InlineTranslations.t("key_take", lang), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 listOf(
-                    "Each note has its own passphrase",
-                    "Never share passphrases digitally",
-                    "Lost passphrase = lost note forever",
-                    "Encrypted data is unreadable without the key"
+                    InlineTranslations.t("key_each_note", lang),
+                    InlineTranslations.t("key_never_share", lang),
+                    InlineTranslations.t("key_lost_forever", lang),
+                    InlineTranslations.t("key_data_unreadable", lang)
                 ).forEach { tip ->
                     Row(verticalAlignment = Alignment.Top) {
                         Text("• ", fontWeight = FontWeight.Bold)
