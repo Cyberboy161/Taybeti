@@ -929,11 +929,22 @@ fun NoteEditorScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         showUnsavedDialog = false
-                        // Save note before exiting
-                        if (currentPageIndex < pages.size) {
-                            saveUndoStateImmediate()
+                        // Encrypt and save the note before exiting
+                        scope.launch {
+                            try {
+                                val noteJson = buildNoteJsonRich(pages, images, marginSettings)
+                                val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
+                                if (plainBytes.isNotEmpty() && noteKey.isNotEmpty()) {
+                                    repository.encryptNoteContent(
+                                        noteId, title, plainBytes, noteKey.toCharArray(), ""
+                                    )
+                                }
+                                SecureMemory.clear(noteKey.toCharArray())
+                                noteKey = ""
+                                isLocked = true
+                            } catch (_: Exception) {}
+                            onBack()
                         }
-                        onBack()
                     }) {
                         Text("Save & Exit")
                     }
