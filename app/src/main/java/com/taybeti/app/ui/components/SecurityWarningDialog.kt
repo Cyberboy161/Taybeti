@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.taybeti.app.security.SecurityChecker
+import com.taybeti.app.util.InlineTranslations
+import com.taybeti.app.util.LocalLanguageCode
 import kotlinx.coroutines.delay
 
 @Composable
@@ -47,6 +49,7 @@ fun SecurityWarningDialog(
     onExit: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val lang = LocalLanguageCode.current
     var warnings by remember { mutableStateOf<List<String>>(emptyList()) }
     var isCritical by remember { mutableStateOf(false) }
 
@@ -89,7 +92,7 @@ fun SecurityWarningDialog(
                         )
                         Spacer(modifier = Modifier.padding(start = 8.dp))
                         Text(
-                            "Security Warning",
+                            InlineTranslations.t("sec_warning_title", lang),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -119,8 +122,8 @@ fun SecurityWarningDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    if (isCritical) "Critical security issues detected!"
-                    else "Potential security issues detected",
+                    if (isCritical) InlineTranslations.t("sec_warning_critical", lang)
+                    else InlineTranslations.t("sec_warning_potential", lang),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.error,
@@ -135,7 +138,9 @@ fun SecurityWarningDialog(
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    warnings.forEach { warning ->
+                    warnings.forEach { warnKey ->
+                        val parts = warnKey.split("|", limit = 2)
+                        val translated = InlineTranslations.t(parts[0], lang).replace("{n}", parts.getOrElse(1) { "" })
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
@@ -149,7 +154,7 @@ fun SecurityWarningDialog(
                             ) {
                                 Text("⚠ ", fontSize = 14.sp)
                                 Text(
-                                    warning,
+                                    translated,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
@@ -163,8 +168,7 @@ fun SecurityWarningDialog(
 
                 // Info text
                 Text(
-                    "These issues may compromise the security of your encrypted data. " +
-                    "Consider resolving them before using Taybeti.",
+                    InlineTranslations.t("sec_warning_info", lang),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -181,7 +185,7 @@ fun SecurityWarningDialog(
                             onClick = onDismiss,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Continue Anyway")
+                            Text(InlineTranslations.t("sec_continue_anyway", lang))
                         }
                     }
                     Button(
@@ -192,7 +196,7 @@ fun SecurityWarningDialog(
                             else MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text(if (isCritical) "Exit App" else "OK")
+                        Text(if (isCritical) InlineTranslations.t("sec_exit_app", lang) else InlineTranslations.t("ok_dialog", lang))
                     }
                 }
             }
@@ -206,6 +210,7 @@ fun SecurityCheckBanner(
     onOpenDetails: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val lang = LocalLanguageCode.current
     var warnings by remember { mutableStateOf<List<String>>(emptyList()) }
     var isVisible by remember { mutableStateOf(false) }
 
@@ -237,7 +242,7 @@ fun SecurityCheckBanner(
                 )
                 Spacer(modifier = Modifier.padding(start = 8.dp))
                 Text(
-                    "${warnings.size} security issue${if (warnings.size > 1) "s" else ""} detected",
+                    InlineTranslations.t("sec_warning_count", lang).replace("{n}", "${warnings.size}"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontWeight = FontWeight.Medium

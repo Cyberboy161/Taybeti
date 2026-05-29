@@ -163,19 +163,19 @@ object SecurityChecker {
         val warnings = mutableListOf<String>()
 
         if (status.isRooted) {
-            warnings.add("Root detected — device security is compromised")
+            warnings.add("secw_root")
         }
         if (status.isUsbDebuggingEnabled) {
-            warnings.add("USB debugging enabled — ADB can access device data")
+            warnings.add("secw_usb_debug")
         }
         if (status.hasScreenOverlay) {
-            warnings.add("Screen overlay detected — other apps may be drawing over Taybeti")
+            warnings.add("secw_screen_overlay")
         }
         if (status.hasSuspiciousAccessibilityServices) {
-            warnings.add("Suspicious accessibility services: ${status.suspiciousServices.joinToString(", ")}")
+            warnings.add("secw_accessibility|${status.suspiciousServices.joinToString(", ")}")
         }
         if (status.isScreenMirroring) {
-            warnings.add("Screen mirroring/casting detected — your screen may be visible elsewhere")
+            warnings.add("secw_mirroring")
         }
 
         return warnings
