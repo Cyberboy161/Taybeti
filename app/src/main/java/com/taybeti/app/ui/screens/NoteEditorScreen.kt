@@ -179,6 +179,8 @@ import com.taybeti.app.util.Constants
 import com.taybeti.app.util.DecoyEncoder
 import com.taybeti.app.util.DecoyPlatform
 import com.taybeti.app.util.LocalStrings
+import com.taybeti.app.util.LocalLanguageCode
+import com.taybeti.app.util.InlineTranslations
 import com.taybeti.app.util.generateRandomKey
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.filter
@@ -618,6 +620,7 @@ fun NoteEditorScreen(
 ) {
     val scope = rememberCoroutineScope()
     val strings = LocalStrings.current
+    val lang = LocalLanguageCode.current
     val context = LocalContext.current
 
     var noteEntity by remember { mutableStateOf<NoteEntity?>(null) }
@@ -796,7 +799,7 @@ fun NoteEditorScreen(
                     val noteJson = buildNoteJsonRich(pages, images, marginSettings)
                     val plainBytes = noteJson.toByteArray(Charsets.UTF_8)
                     if (plainBytes.isEmpty()) {
-                        Toast.makeText(context, "Error: note content is empty", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, InlineTranslations.t("note_content_empty", lang), Toast.LENGTH_SHORT).show()
                         return@launch
                     }
                     val result = repository.encryptNoteContent(
@@ -823,13 +826,13 @@ fun NoteEditorScreen(
                         pages.add(FormattedText())
                         images.clear()
                         isLocked = true
-                        Toast.makeText(context, "Note encrypted and saved", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, InlineTranslations.t("note_saved", lang), Toast.LENGTH_SHORT).show()
                         onBack()
                     } else {
-                        Toast.makeText(context, "Encryption failed: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, InlineTranslations.t("encryption_failed", lang).replace("{msg}", result.exceptionOrNull()?.message ?: ""), Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Failed to save: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, InlineTranslations.t("save_failed", lang).replace("{msg}", e.message ?: ""), Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -861,7 +864,7 @@ fun NoteEditorScreen(
                         )
                     }
                 }.onFailure {
-                    Toast.makeText(context, "Failed to attach file", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, InlineTranslations.t("attach_failed", lang), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -924,8 +927,8 @@ fun NoteEditorScreen(
         if (showUnsavedDialog) {
             AlertDialog(
                 onDismissRequest = { showUnsavedDialog = false },
-                title = { Text("Save note?") },
-                text = { Text("You have unsaved changes.") },
+                title = { Text(InlineTranslations.t("save_note_q", lang)) },
+                text = { Text(InlineTranslations.t("unsaved_changes", lang)) },
                 confirmButton = {
                     TextButton(onClick = {
                         showUnsavedDialog = false
@@ -946,19 +949,19 @@ fun NoteEditorScreen(
                             onBack()
                         }
                     }) {
-                        Text("Save & Exit")
+                        Text(InlineTranslations.t("save_exit", lang))
                     }
                 },
                 dismissButton = {
                     Row {
                         TextButton(onClick = { showUnsavedDialog = false }) {
-                            Text("Stay")
+                            Text(InlineTranslations.t("stay", lang))
                         }
                         TextButton(onClick = {
                             showUnsavedDialog = false
                             onBack()
                         }) {
-                            Text("Discard", color = MaterialTheme.colorScheme.error)
+                            Text(InlineTranslations.t("discard", lang), color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -1348,10 +1351,10 @@ fun NoteEditorScreen(
         if (showEncryptDialog) {
             AlertDialog(
                 onDismissRequest = { showEncryptDialog = false },
-                title = { Text("Encrypt Note", fontWeight = FontWeight.Bold) },
+                title = { Text(InlineTranslations.t("encrypt_note_title", lang), fontWeight = FontWeight.Bold) },
                 text = {
                     Column {
-                        Text("Choose how to encrypt this note with ${images.size} image(s):")
+                        Text(InlineTranslations.t("encrypt_choice", lang).replace("{n}", "${images.size}"))
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = {
@@ -1382,8 +1385,8 @@ fun NoteEditorScreen(
                             Icon(Icons.Default.Shield, null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Column(horizontalAlignment = Alignment.Start) {
-                                Text("Encrypt as Blob", fontWeight = FontWeight.Bold)
-                                Text("Single encrypted text blob (copy/share)", style = MaterialTheme.typography.bodySmall)
+                                Text(InlineTranslations.t("encrypt_as_blob", lang), fontWeight = FontWeight.Bold)
+                                Text(InlineTranslations.t("encrypt_blob_desc", lang), style = MaterialTheme.typography.bodySmall)
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -1398,15 +1401,15 @@ fun NoteEditorScreen(
                             Icon(Icons.Default.AttachFile, null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Column(horizontalAlignment = Alignment.Start) {
-                                Text("Encrypt as File", fontWeight = FontWeight.Bold)
-                                Text("Save encrypted note as .taybeti file", style = MaterialTheme.typography.bodySmall)
+                                Text(InlineTranslations.t("encrypt_as_file", lang), fontWeight = FontWeight.Bold)
+                                Text(InlineTranslations.t("encrypt_file_desc", lang), style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                 },
                 confirmButton = {
                     TextButton(onClick = { showEncryptDialog = false }) {
-                        Text("Cancel")
+                        Text(InlineTranslations.t("cancel", lang))
                     }
                 }
             )
@@ -1445,7 +1448,7 @@ fun NoteEditorScreen(
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Find and Replace", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                        Text(InlineTranslations.t("find_replace", lang), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
                         CompositionLocalProvider(LocalKeyboardState provides findKbState) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1465,7 +1468,7 @@ fun NoteEditorScreen(
                                         .clickable { findField = "find" }
                                         .padding(12.dp)
                                 ) {
-                                    Text(if (findText.isEmpty()) "Find..." else findText, style = MaterialTheme.typography.bodyMedium)
+                                    Text(if (findText.isEmpty()) InlineTranslations.t("find_placeholder", lang) else findText, style = MaterialTheme.typography.bodyMedium)
                                 }
                                 IconButton(onClick = { performFindReplace() }) {
                                     Icon(Icons.Default.Search, "Find")
@@ -1598,7 +1601,7 @@ fun NoteEditorScreen(
                                 Text("Clear")
                             }
                             TextButton(onClick = { showColorPicker = false }) {
-                                Text("Cancel")
+                        Text(InlineTranslations.t("cancel", lang))
                             }
                         }
                     }

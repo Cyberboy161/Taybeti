@@ -38,6 +38,8 @@ import com.taybeti.app.ui.components.KeyboardHost
 import com.taybeti.app.ui.components.NoteEncryptionTutorialDialog
 import com.taybeti.app.ui.components.PasswordField
 import com.taybeti.app.util.Constants
+import com.taybeti.app.util.InlineTranslations
+import com.taybeti.app.util.LocalLanguageCode
 import com.taybeti.app.util.LocalStrings
 import kotlinx.coroutines.launch
 
@@ -47,6 +49,7 @@ fun SetupScreen(
     onSetupComplete: () -> Unit
 ) {
     val strings = LocalStrings.current
+    val lang = LocalLanguageCode.current
     var masterPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var decoyPassword by remember { mutableStateOf("") }
@@ -172,12 +175,12 @@ fun SetupScreen(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Text("Enable Decoy Vault")
+                            Text(InlineTranslations.t("enable_decoy", lang))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDecoyInfo = false }) {
-                            Text("Not Now")
+                            Text(InlineTranslations.t("not_now", lang))
                         }
                     }
                 )
@@ -195,7 +198,7 @@ fun SetupScreen(
                 PasswordField(
                     value = confirmDecoy,
                     onValueChange = { confirmDecoy = it; error = null },
-                    label = "Confirm Decoy Password",
+                    label = InlineTranslations.t("confirm_decoy", lang),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -217,15 +220,15 @@ fun SetupScreen(
             onClick = {
                 when {
                     masterPassword.length < Constants.MIN_MASTER_PASSWORD_LENGTH ->
-                        error = "Master password must be at least ${Constants.MIN_MASTER_PASSWORD_LENGTH} characters"
+                        error = InlineTranslations.t("master_pass_min", lang).replace("{n}", "${Constants.MIN_MASTER_PASSWORD_LENGTH}")
                     masterPassword != confirmPassword ->
                         error = strings.setupPasswordMismatch
                     enableDecoy && decoyPassword.length < Constants.MIN_MASTER_PASSWORD_LENGTH ->
-                        error = "Decoy password must be at least ${Constants.MIN_MASTER_PASSWORD_LENGTH} characters"
+                        error = InlineTranslations.t("decoy_pass_min", lang).replace("{n}", "${Constants.MIN_MASTER_PASSWORD_LENGTH}")
                     enableDecoy && decoyPassword != confirmDecoy ->
-                        error = "Decoy passwords do not match"
+                        error = InlineTranslations.t("decoy_no_match", lang)
                     enableDecoy && decoyPassword == masterPassword ->
-                        error = "Decoy password must differ from master password"
+                        error = InlineTranslations.t("decoy_differ", lang)
                     else -> {
                         isLoading = true
                         scope.launch {
@@ -241,7 +244,7 @@ fun SetupScreen(
                             confirmDecoy = ""
                             if (result.isSuccess) {
                                 showTutorial = true
-                            } else error = "Setup failed: ${result.exceptionOrNull()?.message}"
+                            } else error = InlineTranslations.t("setup_failed", lang).replace("{msg}", "${result.exceptionOrNull()?.message}")
                         }
                     }
                 }

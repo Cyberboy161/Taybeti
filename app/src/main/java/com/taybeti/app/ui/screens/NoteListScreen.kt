@@ -81,6 +81,8 @@ import com.taybeti.app.security.SecureMemory
 import com.taybeti.app.ui.components.CustomKeyboard
 import com.taybeti.app.util.DecoyEncoder
 import com.taybeti.app.util.DecoyPlatform
+import com.taybeti.app.util.InlineTranslations
+import com.taybeti.app.util.LocalLanguageCode
 import com.taybeti.app.util.LocalStrings
 import com.taybeti.app.util.formatTimestamp
 import com.taybeti.app.util.generateNoteId
@@ -101,6 +103,7 @@ fun NoteListScreen(
 ) {
     val context = LocalContext.current
     val strings = LocalStrings.current
+    val lang = LocalLanguageCode.current
     var notes by remember { mutableStateOf<List<NoteEntity>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
@@ -147,14 +150,14 @@ fun NoteListScreen(
                         )
                         db.noteDao().insert(note)
                         
-                        Toast.makeText(context, "Encrypted note loaded", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, InlineTranslations.t("note_loaded", lang), Toast.LENGTH_SHORT).show()
                         notes = when {
                             showFavorites -> db.noteDao().getFavorites(isDecoy)
                             else -> db.noteDao().getAllActive(isDecoy)
                         }
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Failed to load note: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, InlineTranslations.t("load_failed", lang).replace("{msg}", "${e.message}"), Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -207,7 +210,7 @@ fun NoteListScreen(
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
                             Text(
-                                text = if (searchQuery.isEmpty()) "Search notes..." else searchQuery,
+                                text = if (searchQuery.isEmpty()) InlineTranslations.t("search_notes", lang) else searchQuery,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = if (searchQuery.isEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                                 else MaterialTheme.colorScheme.onSurface
@@ -439,6 +442,7 @@ private fun LoadNoteDialog(
     val db = remember { com.taybeti.app.data.database.AppDatabase.getInstance(context) }
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboardManager.current
+    val lang = LocalLanguageCode.current
 
     var title by remember { mutableStateOf("") }
     var encryptedBlob by remember { mutableStateOf("") }
@@ -462,7 +466,7 @@ private fun LoadNoteDialog(
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
-                    title = { Text("Load Encrypted Note") },
+                    title = { Text(InlineTranslations.t("load_enc_note", lang)) },
                     navigationIcon = {
                         IconButton(onClick = onDismiss) {
                             Icon(Icons.Default.ArrowBack, "Back")
@@ -480,14 +484,14 @@ private fun LoadNoteDialog(
                         .verticalScroll(rememberScrollState())
                 ) {
                     Text(
-                        "Paste the encrypted blob or disguised URL, then enter the passphrase.",
+                        InlineTranslations.t("load_desc", lang),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     LoadTextField(
-                        label = "Note title",
+                        label = InlineTranslations.t("note_title_label", lang),
                         value = title,
                         isActive = activeField == "title",
                         onActivate = { activeField = "title" },
@@ -501,7 +505,7 @@ private fun LoadNoteDialog(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             LoadTextField(
-                                label = "Encrypted blob or URL",
+                                label = InlineTranslations.t("enc_blob_url", lang),
                                 value = encryptedBlob,
                                 isActive = activeField == "blob",
                                 onActivate = { activeField = "blob" },
@@ -536,7 +540,7 @@ private fun LoadNoteDialog(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     LoadTextField(
-                        label = "Passphrase",
+                        label = InlineTranslations.t("passphrase", lang),
                         value = passphrase,
                         isActive = activeField == "passphrase",
                         onActivate = { activeField = "passphrase" },
@@ -563,20 +567,20 @@ private fun LoadNoteDialog(
                         enabled = !isLoading,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text(InlineTranslations.t("cancel", lang))
                     }
                     Button(
                         onClick = {
                             if (title.isBlank()) {
-                                error = "Title is required"
+                                error = InlineTranslations.t("title_required", lang)
                                 return@Button
                             }
                             if (encryptedBlob.isBlank()) {
-                                error = "Encrypted blob is required"
+                                error = InlineTranslations.t("blob_required", lang)
                                 return@Button
                             }
                             if (passphrase.isBlank()) {
-                                error = "Passphrase is required"
+                                error = InlineTranslations.t("pass_required", lang)
                                 return@Button
                             }
 
@@ -595,7 +599,7 @@ private fun LoadNoteDialog(
 
                                     val parts = rawBlob.split("::")
                                     if (parts.size != 4) {
-                                        error = "Invalid blob format. Expected salt::iv::tag::ciphertext"
+                                        error = InlineTranslations.t("invalid_blob", lang)
                                         isLoading = false
                                         return@launch
                                     }
@@ -671,7 +675,7 @@ private fun LoadNoteDialog(
 
                                     onSuccess()
                                 } catch (e: Exception) {
-                                    error = "Failed to decrypt: ${e.message ?: "Wrong passphrase"}"
+                                    error = InlineTranslations.t("decrypt_failed", lang).replace("{msg}", e.message ?: InlineTranslations.t("wrong_passphrase", lang))
                                 } finally {
                                     isLoading = false
                                 }
@@ -680,7 +684,7 @@ private fun LoadNoteDialog(
                         enabled = !isLoading,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(if (isLoading) "Loading..." else "Load Note")
+                        Text(if (isLoading) InlineTranslations.t("loading", lang) else InlineTranslations.t("load_note", lang))
                     }
                 }
 
