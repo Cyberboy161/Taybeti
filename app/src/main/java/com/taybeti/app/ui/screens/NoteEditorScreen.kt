@@ -867,7 +867,7 @@ fun NoteEditorScreen(
         }
     }
 
-    val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || pages.any { it.toPlainText().isNotEmpty() } || images.isNotEmpty())
+    val hasUnsavedChanges = !isLocked && (title.isNotEmpty() || pages.any { it.toPlainText().isNotEmpty() || it.renderVersion > 0 } || images.isNotEmpty())
 
     fun attachKeyboardForTitle(kb: KeyboardState) {
         kb.attach(
