@@ -303,7 +303,8 @@ fun NoteEncryptionTutorialDialog(
                                     isActive = activeField == "message",
                                     onActivate = { activeField = "message" },
                                     onCopy = ::handleCopy,
-                                    onPaste = ::handlePaste
+                                    onPaste = ::handlePaste,
+                                    lang = lang
                                 )
                                 1 -> Step2_CreatePassphrase(
                                     userPassphrase,
@@ -320,9 +321,11 @@ fun NoteEncryptionTutorialDialog(
                                 2 -> Step3_Encrypt(
                                     userMessage,
                                     userPassphrase,
-                                    isEncrypting
-                                ) { simulateEncrypt() }
-                                3 -> Step4_EncryptedResult(encryptedResult)
+                                    isEncrypting,
+                                    onEncrypt = { simulateEncrypt() },
+                                    lang = lang
+                                )
+                                3 -> Step4_EncryptedResult(encryptedResult, lang = lang)
                                 4 -> Step5_Decrypt(
                                     encryptedResult,
                                     decryptPassphrase,
@@ -332,9 +335,10 @@ fun NoteEncryptionTutorialDialog(
                                     onActivate = { activeField = "decryptPassphrase" },
                                     onDecrypt = { simulateDecrypt() },
                                     onCopy = ::handleCopy,
-                                    onPaste = ::handlePaste
+                                    onPaste = ::handlePaste,
+                                    lang = lang
                                 )
-                                5 -> Step6_Done()
+                                5 -> Step6_Done(lang = lang)
                             }
                         }
                     }
@@ -466,7 +470,8 @@ private fun Step1_WriteNote(
     isActive: Boolean,
     onActivate: () -> Unit,
     onCopy: () -> Unit,
-    onPaste: () -> Unit
+    onPaste: () -> Unit,
+    lang: String = "en"
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("1", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -519,7 +524,8 @@ private fun Step2_CreatePassphrase(
     onActivateConfirm: () -> Unit,
     onToggleShow: () -> Unit,
     onCopy: () -> Unit,
-    onPaste: () -> Unit
+    onPaste: () -> Unit,
+    lang: String = "en"
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("2", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -550,7 +556,7 @@ private fun Step2_CreatePassphrase(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Key, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Passphrase", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                    Text(InlineTranslations.t("passphrase", lang), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 TutorialTextField(
@@ -571,7 +577,7 @@ private fun Step2_CreatePassphrase(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Key, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Confirm passphrase", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                    Text(InlineTranslations.t("confirm_pass", lang), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 TutorialTextField(
@@ -641,7 +647,8 @@ private fun Step3_Encrypt(
     message: String,
     passphrase: String,
     isEncrypting: Boolean,
-    onEncrypt: () -> Unit
+    onEncrypt: () -> Unit,
+    lang: String = "en"
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("3", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -670,7 +677,7 @@ private fun Step3_Encrypt(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Plaintext:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                    Text(InlineTranslations.t("plaintext_lbl", lang), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                     Spacer(modifier = Modifier.weight(1f))
                     Icon(Icons.Default.LockOpen, null, tint = Color(0xFF2E7D32), modifier = Modifier.size(18.dp))
                 }
@@ -704,7 +711,7 @@ private fun Step3_Encrypt(
 }
 
 @Composable
-private fun Step4_EncryptedResult(encryptedResult: String) {
+private fun Step4_EncryptedResult(encryptedResult: String, lang: String = "en") {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("4", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(8.dp))
@@ -776,7 +783,8 @@ private fun Step5_Decrypt(
     onActivate: () -> Unit,
     onDecrypt: () -> Unit,
     onCopy: () -> Unit,
-    onPaste: () -> Unit
+    onPaste: () -> Unit,
+    lang: String = "en"
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("5", fontSize = 42.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -804,7 +812,7 @@ private fun Step5_Decrypt(
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Encrypted data:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                Text(InlineTranslations.t("enc_data", lang), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(4.dp))
                 Box(
                     modifier = Modifier
@@ -846,7 +854,7 @@ private fun Step5_Decrypt(
                 if (decryptedResult.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp))
                     val isSuccess = !decryptedResult.startsWith("ERROR")
-                    Text("Result:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                    Text(InlineTranslations.t("result_lbl", lang), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                     Spacer(modifier = Modifier.height(4.dp))
                     Box(
                         modifier = Modifier
@@ -872,7 +880,7 @@ private fun Step5_Decrypt(
 }
 
 @Composable
-private fun Step6_Done() {
+private fun Step6_Done(lang: String = "en") {
     val scale = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
         scale.animateTo(1f, animationSpec = tween(600, easing = FastOutSlowInEasing))
@@ -921,7 +929,7 @@ private fun Step6_Done() {
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Key takeaways:", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+                Text(InlineTranslations.t("key_take", lang), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 listOf(
                     "Each note has its own passphrase",
