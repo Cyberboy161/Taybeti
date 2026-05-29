@@ -94,6 +94,7 @@ import com.taybeti.app.security.SecurityChecker
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import com.taybeti.app.util.InlineTranslations
 import com.taybeti.app.util.LocaleManager
 import com.taybeti.app.util.LocalLanguageCode
 import com.taybeti.app.util.LocalStrings
@@ -278,6 +279,7 @@ fun MainDrawerScreen(
     var showPrintCardsInfo by remember { mutableStateOf(false) }
 
     val strings = LocalStrings.current
+    val lang = LocalLanguageCode.current
     val ctx = LocalContext.current
     var autoLockMinutes by remember {
         mutableStateOf(ctx.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
@@ -409,7 +411,7 @@ fun MainDrawerScreen(
     if (showPrintCardsInfo) {
         AlertDialog(
             onDismissRequest = { showPrintCardsInfo = false },
-            title = { Text("🖨️ Gre Cards", fontWeight = FontWeight.Bold) },
+            title = { Text(InlineTranslations.t("card_title", lang), fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     Text("What are they?", fontWeight = FontWeight.Bold)
@@ -430,7 +432,7 @@ fun MainDrawerScreen(
     if (showSecurityTips) {
         AlertDialog(
             onDismissRequest = { showSecurityTips = false },
-            title = { Text("🛡️ Security & Help", fontWeight = FontWeight.Bold) },
+            title = { Text(InlineTranslations.t("sec_title", lang), fontWeight = FontWeight.Bold) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text("📋 10 Security Rules", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
@@ -562,11 +564,11 @@ fun MainDrawerScreen(
                     }
                     androidx.compose.material3.HorizontalDivider()
                     Text("More", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-                    DrawerItem(Icons.Default.Warning, "Security & Help") {
+                    DrawerItem(Icons.Default.Warning, InlineTranslations.t("sec_title", lang)) {
                         scope.launch { drawerState.close() }
                         showSecurityTips = true
                     }
-                    DrawerItem(Icons.Default.Note, "Gre Cards") {
+                    DrawerItem(Icons.Default.Note, InlineTranslations.t("card_title", lang)) {
                         scope.launch { drawerState.close() }
                         showPrintCardsInfo = true
                     }

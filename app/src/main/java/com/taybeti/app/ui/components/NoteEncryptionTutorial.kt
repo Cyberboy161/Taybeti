@@ -82,12 +82,15 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import com.taybeti.app.util.InlineTranslations
+import com.taybeti.app.util.LocalLanguageCode
 
 @Composable
 fun NoteEncryptionTutorialDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val lang = LocalLanguageCode.current
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     var step by remember { mutableIntStateOf(0) }
@@ -223,7 +226,7 @@ fun NoteEncryptionTutorialDialog(
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             TextButton(onClick = onDismiss) {
-                                Text("Skip", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                Text(InlineTranslations.t("skip", lang), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                             }
                             IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
                                 Icon(Icons.Default.Close, "Close", modifier = Modifier.size(18.dp))
@@ -263,13 +266,13 @@ fun NoteEncryptionTutorialDialog(
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Back")
+                                Text(InlineTranslations.t("back", lang))
                             }
                         } else { Spacer(Modifier) }
                         Button(onClick = {
                             if (step < totalSteps - 1) step++ else onDismiss()
                         }, enabled = step < totalSteps - 1 || userPassphrase.isNotEmpty()) {
-                            Text(if (step < totalSteps - 1) "Next" else "Done!")
+                            Text(if (step < totalSteps - 1) InlineTranslations.t("next", lang) else InlineTranslations.t("done", lang))
                         }
                     }
 
