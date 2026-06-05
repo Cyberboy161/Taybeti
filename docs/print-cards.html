@@ -77,8 +77,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#111;color:#eee;overflo
         <option value="tr">Türkçe only</option>
     </select></div>
     <div class="g"><label>Print</label><select id="pOrient" onchange="u()">
-        <option value="portrait">Portrait A4</option>
-        <option value="landscape">Landscape A4</option>
+        <option value="portrait">3×3 Portrait A4</option>
+        <option value="landscape">2×4 Landscape A4</option>
+        <option value="compact">2×2 Compact A4</option>
     </select></div>
     <div class="g" style="margin-left:auto"><label>Design</label><select id="ds" onchange="u()">
         <option value="cyber" selected>Cyber</option><option value="matrix">Matrix</option><option value="red">Red</option><option value="blue">Blue</option><option value="circuit">Circuit</option><option value="fire">Fire</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="dark">Dark</option><option value="gold">Gold</option><option value="anime">Anime</option><option value="void">Void</option><option value="rainbow">Rainbow</option></select></div>
@@ -223,8 +224,8 @@ function u(){
     document.getElementById('pb').innerHTML=makeBackCard(lo,bg);
     // Generate print pages — identical cards, just repeated
     var orient=document.getElementById('pOrient').value;
-    var cols=orient==='landscape'?4:3;
-    var rows=orient==='landscape'?2:3;
+    var cols=orient==='landscape'?4:orient==='compact'?2:3;
+    var rows=orient==='landscape'?2:orient==='compact'?2:3;
     // Use preview card size for print too
     var total=cols*rows;
     var pfw='',pbw='';
